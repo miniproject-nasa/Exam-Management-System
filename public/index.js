@@ -1,4 +1,5 @@
-// const container = document.querySelector('.input-container')
+
+        // const container = document.querySelector('.input-container')
         
         // let contentTxt=''
         // let mask=true
@@ -43,28 +44,39 @@
 
 
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("form").addEventListener("submit", async function (event) {
+            const loginForm = document.getElementById("loginForm");
+        
+            async function checkAuthStatus() {
+                try {
+                    const response = await fetch("/check-auth");
+                    const data = await response.json();
+        
+                    if (data.isAuthenticated) {
+                        window.location.href = "/home.html"; 
+                    }
+                } catch (error) {
+                    console.error("Error checking auth status:", error);
+                }
+            }
+        
+            checkAuthStatus();
+        
+            loginForm.addEventListener("submit", async function (event) {
                 event.preventDefault();
                 console.log("Form submitted");
-                
         
                 const username = document.getElementById("username").value;
                 const password = document.getElementById("password").value;
-                console.log(username, password);
         
                 if (!username || !password) {
-                    console.log("Please enter both username and password.");
-                    document.getElementById("invalid-credentials").innerHTML = <p id="invalid-msg">enter both username and password</p>;
-                    // alert("Please enter both username and password.");
+                    document.getElementById("invalid-credentials").innerHTML = `<p id="invalid-msg">Enter both username and password</p>`;
                     return;
                 }
         
                 try {
                     const response = await fetch("/login", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ username, password })
                     });
         
@@ -73,13 +85,11 @@
                     if (data.success) {
                         window.location.href = data.redirect;
                     } else {
-                        // alert(data.error);
-                        document.getElementById("invalid-credentials").innerHTML = <p id="invalid-msg">${data.error}</p>;
+                        document.getElementById("invalid-credentials").innerHTML = `<p id="invalid-msg">${data.error}</p>`;
                     }
                 } catch (error) {
                     console.error("Error logging in:", error);
-                    document.getElementById("invalid-credentials").innerHTML = <p id="invalid-msg">An error occurred. Please try again later</p>;
-                    // alert("An error occurred. Please try again later.");
+                    document.getElementById("invalid-credentials").innerHTML = `<p id="invalid-msg">An error occurred. Please try again later</p>`;
                 }
             });
         });
