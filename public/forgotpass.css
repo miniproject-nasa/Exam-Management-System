@@ -1,0 +1,282 @@
+body {
+    background-image: url('bgb.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+header {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    background-color: white;
+    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.05);
+}
+
+a {
+    text-decoration: none;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+footer {
+    width: 100%;
+    text-align: center;
+    background-color: white;
+    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.05);
+    padding: 10px 0;
+}
+
+header img {
+    transform: scale(0.85);
+    margin-right: -15px;
+}
+
+h2, p {
+    margin: 0;
+    color: rgba(15, 98, 254, 1);
+}
+
+p {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+section {
+    flex: 1;
+}
+
+.footer-style {
+    color: rgba(112, 112, 112, 1);
+    font-weight: 500;
+    font-size: 14px;
+    margin: 0;
+}
+
+form {
+    position: relative;
+    margin: 20px auto;
+    padding: 50px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 1px 15px rgba(0,0,0,0.05);
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.reset-title {
+    text-align: center;
+    color: rgba(15, 98, 254, 1);
+    font-size: 22px;
+    margin-bottom: -5px;
+}
+
+.otp-gone {
+    display: block;
+    margin-top: 10px;
+    color: rgba(112, 112, 112, 1);
+    text-align: center;
+    font-size: 11px;
+    text-decoration: none;
+    margin-bottom: 40px;
+}
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 25px;
+    height: auto;
+    cursor: pointer;
+}
+
+.otp-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.no-otp {
+    display: block;
+    margin-top: -5px;
+    color: rgba(112, 112, 112, 1);
+    text-align: center;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.resend {
+    cursor: pointer;
+    display: block;
+    margin-top: -5px;
+    color: rgba(15, 98, 254, 1);
+    text-align: center;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.resend:hover {
+    text-decoration: underline;
+}
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 5px;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(112, 112, 112, 1);
+}
+
+form input[type="text"] {
+    padding: 12px;
+    width: 100%;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    display: block;
+    width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    margin-top: -10px;
+    border: none;
+    padding: 16px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+form button:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.01);
+}
+
+form input[type="text"]:focus,
+form button:focus {
+    outline: none;
+    border: 1px solid rgba(15, 98, 254, 1);
+}
+
+.back-button:hover {
+    filter: brightness(0.7);
+}
+
+@media only screen and (max-width: 650px) {
+    header {
+        height: 55px;
+    }
+
+    footer {
+        height: 1px;
+    }
+
+    header img {
+        transform: scale(0.50);
+        margin-left: -20px;
+    }
+
+    .title-head {
+        margin-left: -12px;
+    }
+
+    section, form {
+        width: calc(100% - 70px);
+        margin: 5px auto;
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 16px;
+    }
+
+    form button {
+        margin-top: -30px;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    form input[type="text"] {
+        padding: 4px;
+        font-size: 12.4px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+        margin-top: -25px;
+    }
+
+    .form-group label {
+        margin-top: -5px;
+        margin-bottom: 2px;
+        font-size: 11.6px;
+    }
+
+    .reset-title {
+        font-size: 14px;
+        margin-bottom: -7px;
+    }
+    
+    .resend {
+        font-size: 9px;
+        margin-top: -14px;
+    }
+
+    .no-otp {
+        font-size: 6.6px;
+        margin-top: -15px;
+    }
+
+    .otp-gone {
+        font-size: 5.8px;
+        margin-bottom: 40px;
+    }
+    
+    .back-button {
+        top: 7px;
+        left: 7px;
+        width: 20px;
+        height: auto;
+    }
+
+    p {
+        font-size: 11px;
+    }
+    
+    .footer-style {
+        font-size: 7px;
+    }
+
+    .otp-container {
+        margin-top: -5px;
+        gap: 2px;
+    }
+}

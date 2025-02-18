@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Internal Exam Management">
+    <title>Scrutiny Allocation</title>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="scrutiny.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <img src="images/logo.webp" alt="logo">
+            <div class="title-head">
+                <h2>Internal Exam</h2>
+                <p>Management</p>
+            </div>
+
+        <div class="menu-container">
+            <a href="home.html"><p class="menu">Home</p></a>
+        </div>
+    </header>
+    <br>
+    <section class="main">
+        <form>
+            <h2 class="upload-title">Scrutiny</h2>
+
+            <div class="form-group">
+                <label for="mode">Module</label>
+                <div class="dropdown">
+                    <select id="module" name="module">
+                        <option value="" disabled selected>Select an option</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <div class="dropdown">
+                    <select id="subject" name="subject">
+                        <option value="" disabled selected>Select an option</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="batch">Faculty</label>
+                <div class="dropdown">
+                    <select id="faculty" name="faculty">
+                        <option value="" disabled selected>Select an option</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="textmessage">Text Message</label>
+                <input type="text" id="textmessage" name="textmessage"><br><br>
+            </div>
+
+            <div class="flex-container">
+                <div class="content-section">
+                    <p class="information-type">
+                        Select your files
+                    </p>
+                </div>
+                <div class="pdf-container">
+                    <div class="pdf-box">
+                        <div class="pdf-box-small">
+                            <p class="info-new-type">PDF</p>
+                        </div>
+                        <p class="pdf-box-content">OS Scrutiny.pdf</p>
+                    </div>
+                    <div class="pdf-box">
+                        <div class="pdf-box-small">
+                            <p class="info-new-type">PDF</p>
+                        </div>
+                        <p class="pdf-box-content">OS Trial.pdf</p>
+                    </div>
+                </div>
+                <button type="submit">Send</button>
+            </div>
+            <br><br><br>         
+        </form>
+    </section>
+    <br>
+    <footer>
+        <p class="footer-style">&copy; 2025, DPCSE</p>
+    </footer>
+</body>

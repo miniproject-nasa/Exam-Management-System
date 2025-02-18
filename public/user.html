@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Internal Exam Management">
+    <title>User Information</title>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="profiles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <img src="images/logo.webp" alt="logo">
+            <div class="title-head">
+                <h2>Internal Exam</h2>
+                <p>Management</p>
+            </div>
+
+        <div class="menu-container">
+            <a href="home.html"><p class="menu">Home</p></a>
+        </div>
+    </header>
+    <br>
+    <section>
+        <a href="#popup-form" class="button-type">
+            <img class="img-chr" src="images/plus.webp" alt="Icon">
+            Add New User
+        </a>
+    </section>
+
+    <div id="popup-form" class="popup">
+        <div class="popup-content">
+            <a href="#" class="close">&times;</a>
+            <form>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+    
+                <label for="mobile">Mobile</label>
+                <input type="text" id="mobile" name="mobile" required>
+    
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" required>
+    
+                <label for="role">Role</label>
+                <input type="text" id="role" name="role" required>
+    
+                <label for="user-name">User Name</label>
+                <input type="text" id="username" name="username" required>
+    
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+    <br><br><br>
+
+    <div class="main-content">
+        <div class="information-box">
+            <ul class="information-type">
+                <li>Name: Anil Kumar</li>
+                <li>Mobile: +91 9745245689</li>
+                <li>Email: anilgecp@gmail.com</li>
+                <li>Role: Module Coordinator - AI/ML</li>
+                <li>Username: mcanilcse</li>
+            </ul>            
+            <div class="button-container">
+                <button class="square-btn">
+                    <img class="small-button" src="images/edit.webp" alt="Edit">
+                </button>
+                <button class="square-btn">
+                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
+                </button>
+            </div>
+        </div>
+    
+        <div class="information-box">
+            <ul class="information-type">
+                <li>Name: Shibhu Kumar</li>
+                <li>Mobile: +91 9656456892</li>
+                <li>Email: shibhukumar23@gmail.com</li>
+                <li>Role: Faculty</li>
+                <li>Username: fcshibhucse</li>
+            </ul>            
+            <div class="button-container">
+                <button class="square-btn">
+                    <img class="small-button" src="images/edit.webp" alt="Edit">
+                </button>
+                <button class="square-btn">
+                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <br><br><br>
+    <footer>
+        <p class="footer-style">&copy; 2025, DPCSE</p>
+    </footer>
+</body>

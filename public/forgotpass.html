@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Internal Exam Management">
+    <title>Forgot Password</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="forgotpass.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <img src="logo.webp" alt="logo">
+            <div class="title-head">
+                <h2>Internal Exam</h2>
+                <p>Management</p>
+            </div>
+    </header>
+    <br>
+    <section>
+        <form>
+            <a href="index.html"><img class="back-button" src="back.webp" alt="back-button"></a>
+            <br>
+            <h2 class="reset-title">Reset Password</h2>
+            <p class="otp-gone">An OTP have been sent to your<br>registered Email ID</p>
+            <br>
+            <div class="form-group">
+                <label for="otp">OTP</label>
+                <input type="text" id="otp" name="otp"><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="text" id="new-password" name="new-password"><br><br>
+            </div>
+            <br>
+
+            <button type="submit">Change</button><br><br>
+
+            <div class="otp-container">
+                <p class="no-otp">Don't receive the OTP?</p>
+                <br>
+                <a href="forgotpass.html"><p class="resend">Resend</p></a>
+            </div>            
+        </form>
+    </section>
+    <br>
+    <footer>
+        <p class="footer-style">&copy; 2025, DPCSE</p>
+    </footer>
+</body>

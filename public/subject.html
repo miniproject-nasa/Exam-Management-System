@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Internal Exam Management">
+    <title>Subject Information</title>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="profiles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <img src="images/logo.webp" alt="logo">
+            <div class="title-head">
+                <h2>Internal Exam</h2>
+                <p>Management</p>
+            </div>
+
+        <div class="menu-container">
+            <a href="home.html"><p class="menu">Home</p></a>
+        </div>
+    </header>
+    <br>
+
+    <section>
+        <a href="#popup-form" class="button-type">
+            <img class="img-chr" src="images/plus.webp" alt="Icon">
+            Add New Subject
+        </a>
+    </section>
+    <br><br><br>
+
+    <div id="popup-form" class="popup">
+        <div class="popup-content">
+            <a href="#" class="close">&times;</a>
+            <form>
+                <label for="subject-name">Subject Name</label>
+                <input type="text" id="subject-name" name="subject-name" required>
+    
+                <label for="subject-code">Subject Code</label>
+                <input type="text" id="subject-code" name="subject-code" required>
+    
+                <label for="batch">Batch</label>
+                <input type="text" id="batch" name="batch" required>
+    
+                <label for="module">Module</label>
+                <input type="text" id="module" name="module" required>
+    
+                <label for="faculty">Subject Faculty</label>
+                <input type="text" id="faculty" name="faculty" required>
+    
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>    
+
+    <div class="main-content">
+        <div class="information-box">
+            <ul class="information-type">
+                <li>Subject Name: Operating System</li>
+                <li>Subject Code: CST 207</li>
+                <li>Batch: S3</li>
+                <li>Module: System</li>
+                <li>Subject Faculty: Praveen Pillai Thulaseedharan</li>
+            </ul>            
+            <div class="button-container">
+                <button class="square-btn">
+                    <img class="small-button" src="images/edit.webp" alt="Edit">
+                </button>
+                <button class="square-btn">
+                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
+                </button>
+            </div>
+        </div>
+    
+        <div class="information-box">
+            <ul class="information-type">
+                <li>Subject Name: Compiler Design</li>
+                <li>Subject Code: CST 213</li>
+                <li>Batch: S6</li>
+                <li>Module: System</li>
+                <li>Subject Faculty: Anu Bonia Francis</li>
+            </ul>            
+            <div class="button-container">
+                <button class="square-btn">
+                    <img class="small-button" src="images/edit.webp" alt="Edit">
+                </button>
+                <button class="square-btn">
+                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <br><br><br>
+    <footer>
+        <p class="footer-style">&copy; 2025, DPCSE</p>
+    </footer>
+</body>

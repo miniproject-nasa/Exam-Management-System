@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Internal Exam Management">
+    <title>Login</title>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <img src="images/logo.webp" alt="logo">
+            <div class="title-head">
+                <h2>Internal Exam</h2>
+                <p>Management</p>
+            </div>
+    </header>
+    <br>
+    <section>
+        <form id="loginForm">
+            <h2 class="login-title">Login</h2>
+
+            <div class="form-group" >
+                <label for="username">User Name</label>
+                <input type="text" id="username" name="username"><br><br>
+            </div>
+
+            <div class="form-group" >
+                <label for="password">Password</label>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" >
+                    <img class="input-icon" id="hide" src="eye-close.webp" alt="Show Password" onmousedown="showHide(event)" onmouseup="showHide(event)"> 
+                    <!--<img src="images/eye-open.webp" alt="Show Password" class="input-icon">-->
+                </div>
+            </div>            
+
+            <!-- <a href="home.html" class="login-button">Login</a> -->
+            <button type="submit" class="login-button">Login</button>
+            <br><br>
+
+            <a href="forgotpass.html"><p class="forgot-password-link">Forgot your password?</p></a>
+            <div id="invalid-credentials">
+                <!-- <p id="invalid-msg">Invalid Credentials</p> -->
+            </div>
+        </form>
+    </section>
+    <br>
+    <footer>
+        <p class="footer-style">&copy; 2025, DPCSE</p>
+    </footer>
+    <script src="index.js"></script>
+    
+</body>
