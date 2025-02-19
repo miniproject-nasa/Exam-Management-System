@@ -1,12 +1,7 @@
 const mongoose = require("mongoose");
 const express = require("express");
-const path = require("path");
-const { log } = require("console");
 const app = express();
 const session = require("express-session");
-
-const bodyParser = require('body-parser');
-
 
 // Connect to MongoDB
 
@@ -21,9 +16,6 @@ mongoose
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 app.use(express.json());
-
-app.use(bodyParser.json());
-
 
 function isAuthenticated(req, res, next) {
   if (req.session.user) {
@@ -56,97 +48,102 @@ app.get("/usermanagement", (req, res) => {
 app.get("/modulemanagement", (req, res) => {
   res.redirect("/module.html");
 });
-// SUBJECT MANAGEMENT API'S
 
 const subjectSchema = new mongoose.Schema({
-    subject_name: { type: String, required: true },
-    subject_code: { type: String, required: true, unique: true },
-    batch:        { type: String, required: true },
-    module:       { type: String, required: true },
-    faculty:      { type: String, required: true }
+  S_name: String,
+  S_code: String,
+  S_module: String,
+  S_batch: String,
+  S_faculty: String,
 });
-const subject = mongoose.model("subject", subjectSchema, "subjects");
 
-//subject insert
+const Subject = mongoose.model("Subject", subjectSchema, "subjects");
 
-// API Route to Insert a New Subject
+// --- Add Subject ---
 app.post("/add-subject", async (req, res) => {
-  const { subject_name, subject_code, batch, module, faculty } = req.body;
   try {
-    const exists = await Subject.findOne({ subject_code });
-    if (exists) {
-      return res.status(400).json({ error: "Subject already exists" });
+    const { S_name, S_code, S_module, S_batch, S_faculty } = req.body;
+
+    // Check if a subject with the same S_code already exists
+    const existingSubject = await Subject.findOne({ S_code });
+    if (existingSubject) {
+      return res.status(400).json({ error: "Subject code already exists" });
     }
-    const newSubject = new Subject({ subject_name, subject_code, batch, module, faculty });
+
+    const newSubject = new Subject({
+      S_name,
+      S_code,
+      S_module,
+      S_batch,
+      S_faculty,
+    });
+
     await newSubject.save();
-    res.status(200).json({ message: "Subject added successfully", data: newSubject });
+    res
+      .status(201)
+      .json({ message: "Subject added successfully", data: newSubject });
   } catch (error) {
-    res.status(400).json({ error: "Failed to add subject", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to add subject", details: error.message });
   }
 });
 
-// All Subjects
-
+// --- Get Subjects ---
 app.get("/get-subjects", async (req, res) => {
   try {
     const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
-    res.status(404).json({ error: "Failed to get subjects", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to get subjects", details: error.message });
   }
 });
 
-//delete a Subject
-
-app.delete("/delete-subject/:subject_code", async (req, res) => {
+// --- Delete Subject ---
+app.delete("/delete-subject/:S_code", async (req, res) => {
   try {
-    const subject_code = req.params.subject_code;
-    const deletedSubject = await Subject.findOneAndDelete({ subject_code });
+    const { S_code } = req.params;
+    const deletedSubject = await Subject.findOneAndDelete({ S_code });
+
     if (!deletedSubject) {
       return res.status(404).json({ error: "Subject not found" });
     }
-    res.status(200).json({ message: "Subject deleted successfully", data: deletedSubject });
+
+    res
+      .status(200)
+      .json({ message: "Subject deleted successfully", data: deletedSubject });
   } catch (error) {
-    res.status(404).json({ error: "Failed to delete subject", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to delete subject", details: error.message });
   }
 });
 
-// update a subject
-app.put("/update-subject/:subject_code", async (req, res) => {
-  const S_code = req.params.subject_code;
-  const { S_name, S_module, S_batch } = req.body;
+// --- Update Subject ---
+app.put("/update-subject/:S_code", async (req, res) => {
   try {
-    const updatedSubject = await subject.findOneAndUpdate(
+    const { S_code } = req.params;
+    const { S_name, S_module, S_batch, S_faculty } = req.body;
+
+    const updatedSubject = await Subject.findOneAndUpdate(
       { S_code },
-      { S_name, S_module, S_batch },
+      { S_name, S_module, S_batch, S_faculty },
       { new: true }
     );
+
     if (!updatedSubject) {
-      return res.status(400).json({ error: "Subject not found" });
+      return res.status(404).json({ error: "Subject not found" });
     }
+
     res
       .status(200)
       .json({ message: "Subject updated successfully", data: updatedSubject });
   } catch (error) {
     res
-      .status(400)
+      .status(500)
       .json({ error: "Failed to update subject", details: error.message });
-  }
-});app.put("/update-subject/:subject_code", async (req, res) => {
-  const subject_code = req.params.subject_code;
-  const { subject_name, batch, module, faculty } = req.body;
-  try {
-    const updatedSubject = await Subject.findOneAndUpdate(
-      { subject_code },
-      { subject_name, batch, module, faculty },
-      { new: true }
-    );
-    if (!updatedSubject) {
-      return res.status(400).json({ error: "Subject not found" });
-    }
-    res.status(200).json({ message: "Subject updated successfully", data: updatedSubject });
-  } catch (error) {
-    res.status(400).json({ error: "Failed to update subject", details: error.message });
   }
 });
 
@@ -381,52 +378,59 @@ app.post("/login", async (req, res) => {
 
 // MODULE MANAGEMENT API'S
 
-const moduleSchema=new mongoose.Schema({
-  M_name:String,
-  M_id:String,
-  M_subject:[String]
-})
-const modulem=mongoose.model('modulem',moduleSchema,'modules');
+const moduleSchema = new mongoose.Schema({
+  M_name: String,
+  M_id: String,
+  M_subject: [String],
+});
+const modulem = mongoose.model("modulem", moduleSchema, "modules");
 // all modules
 
 app.get("/get-modules", async (req, res) => {
-  try{
-    const modules=await modulem.find();
+  try {
+    const modules = await modulem.find();
     res.status(200).json(modules);
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to get modules",details:error.message});
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to get modules", details: error.message });
   }
 });
 
 // module insert
 
-app.post('/add-module',async (req,res)=>{
-  try{
-    const {M_name,M_id,M_subject}=req.body;
-    const newModule=new modulem({
+app.post("/add-module", async (req, res) => {
+  try {
+    const { M_name, M_id, M_subject } = req.body;
+    const newModule = new modulem({
       M_name,
       M_id,
-      M_subject
+      M_subject,
     });
     const savedModule = await newModule.save();
-    res.status(200).json({message:"Module added successfully",data:savedModule});
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to add module",details:error.message});
+    res
+      .status(200)
+      .json({ message: "Module added successfully", data: savedModule });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to add module", details: error.message });
   }
 });
 
 // module delete
 
 app.delete("/delete-module/:module_id", async (req, res) => {
-  try{
-    const M_id=req.params.module_id;
-    const deleteModule=await modulem.findOneAndDelete(M_id);
-    res.status(200).json({message:"Module deleted successfully",data:deleteModule});
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to delete module",details:error.message});
+  try {
+    const M_id = req.params.module_id;
+    const deleteModule = await modulem.findOneAndDelete(M_id);
+    res
+      .status(200)
+      .json({ message: "Module deleted successfully", data: deleteModule });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to delete module", details: error.message });
   }
 });
 
@@ -487,25 +491,27 @@ app.delete("/delete-batch/:batch_id", async (req, res) => {
   }
 });
 
-// update a batch
-app.put("/update-batch/:batch_id", async (req, res) => {
-  const B_id = req.params.batch_id;
-  const { B_name, B_strenth } = req.body;
+app.put("/update-batch/:batch_name", async (req, res) => {
+  const B_name = req.params.batch_name;
+  const { B_strenth } = req.body;
+
   try {
     const updatedBatch = await batch.findOneAndUpdate(
-      { B_id },
-      { B_name, B_strenth },
+      { B_name },
+      { $set: { B_strenth } },
       { new: true }
     );
+
     if (!updatedBatch) {
-      return res.status(400).json({ error: "Batch not found" });
+      return res.status(404).json({ error: "Batch not found" });
     }
+
     res
       .status(200)
       .json({ message: "Batch updated successfully", data: updatedBatch });
   } catch (error) {
     res
-      .status(400)
+      .status(500)
       .json({ error: "Failed to update batch", details: error.message });
   }
 });
