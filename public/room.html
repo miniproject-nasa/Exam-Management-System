@@ -1,103 +1,63 @@
 <!DOCTYPE html>
-<html lang="eng">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Internal Exam Management">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Internal Exam Management" />
     <title>Room Information</title>
-    <link rel="icon" href="images/icon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="profiles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-</head>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="profiles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
+  <body>
     <header>
-        <img src="images/logo.webp" alt="logo">
-            <div class="title-head">
-                <h2>Internal Exam</h2>
-                <p>Management</p>
-            </div>
+      <img src="images/logo.webp" alt="logo" />
+      <div class="title-head">
+        <h2>Internal Exam</h2>
+        <p>Management</p>
+      </div>
 
-        <div class="menu-container">
-            <a href="home.html"><p class="menu">Home</p></a>
-        </div>
+      <div class="menu-container">
+        <a href="home.html"><p class="menu">Home</p></a>
+      </div>
     </header>
-    <br>
+    <br />
     <section>
-        <a href="#popup-form" class="button-type">
-            <img class="img-chr" src="images/plus.webp" alt="Icon">
-            Add New Room
-        </a>
+      <a href="#popup-form" class="button-type">
+        <img class="img-chr" src="images/plus.webp" alt="Icon" />
+        Add New Room
+      </a>
     </section>
 
     <div id="popup-form" class="popup">
-        <div class="popup-content">
-            <a href="#" class="close">&times;</a>
-            <form>
-                <label for="room-no">Room No</label>
-                <input type="text" id="room-no" name="room-no" required>
-    
-                <label for="capacity">Capacity</label>
-                <input type="text" id="capacity" name="capacity" required>
-    
-                <button type="submit">Save</button>
-            </form>
-        </div>
+      <div class="popup-content">
+        <a href="#" class="close">&times;</a>
+        <form id="roomForm">
+          <label for="room-no">Room No</label>
+          <input type="text" id="room-no" name="room-no" required />
+
+          <label for="capacity">Capacity</label>
+          <input type="text" id="capacity" name="capacity" required />
+
+          <button type="submit">Save</button>
+        </form>
+      </div>
     </div>
-    <br><br><br>
+    <br /><br /><br />
 
-    <div class="main-content">
-        <div class="information-box">
-            <ul class="information-type">
-                <li>Room No : 101</li>
-                <li>Capacity : 40</li>
-            </ul>
-            
-            <div class="button-container">
-                <button class="square-btn">
-                    <img class="small-button" src="images/edit.webp" alt="Edit">
-                </button>
-                <button class="square-btn">
-                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
-                </button>
-            </div>
-        </div>
-    
-        <div class="information-box">
-            <ul class="information-type">
-                <li>Room No : 107</li>
-                <li>Capacity : 40</li>
-            </ul>
-            
-            <div class="button-container">
-                <button class="square-btn">
-                    <img class="small-button" src="images/edit.webp" alt="Edit">
-                </button>
-                <button class="square-btn">
-                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
-                </button>
-            </div>
-        </div>
-
-        <div class="information-box">
-            <ul class="information-type">
-                <li>Room No : 111</li>
-                <li>Capacity : 40</li>
-            </ul>
-            
-            <div class="button-container">
-                <button class="square-btn">
-                    <img class="small-button" src="images/edit.webp" alt="Edit">
-                </button>
-                <button class="square-btn">
-                    <img class="small-button-2" src="images/trash.webp" alt="Delete">
-                </button>
-            </div>
-        </div>
+    <div class="main-content" id="room-list">
+      <!-- Rooms will be dynamically inserted here -->
     </div>
 
-    <br><br><br>
+    <br /><br /><br />
     <footer>
-        <p class="footer-style">&copy; 2025, DPCSE</p>
+      <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
-</body>
+
+    <script src="room.js"></script>
+  </body>
+</html>
