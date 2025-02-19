@@ -206,7 +206,7 @@ const userSchema = new mongoose.Schema({
 });
 const user=mongoose.model('user',userSchema,'users');
 
-// uer insert
+// user insert
 
 app.post('/add-user',async (req,res)=>{
   try{
