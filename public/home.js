@@ -65,6 +65,58 @@ document.addEventListener("DOMContentLoaded",async function () {
         
     }
     await displayItems(data);
+
+
+    const items=document.querySelectorAll('.item');
+    await items.forEach(item=>{
+        item.addEventListener('click',()=>{
+            if(item.classList.contains('user')){
+                window.location.href = "/user.html";
+            }
+            else if(item.classList.contains('module')){
+                window.location.href = "/module.html";
+            }
+            else if(item.classList.contains('upload')){
+                window.location.href = "/upload.html";
+            }
+            else if(item.classList.contains('inbox')){
+                window.location.href = "/inbox.html";
+            }
+            else if(item.classList.contains('scutiny')){
+                window.location.href = "/scutiny.html";
+            }
+            else if(item.classList.contains('notify')){
+                window.location.href = "/notify.html";
+            }
+            else if(item.classList.contains('seating')){
+                window.location.href = "/seating.html";
+            }
+            else if(item.classList.contains('duty')){
+                window.location.href = "/duty.html";
+            }
+            else if(item.classList.contains('subject')){
+                window.location.href = "/subject.html";
+            }
+            else if(item.classList.contains('batch')){
+                window.location.href = "/batch.html";
+            }
+            else if(item.classList.contains('room')){
+                window.location.href = "/room.html";
+            }
+
+            // window.location.href = `/${item.id}.html`;
+        })
+    })
+    
+    // function itemclick(e){
+    //     console.log(e.target.classList);
+        // if(e.target.classList.contains('item')){
+        //     console.log('item clicked'); 
+        // }
+    // }
+    // mainContainer.addEventListener('click',itemclick);
+
+
     
 
 });
