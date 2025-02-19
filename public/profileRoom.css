@@ -294,6 +294,7 @@ form button:focus {
 
 /* Mobile Responsive Styles */
 @media only screen and (max-width: 650px) {
+
     header {
         height: 55px;
     }
