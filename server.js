@@ -299,7 +299,7 @@ app.post('/login',async (req,res)=>{
       if(userfinal.U_password===password){
         req.session.user = { id: userfinal._id, username: userfinal.U_name, role: userfinal.U_role };
         console.log("Login Successful");
-        res.status(200).json({success:true,message:"Login Successful",redirect:"/home.html"});
+        res.status(200).json({success:true,message:"Login Successful",redirect:"/home.html",user:req.session.user});
 
       }
       else{
