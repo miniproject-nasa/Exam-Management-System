@@ -1,5 +1,5 @@
 body {
-    background-image: url('bgb.webp');
+    background-image: url('./images/bgb.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -97,6 +97,7 @@ p {
     padding-left: 40px;
     padding-right: 40px;
 }
+
 
 .item {
     cursor: pointer;
