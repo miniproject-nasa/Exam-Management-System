@@ -57,6 +57,7 @@ const subjectSchema = new mongoose.Schema({
   S_code: String,
   S_module: String,
   S_batch: String,
+  S_faculty: String,
 });
 const subject = mongoose.model("subject", subjectSchema, "subjects");
 
@@ -75,6 +76,7 @@ app.post("/add-subject", async (req, res) => {
       S_code,
       S_module,
       S_batch,
+      S_faculty,
     });
 
     //Save to MongoDB
@@ -132,7 +134,7 @@ app.put("/update-subject/:subject_code", async (req, res) => {
   try {
     const updatedSubject = await subject.findOneAndUpdate(
       { S_code },
-      { S_name, S_module, S_batch },
+      { S_name, S_module, S_batch, S_faculty },
       { new: true }
     );
     if (!updatedSubject) {
@@ -379,52 +381,59 @@ app.post("/login", async (req, res) => {
 
 // MODULE MANAGEMENT API'S
 
-const moduleSchema=new mongoose.Schema({
-  M_name:String,
-  M_id:String,
-  M_subject:[String]
-})
-const modulem=mongoose.model('modulem',moduleSchema,'modules');
+const moduleSchema = new mongoose.Schema({
+  M_name: String,
+  M_id: String,
+  M_subject: [String],
+});
+const modulem = mongoose.model("modulem", moduleSchema, "modules");
 // all modules
 
 app.get("/get-modules", async (req, res) => {
-  try{
-    const modules=await modulem.find();
+  try {
+    const modules = await modulem.find();
     res.status(200).json(modules);
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to get modules",details:error.message});
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to get modules", details: error.message });
   }
 });
 
 // module insert
 
-app.post('/add-module',async (req,res)=>{
-  try{
-    const {M_name,M_id,M_subject}=req.body;
-    const newModule=new modulem({
+app.post("/add-module", async (req, res) => {
+  try {
+    const { M_name, M_id, M_subject } = req.body;
+    const newModule = new modulem({
       M_name,
       M_id,
-      M_subject
+      M_subject,
     });
     const savedModule = await newModule.save();
-    res.status(200).json({message:"Module added successfully",data:savedModule});
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to add module",details:error.message});
+    res
+      .status(200)
+      .json({ message: "Module added successfully", data: savedModule });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to add module", details: error.message });
   }
 });
 
 // module delete
 
 app.delete("/delete-module/:module_id", async (req, res) => {
-  try{
-    const M_id=req.params.module_id;
-    const deleteModule=await modulem.findOneAndDelete(M_id);
-    res.status(200).json({message:"Module deleted successfully",data:deleteModule});
-  }
-  catch(error){
-    res.status(404).json({error:"Failed to delete module",details:error.message});
+  try {
+    const M_id = req.params.module_id;
+    const deleteModule = await modulem.findOneAndDelete(M_id);
+    res
+      .status(200)
+      .json({ message: "Module deleted successfully", data: deleteModule });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to delete module", details: error.message });
   }
 });
 
@@ -485,25 +494,27 @@ app.delete("/delete-batch/:batch_id", async (req, res) => {
   }
 });
 
-// update a batch
-app.put("/update-batch/:batch_id", async (req, res) => {
-  const B_id = req.params.batch_id;
-  const { B_name, B_strenth } = req.body;
+app.put("/update-batch/:batch_name", async (req, res) => {
+  const B_name = req.params.batch_name;
+  const { B_strenth } = req.body;
+
   try {
     const updatedBatch = await batch.findOneAndUpdate(
-      { B_id },
-      { B_name, B_strenth },
+      { B_name },
+      { $set: { B_strenth } },
       { new: true }
     );
+
     if (!updatedBatch) {
-      return res.status(400).json({ error: "Batch not found" });
+      return res.status(404).json({ error: "Batch not found" });
     }
+
     res
       .status(200)
       .json({ message: "Batch updated successfully", data: updatedBatch });
   } catch (error) {
     res
-      .status(400)
+      .status(500)
       .json({ error: "Failed to update batch", details: error.message });
   }
 });
