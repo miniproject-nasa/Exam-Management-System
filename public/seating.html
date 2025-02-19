@@ -32,18 +32,35 @@
                 <div class="dropdown">
                     <select id="batches" name="batches">
                         <option value="" disabled selected>Select an option</option>
+                        <option>S1 A</option>
+                        <option>S1 B</option>
                     </select>
                 </div>
             </div>
-
+            <button class="add-button" type="button" onclick="addToDisplayBox('batches', 'batch-box')">Add</button>
+            
+            <div class="form-group">
+                <div class="display-box" id="batch-box"></div>
+            </div>
+            
             <div class="form-group">
                 <label for="rooms">Available Rooms</label>
                 <div class="dropdown">
                     <select id="rooms" name="rooms">
                         <option value="" disabled selected>Select an option</option>
+                        <option>101</option>
+                        <option>203</option>
+                        <option>111</option>
+                        <option>213</option>
                     </select>
                 </div>
             </div>
+            
+            <button class="add-button" type="button" onclick="addToDisplayBox('rooms', 'room-box')">Add</button>
+            
+            <div class="form-group">
+                <div class="display-box" id="room-box"></div>
+            </div>            
 
             <div class="flex-container">
                 <button type="submit">Generate</button>
@@ -68,4 +85,6 @@
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+
+    <script src="seating.js"></script>
 </body>
