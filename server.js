@@ -38,6 +38,18 @@ app.get("/batchmanagement", (req, res) => {
 app.get("/roommanagement", (req, res) => {
   res.redirect("/room.html");
 });
+
+app.get("/subjectmanagement", (req, res) => {
+  res.redirect("/subject.html");
+});
+
+app.get("/usermanagement", (req, res) => {
+  res.redirect("/user.html");
+});
+
+app.get("/modulemanagement", (req, res) => {
+  res.redirect("/module.html");
+});
 // SUBJECT MANAGEMENT API'S
 
 const subjectSchema = new mongoose.Schema({
@@ -367,54 +379,54 @@ app.post("/login", async (req, res) => {
 
 // MODULE MANAGEMENT API'S
 
-// const moduleSchema=new mongoose.Schema({
-//   M_name:String,
-//   M_id:String,
-//   M_subject:[String]
-// })
-// const module=mongoose.model('module',moduleSchema,'modules');
-// // all modules
+const moduleSchema=new mongoose.Schema({
+  M_name:String,
+  M_id:String,
+  M_subject:[String]
+})
+const modulem=mongoose.model('modulem',moduleSchema,'modules');
+// all modules
 
-// app.get("/get-modules", async (req, res) => {
-//   try{
-//     const modules=await module.find();
-//     res.status(200).json(modules);
-//   }
-//   catch(error){
-//     res.status(404).json({error:"Failed to get modules",details:error.message});
-//   }
-// });
+app.get("/get-modules", async (req, res) => {
+  try{
+    const modules=await modulem.find();
+    res.status(200).json(modules);
+  }
+  catch(error){
+    res.status(404).json({error:"Failed to get modules",details:error.message});
+  }
+});
 
-// // module insert
+// module insert
 
-// app.post('/add-module',async (req,res)=>{
-//   try{
-//     const {M_name,M_id,M_subject}=req.body;
-//     const newModule=new module({
-//       M_name,
-//       M_id,
-//       M_subject
-//     });
-//     const savedModule = await newModule.save();
-//     res.status(200).json({message:"Module added successfully",data:savedModule});
-//   }
-//   catch(error){
-//     res.status(404).json({error:"Failed to add module",details:error.message});
-//   }
-// });
+app.post('/add-module',async (req,res)=>{
+  try{
+    const {M_name,M_id,M_subject}=req.body;
+    const newModule=new modulem({
+      M_name,
+      M_id,
+      M_subject
+    });
+    const savedModule = await newModule.save();
+    res.status(200).json({message:"Module added successfully",data:savedModule});
+  }
+  catch(error){
+    res.status(404).json({error:"Failed to add module",details:error.message});
+  }
+});
 
-// // module delete
+// module delete
 
-// app.delete("/delete-module/:module_id", async (req, res) => {
-//   try{
-//     const M_id=req.params.module_id;
-//     const deleteModule=await module.findOneAndDelete(M_id);
-//     res.status(200).json({message:"Module deleted successfully",data:deleteModule});
-//   }
-//   catch(error){
-//     res.status(404).json({error:"Failed to delete module",details:error.message});
-//   }
-// });
+app.delete("/delete-module/:module_id", async (req, res) => {
+  try{
+    const M_id=req.params.module_id;
+    const deleteModule=await modulem.findOneAndDelete(M_id);
+    res.status(200).json({message:"Module deleted successfully",data:deleteModule});
+  }
+  catch(error){
+    res.status(404).json({error:"Failed to delete module",details:error.message});
+  }
+});
 
 // BATCH MANAGEMENT API'S
 const batchSchema = new mongoose.Schema({
