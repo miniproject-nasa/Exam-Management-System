@@ -5,6 +5,9 @@ const { log } = require("console");
 const app = express();
 const session = require("express-session");
 
+const bodyParser = require('body-parser');
+
+
 // Connect to MongoDB
 
 mongoose
@@ -18,6 +21,9 @@ mongoose
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 app.use(express.json());
+
+app.use(bodyParser.json());
+
 
 function isAuthenticated(req, res, next) {
   if (req.session.user) {
@@ -53,6 +59,11 @@ app.get("/modulemanagement", (req, res) => {
 // SUBJECT MANAGEMENT API'S
 
 const subjectSchema = new mongoose.Schema({
+    subject_name: { type: String, required: true },
+    subject_code: { type: String, required: true, unique: true },
+    batch:        { type: String, required: true },
+    module:       { type: String, required: true },
+    faculty:      { type: String, required: true }
   S_name: String,
   S_code: String,
   S_module: String,
@@ -65,6 +76,15 @@ const subject = mongoose.model("subject", subjectSchema, "subjects");
 
 // API Route to Insert a New Subject
 app.post("/add-subject", async (req, res) => {
+  const { subject_name, subject_code, batch, module, faculty } = req.body;
+  try {
+    const exists = await Subject.findOne({ subject_code });
+    if (exists) {
+      return res.status(400).json({ error: "Subject already exists" });
+    }
+    const newSubject = new Subject({ subject_name, subject_code, batch, module, faculty });
+    await newSubject.save();
+    res.status(200).json({ message: "Subject added successfully", data: newSubject });
   try {
     console.log(req.body);
     const { S_name, S_code, S_module, S_batch } = req.body;
@@ -85,9 +105,7 @@ app.post("/add-subject", async (req, res) => {
       .status(201)
       .json({ message: "Subject added successfully", data: savedSubject });
   } catch (error) {
-    res
-      .status(404)
-      .json({ error: "Failed to add subject", details: error.message });
+    res.status(400).json({ error: "Failed to add subject", details: error.message });
   }
 });
 
@@ -95,12 +113,10 @@ app.post("/add-subject", async (req, res) => {
 
 app.get("/get-subjects", async (req, res) => {
   try {
-    const subjects = await subject.find();
+    const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
-    res
-      .status(404)
-      .json({ error: "Failed to get subjects", details: error.message });
+    res.status(404).json({ error: "Failed to get subjects", details: error.message });
   }
 });
 
@@ -109,21 +125,13 @@ app.get("/get-subjects", async (req, res) => {
 app.delete("/delete-subject/:subject_code", async (req, res) => {
   try {
     const subject_code = req.params.subject_code;
-
-    console.log(subject_code);
-
-    const deletedSubject = await subject.findOneAndDelete(subject_code);
-
+    const deletedSubject = await Subject.findOneAndDelete({ subject_code });
     if (!deletedSubject) {
       return res.status(404).json({ error: "Subject not found" });
     }
-    res
-      .status(200)
-      .json({ message: "Subject deleted successfully", data: deletedSubject });
+    res.status(200).json({ message: "Subject deleted successfully", data: deletedSubject });
   } catch (error) {
-    res
-      .status(404)
-      .json({ error: "Failed to delete subject", details: error.message });
+    res.status(404).json({ error: "Failed to delete subject", details: error.message });
   }
 });
 
@@ -147,6 +155,22 @@ app.put("/update-subject/:subject_code", async (req, res) => {
     res
       .status(400)
       .json({ error: "Failed to update subject", details: error.message });
+  }
+});app.put("/update-subject/:subject_code", async (req, res) => {
+  const subject_code = req.params.subject_code;
+  const { subject_name, batch, module, faculty } = req.body;
+  try {
+    const updatedSubject = await Subject.findOneAndUpdate(
+      { subject_code },
+      { subject_name, batch, module, faculty },
+      { new: true }
+    );
+    if (!updatedSubject) {
+      return res.status(400).json({ error: "Subject not found" });
+    }
+    res.status(200).json({ message: "Subject updated successfully", data: updatedSubject });
+  } catch (error) {
+    res.status(400).json({ error: "Failed to update subject", details: error.message });
   }
 });
 
