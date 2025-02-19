@@ -33,6 +33,14 @@ app.get("/login",(req,res)=>{
   res.redirect("/index.html");
 });
 
+app.get("/batchmanagement",(req,res)=>{
+  res.redirect("/batch.html");
+}
+);
+app.get("/roommanagement",(req,res)=>{
+  res.redirect("/room.html");
+}
+);
 // SUBJECT MANAGEMENT API'S
 
 
