@@ -1,12 +1,7 @@
 const mongoose = require("mongoose");
 const express = require("express");
-const path = require("path");
-const { log } = require("console");
 const app = express();
 const session = require("express-session");
-
-const bodyParser = require('body-parser');
-
 
 // Connect to MongoDB
 
@@ -21,9 +16,6 @@ mongoose
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 app.use(express.json());
-
-app.use(bodyParser.json());
-
 
 function isAuthenticated(req, res, next) {
   if (req.session.user) {
@@ -56,42 +48,29 @@ app.get("/usermanagement", (req, res) => {
 app.get("/modulemanagement", (req, res) => {
   res.redirect("/module.html");
 });
-// SUBJECT MANAGEMENT API'S
 
 const subjectSchema = new mongoose.Schema({
-    subject_name: { type: String, required: true },
-    subject_code: { type: String, required: true, unique: true },
-    batch:        { type: String, required: true },
-    module:       { type: String, required: true },
-    faculty:      { type: String, required: true }
   S_name: String,
   S_code: String,
   S_module: String,
   S_batch: String,
   S_faculty: String,
 });
-const subject = mongoose.model("subject", subjectSchema, "subjects");
 
-//subject insert
+const Subject = mongoose.model("Subject", subjectSchema, "subjects");
 
-// API Route to Insert a New Subject
+// --- Add Subject ---
 app.post("/add-subject", async (req, res) => {
-  const { subject_name, subject_code, batch, module, faculty } = req.body;
   try {
-    const exists = await Subject.findOne({ subject_code });
-    if (exists) {
-      return res.status(400).json({ error: "Subject already exists" });
-    }
-    const newSubject = new Subject({ subject_name, subject_code, batch, module, faculty });
-    await newSubject.save();
-    res.status(200).json({ message: "Subject added successfully", data: newSubject });
-  try {
-    console.log(req.body);
-    const { S_name, S_code, S_module, S_batch } = req.body;
-    console.log(S_name, S_code, S_module, S_batch);
+    const { S_name, S_code, S_module, S_batch, S_faculty } = req.body;
 
-    //Create a new subject document
-    const newSubject = new subject({
+    // Check if a subject with the same S_code already exists
+    const existingSubject = await Subject.findOne({ S_code });
+    if (existingSubject) {
+      return res.status(400).json({ error: "Subject code already exists" });
+    }
+
+    const newSubject = new Subject({
       S_name,
       S_code,
       S_module,
@@ -99,78 +78,72 @@ app.post("/add-subject", async (req, res) => {
       S_faculty,
     });
 
-    //Save to MongoDB
-    const savedSubject = await newSubject.save();
+    await newSubject.save();
     res
       .status(201)
-      .json({ message: "Subject added successfully", data: savedSubject });
+      .json({ message: "Subject added successfully", data: newSubject });
   } catch (error) {
-    res.status(400).json({ error: "Failed to add subject", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to add subject", details: error.message });
   }
 });
 
-// All Subjects
-
+// --- Get Subjects ---
 app.get("/get-subjects", async (req, res) => {
   try {
     const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
-    res.status(404).json({ error: "Failed to get subjects", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to get subjects", details: error.message });
   }
 });
 
-//delete a Subject
-
-app.delete("/delete-subject/:subject_code", async (req, res) => {
+// --- Delete Subject ---
+app.delete("/delete-subject/:S_code", async (req, res) => {
   try {
-    const subject_code = req.params.subject_code;
-    const deletedSubject = await Subject.findOneAndDelete({ subject_code });
+    const { S_code } = req.params;
+    const deletedSubject = await Subject.findOneAndDelete({ S_code });
+
     if (!deletedSubject) {
       return res.status(404).json({ error: "Subject not found" });
     }
-    res.status(200).json({ message: "Subject deleted successfully", data: deletedSubject });
+
+    res
+      .status(200)
+      .json({ message: "Subject deleted successfully", data: deletedSubject });
   } catch (error) {
-    res.status(404).json({ error: "Failed to delete subject", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to delete subject", details: error.message });
   }
 });
 
-// update a subject
-app.put("/update-subject/:subject_code", async (req, res) => {
-  const S_code = req.params.subject_code;
-  const { S_name, S_module, S_batch } = req.body;
+// --- Update Subject ---
+app.put("/update-subject/:S_code", async (req, res) => {
   try {
-    const updatedSubject = await subject.findOneAndUpdate(
+    const { S_code } = req.params;
+    const { S_name, S_module, S_batch, S_faculty } = req.body;
+
+    const updatedSubject = await Subject.findOneAndUpdate(
       { S_code },
       { S_name, S_module, S_batch, S_faculty },
       { new: true }
     );
+
     if (!updatedSubject) {
-      return res.status(400).json({ error: "Subject not found" });
+      return res.status(404).json({ error: "Subject not found" });
     }
+
     res
       .status(200)
       .json({ message: "Subject updated successfully", data: updatedSubject });
   } catch (error) {
     res
-      .status(400)
+      .status(500)
       .json({ error: "Failed to update subject", details: error.message });
-  }
-});app.put("/update-subject/:subject_code", async (req, res) => {
-  const subject_code = req.params.subject_code;
-  const { subject_name, batch, module, faculty } = req.body;
-  try {
-    const updatedSubject = await Subject.findOneAndUpdate(
-      { subject_code },
-      { subject_name, batch, module, faculty },
-      { new: true }
-    );
-    if (!updatedSubject) {
-      return res.status(400).json({ error: "Subject not found" });
-    }
-    res.status(200).json({ message: "Subject updated successfully", data: updatedSubject });
-  } catch (error) {
-    res.status(400).json({ error: "Failed to update subject", details: error.message });
   }
 });
 
