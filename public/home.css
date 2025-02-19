@@ -100,7 +100,8 @@ p {
 
 .item {
     cursor: pointer;
-    display: flex;
+    /* display: flex; */
+    display: none;
     flex-direction: column;
     align-items: center;
     width: 140px;
