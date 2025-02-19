@@ -490,3 +490,9 @@ section {
         margin-top: 0;
     }
 }
+
+#update-batch-name:focus{
+    border: 1px solid #ddd !important;
+    outline: none;
+    cursor: text;
+}

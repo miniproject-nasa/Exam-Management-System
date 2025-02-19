@@ -438,3 +438,10 @@ form button:focus {
         margin-top: 0;
     }
 }
+
+/* Override focus style for the update capacity input */
+#update-room-no:focus {
+    border: 1px solid #ddd !important;
+    outline: none;
+    cursor: text;
+}
