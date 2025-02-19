@@ -367,14 +367,14 @@ app.post("/login", async (req, res) => {
 
 // LOGOUT
 
-// app.get("/logout", (req, res) => {
-//   req.session.destroy((err) => {
-//       if (err) {
-//           return res.status(500).json({ error: "Logout failed" });
-//       }
-//       res.json({ success: true, message: "Logged out successfully" });
-//   });
-// });
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+      if (err) {
+          return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ success: true, message: "Logged out successfully" });
+  });
+});
 
 // MODULE MANAGEMENT API'S
 
