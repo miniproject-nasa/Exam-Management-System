@@ -1,5 +1,5 @@
 body {
-    background-image: url('bgb.webp');
+    background-image: url('./images/bgb.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -98,9 +98,11 @@ p {
     padding-right: 40px;
 }
 
+
 .item {
     cursor: pointer;
-    display: flex;
+    /* display: flex; */
+    display: none;
     flex-direction: column;
     align-items: center;
     width: 140px;

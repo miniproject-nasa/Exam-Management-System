@@ -43,7 +43,7 @@
         // }
 
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             const loginForm = document.getElementById("loginForm");
         
             async function checkAuthStatus() {
