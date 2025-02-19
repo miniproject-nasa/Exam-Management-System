@@ -152,7 +152,6 @@ p {
     left: 5%;
     margin-bottom: -40px;
     margin-top: 7px;
-
     background: rgba(15, 98, 254, 1);
     color: white;
     border: none;
@@ -161,7 +160,6 @@ p {
     cursor: pointer;
     font-size: 14px;
     letter-spacing: 0.8px;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -179,6 +177,7 @@ form button:focus {
     border: 1px solid rgba(15, 98, 254, 1);
 }
 
+/* Popup Styles */
 .popup {
     position: fixed;
     top: 0;
@@ -186,15 +185,15 @@ form button:focus {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.05);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    visibility: hidden;
     transition: 0.3s ease-in-out;
+    z-index: 1000;
 }
 
 .popup:target {
+    display: flex;
     opacity: 1;
     visibility: visible;
 }
@@ -202,7 +201,7 @@ form button:focus {
 .popup-content {
     background: white;
     padding: 40px;
-    width: 100%;
+    width: 90%;
     max-width: 450px;
     box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
@@ -267,11 +266,33 @@ form button:focus {
     transition: 0.2s;
 }
 
+.popup-content p {
+    color: rgb(239, 11, 11);
+}
+
 .popup-content button:hover {
     background: rgb(1, 83, 235);
     transform: scale(1.02);
 }
 
+/* Delete confirmation specific styles */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.danger {
+    background: rgb(1, 83, 235) !important;
+}
+
+#cancel-delete {
+    background: rgba(112, 112, 112, 1) !important;
+}
+
+/* Mobile Responsive Styles */
 @media only screen and (max-width: 650px) {
     header {
         height: 55px;
@@ -375,59 +396,44 @@ form button:focus {
         font-size: 9px;
     }
 
+    /* Mobile popup styles */
     .popup {
         opacity: 1;
         visibility: visible;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.1);
-        z-index: 9999;
     }
     
     .popup-content {
         max-width: 280px;
-        width: 100%;
         padding: 15px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
     
     .popup-content label {
         font-size: 10px;
         margin-bottom: 4px;
         text-align: center;
-        display: block;
-        width: 100%;
-        left: 20px;
     }
     
     .popup-content input {
         padding: 10px;
         font-size: 10px;
         margin-bottom: 12px;
-        width: 100%;
         max-width: 230px;
         text-align: center;
-        display: block;
     }
     
     .popup-content button {
         margin-top: 8px;
         padding: 10px;
         font-size: 12px;
-        width: 100%;
         max-width: 230px;
-        display: block;
-    }    
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .button-group button {
+        margin-top: 0;
+    }
 }
