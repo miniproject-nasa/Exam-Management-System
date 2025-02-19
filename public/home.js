@@ -1,4 +1,5 @@
 let data={};
+
 document.addEventListener("DOMContentLoaded",async function () {
 
     const mainContainer=document.querySelector(".main-container")
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded",async function () {
     await checkAuthStatus();
     
     console.log(data);
-
+    
     function displayItems(data) {
         if(data.isAuthenticated){
             const role=data.user.role;
@@ -109,14 +110,33 @@ document.addEventListener("DOMContentLoaded",async function () {
     })
     
     // function itemclick(e){
-    //     console.log(e.target.classList);
+        //     console.log(e.target.classList);
         // if(e.target.classList.contains('item')){
-        //     console.log('item clicked'); 
-        // }
-    // }
-    // mainContainer.addEventListener('click',itemclick);
-
-
-    
-
+            //     console.log('item clicked'); 
+            // }
+            // }
+            // mainContainer.addEventListener('click',itemclick);
+            
+            
+            const logout=document.querySelector('.logout')
+            console.log(logout);
+            
+            logout.addEventListener("click",async function (e) {
+                try
+                {
+                    const response = await fetch("/logout", {
+                        method: "GET",
+                        headers: { "Content-Type": "application/json" }
+                    }); 
+                    const reslt=await response.json();
+                    if(reslt.success)
+                        window.location.href = "/index.html";
+                        
+                }
+                catch(error){
+                        console.log(error)
+                }
+                    
+            })
+            
 });
