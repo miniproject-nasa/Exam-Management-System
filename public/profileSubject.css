@@ -193,11 +193,13 @@ form button:focus {
     z-index: 1000;
 }
 
-.popup:target {
+/* New rule: when a popup has the active class, display it */
+.popup.active {
     display: flex;
     opacity: 1;
     visibility: visible;
 }
+
 
 .popup-content {
     background: white;
@@ -226,6 +228,7 @@ form button:focus {
 .close:hover {
     color: rgb(41, 38, 38);
 }
+
 
 .popup-content label {
     font-size: 14px;
