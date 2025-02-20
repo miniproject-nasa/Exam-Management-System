@@ -369,71 +369,126 @@ app.post("/login", async (req, res) => {
 
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
-      if (err) {
-          return res.status(500).json({ error: "Logout failed" });
-      }
-      res.json({ success: true, message: "Logged out successfully" });
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.json({ success: true, message: "Logged out successfully" });
   });
 });
 
 // MODULE MANAGEMENT API'S
-
 const moduleSchema = new mongoose.Schema({
-  M_name: String,
-  M_id: String,
-  M_subject: [String],
+  moduleName: {
+    type: String,
+    required: true,
+  },
+  moduleCoordinator: {
+    type: String,
+    required: true,
+  },
+  subjects: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  faculties: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
-const modulem = mongoose.model("modulem", moduleSchema, "modules");
-// all modules
 
-app.get("/get-modules", async (req, res) => {
+const Module = mongoose.model("Module", moduleSchema, "modules");
+
+// Update your existing module routes:
+
+// GET all modules
+app.get("/api/modules", async (req, res) => {
   try {
-    const modules = await modulem.find();
+    const modules = await Module.find();
     res.status(200).json(modules);
   } catch (error) {
     res
-      .status(404)
-      .json({ error: "Failed to get modules", details: error.message });
+      .status(500)
+      .json({ error: "Failed to fetch modules", details: error.message });
   }
 });
 
-// module insert
-
-app.post("/add-module", async (req, res) => {
+// POST new module
+app.post("/api/modules", async (req, res) => {
   try {
-    const { M_name, M_id, M_subject } = req.body;
-    const newModule = new modulem({
-      M_name,
-      M_id,
-      M_subject,
+    const { moduleName, moduleCoordinator, subjects, faculties } = req.body;
+
+    const newModule = new Module({
+      moduleName,
+      moduleCoordinator,
+      subjects,
+      faculties,
     });
+
     const savedModule = await newModule.save();
     res
-      .status(200)
+      .status(201)
       .json({ message: "Module added successfully", data: savedModule });
   } catch (error) {
     res
-      .status(404)
+      .status(400)
       .json({ error: "Failed to add module", details: error.message });
   }
 });
 
-// module delete
-
-app.delete("/delete-module/:module_id", async (req, res) => {
+// DELETE module
+app.delete("/api/modules/:id", async (req, res) => {
   try {
-    const M_id = req.params.module_id;
-    const deleteModule = await modulem.findOneAndDelete(M_id);
+    const deletedModule = await Module.findByIdAndDelete(req.params.id);
+    if (!deletedModule) {
+      return res.status(404).json({ error: "Module not found" });
+    }
     res
       .status(200)
-      .json({ message: "Module deleted successfully", data: deleteModule });
+      .json({ message: "Module deleted successfully", data: deletedModule });
   } catch (error) {
     res
-      .status(404)
+      .status(500)
       .json({ error: "Failed to delete module", details: error.message });
   }
 });
 
+// UPDATE module
+app.put("/api/modules/:id", async (req, res) => {
+  try {
+    const { moduleName, moduleCoordinator, subjects, faculties } = req.body;
+
+    const updatedModule = await Module.findByIdAndUpdate(
+      req.params.id,
+      {
+        moduleName,
+        moduleCoordinator,
+        subjects,
+        faculties,
+      },
+      { new: true }
+    );
+
+    if (!updatedModule) {
+      return res.status(404).json({ error: "Module not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Module updated successfully", data: updatedModule });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ error: "Failed to update module", details: error.message });
+  }
+});
 // BATCH MANAGEMENT API'S
 const batchSchema = new mongoose.Schema({
   B_id: String,
@@ -513,6 +568,68 @@ app.put("/update-batch/:batch_name", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to update batch", details: error.message });
+  }
+});
+
+// GET a single module by ID
+app.get("/api/modules/:id", async (req, res) => {
+  try {
+    const module = await Module.findById(req.params.id);
+    if (!module) {
+      return res.status(404).json({ error: "Module not found" });
+    }
+    res.status(200).json(module);
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Failed to fetch module", 
+      details: error.message 
+    });
+  }
+});
+
+// UPDATE a module
+app.put("/api/modules/:id", async (req, res) => {
+  try {
+    const { moduleCoordinator, subjects, faculties } = req.body;
+    
+    const updatedModule = await Module.findByIdAndUpdate(
+      req.params.id,
+      {
+        moduleCoordinator,
+        subjects,
+        faculties
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedModule) {
+      return res.status(404).json({ error: "Module not found" });
+    }
+
+    res.status(200).json(updatedModule);
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Failed to update module", 
+      details: error.message 
+    });
+  }
+});
+
+// DELETE a module
+app.delete("/api/modules/:id", async (req, res) => {
+  try {
+    const deletedModule = await Module.findByIdAndDelete(req.params.id);
+    
+    if (!deletedModule) {
+      return res.status(404).json({ error: "Module not found" });
+    }
+
+    res.status(200).json({ message: "Module deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Failed to delete module", 
+      details: error.message 
+    });
   }
 });
 

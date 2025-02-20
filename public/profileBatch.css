@@ -105,10 +105,11 @@ p {
 }
 
 .information-type {
-    font-size: 11px;
+    font-size: 13px;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
-    line-height: 1.6;
+    line-height: 1.4;
+    font-weight: 700;
 }
 
 .button-container {
