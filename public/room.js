@@ -2,40 +2,66 @@ document.addEventListener("DOMContentLoaded", async function () {
   const roomList = document.getElementById("room-list");
   const roomForm = document.getElementById("roomForm");
 
+  // Helper functions to open and close popups without changing the URL hash
+  function openPopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.add("active");
+    }
+  }
+
+  function closePopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.remove("active");
+    }
+  }
+
+  // Event delegation for all close buttons in popups (works even for dynamically added ones)
+  document.addEventListener("click", function (e) {
+    if (e.target.matches(".popup .close")) {
+      e.preventDefault();
+      const popup = e.target.closest(".popup");
+      if (popup) {
+        popup.classList.remove("active");
+      }
+    }
+  });
+
   // Create update popup
   const updatePopupHtml = `
-        <div id="update-popup" class="popup">
-            <div class="popup-content">
-                <a href="#" class="close">&times;</a>
-                <form id="updateRoomForm">
-                <label for="update-room-no">Room No</label>
-                <input type="text" id="update-room-no" name="update-room-no" readonly style="background-color: #f0f0f0; cursor: not-allowed;" />
-                
-                <label for="update-capacity">Capacity</label>
-                <input type="text" id="update-capacity" name="update-capacity" required />
-      
-                <button type="submit">Update</button>
-                </form>
-            </div>
-        </div>
-    `;
+    <div id="update-popup" class="popup">
+      <div class="popup-content">
+        <a href="#" class="close">&times;</a>
+        <form id="updateRoomForm">
+          <label for="update-room-no">Room No</label>
+          <input type="text" id="update-room-no" name="update-room-no" readonly style="background-color: #f0f0f0; cursor: not-allowed;" />
+          
+          <label for="update-capacity">Capacity</label>
+          <input type="text" id="update-capacity" name="update-capacity" required />
+    
+          <button type="submit">Update</button>
+        </form>
+      </div>
+    </div>
+  `;
 
   // Create delete popup
   const deletePopupHtml = `
-      <div id="delete-popup" class="popup">
-        <div class="popup-content">
-          <a href="#" class="close">&times;</a>
-          <h3>Confirm Deletion</h3>
-          <p>Are you sure you want to delete room <span id="delete-room-no"></span>?</p>
-          <div class="button-group">
-            <button id="confirm-delete" class="danger">Delete</button>
-            <button id="cancel-delete">Cancel</button>
-          </div>
+    <div id="delete-popup" class="popup">
+      <div class="popup-content">
+        <a href="#" class="close">&times;</a>
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete room <span id="delete-room-no"></span>?</p>
+        <div class="button-group">
+          <button id="confirm-delete" class="danger">Delete</button>
+          <button id="cancel-delete">Cancel</button>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-  // Add popups to document
+  // Append popups to document
   document.body.insertAdjacentHTML("beforeend", updatePopupHtml);
   document.body.insertAdjacentHTML("beforeend", deletePopupHtml);
 
@@ -61,19 +87,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         const roomElement = document.createElement("div");
         roomElement.classList.add("information-box");
         roomElement.innerHTML = `
-            <ul class="information-type">
-              <li>Room No: ${room.R_code}</li>
-              <li>Capacity: ${room.R_capacity}</li>
-            </ul>
-            <div class="button-container">
-              <button class="square-btn" onclick="editRoom('${room.R_code}', '${room.R_capacity}')">
-                <img class="small-button" src="images/edit.webp" alt="Edit">
-              </button>
-              <button class="square-btn" onclick="deleteRoom('${room.R_code}')">
-                <img class="small-button-2" src="images/trash.webp" alt="Delete">
-              </button>
-            </div>
-          `;
+          <ul class="information-type">
+            <li>Room No: ${room.R_code}</li>
+            <li>Capacity: ${room.R_capacity}</li>
+          </ul>
+          <div class="button-container">
+            <button class="square-btn" onclick="editRoom('${room.R_code}', '${room.R_capacity}')">
+              <img class="small-button" src="images/edit.webp" alt="Edit">
+            </button>
+            <button class="square-btn" onclick="deleteRoom('${room.R_code}')">
+              <img class="small-button-2" src="images/trash.webp" alt="Delete">
+            </button>
+          </div>
+        `;
         roomList.appendChild(roomElement);
       });
     } catch (error) {
@@ -108,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (response.ok) {
         await fetchRooms();
         roomForm.reset();
-        window.location.href = "#"; // Close popup
+        closePopup("popup-form");
       } else {
         const error = await response.json();
         alert(error.error || "Failed to add room");
@@ -119,13 +145,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  // Add these functions to the global scope
+  // Expose deleteRoom and editRoom functions to global scope
   window.deleteRoom = function (roomCode) {
-    // Show delete popup
     document.getElementById("delete-room-no").textContent = roomCode;
-    window.location.href = "#delete-popup";
+    openPopup("delete-popup");
 
-    // Handle delete confirmation
     document.getElementById("confirm-delete").onclick = async function () {
       try {
         const response = await fetch(`/delete-room/${roomCode}`, {
@@ -134,7 +158,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         if (response.ok) {
           await fetchRooms();
-          window.location.href = "#"; // Close popup
+          closePopup("delete-popup");
         } else {
           const error = await response.json();
           alert(error.error || "Failed to delete room");
@@ -145,47 +169,49 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     };
 
-    // Handle cancel
     document.getElementById("cancel-delete").onclick = function () {
-      window.location.href = "#"; // Close popup
+      closePopup("delete-popup");
     };
   };
 
   window.editRoom = function (roomCode, currentCapacity) {
-    // Populate update form
     document.getElementById("update-room-no").value = roomCode;
     document.getElementById("update-capacity").value = currentCapacity;
-    window.location.href = "#update-popup";
+    openPopup("update-popup");
   };
 
   // Handle update form submission
-  document
-    .getElementById("updateRoomForm")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault();
-      const roomCode = document.getElementById("update-room-no").value;
-      const capacity = document.getElementById("update-capacity").value;
+  document.getElementById("updateRoomForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const roomCode = document.getElementById("update-room-no").value;
+    const capacity = document.getElementById("update-capacity").value;
 
-      try {
-        const response = await fetch(`/update-room/${roomCode}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ R_capacity: capacity }),
-        });
+    try {
+      const response = await fetch(`/update-room/${roomCode}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ R_capacity: capacity }),
+      });
 
-        if (response.ok) {
-          await fetchRooms();
-          window.location.href = "#"; // Close popup
-        } else {
-          const error = await response.json();
-          alert(error.error || "Failed to update room");
-        }
-      } catch (error) {
-        console.error("Error updating room:", error);
-        alert("Failed to update room. Please try again.");
+      if (response.ok) {
+        await fetchRooms();
+        closePopup("update-popup");
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to update room");
       }
-    });
+    } catch (error) {
+      console.error("Error updating room:", error);
+      alert("Failed to update room. Please try again.");
+    }
+  });
 
   roomForm.addEventListener("submit", addRoom);
+  
+  // Event listener for opening add room popup (instead of using an anchor with hash)
+  document.getElementById("open-add-room").addEventListener("click", function () {
+    openPopup("popup-form");
+  });
+
   fetchRooms(); // Initial load of rooms
 });

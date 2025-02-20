@@ -194,11 +194,13 @@ form button:focus {
     z-index: 1000;
 }
 
-.popup:target {
+/* New rule: when a popup has the active class, display it */
+.popup.active {
     display: flex;
     opacity: 1;
     visibility: visible;
 }
+
 
 .popup-content {
     background: white;
