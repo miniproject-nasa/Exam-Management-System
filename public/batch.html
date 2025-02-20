@@ -12,7 +12,6 @@
       rel="stylesheet"
     />
   </head>
-
   <body>
     <header>
       <img src="images/logo.webp" alt="logo" />
@@ -26,10 +25,11 @@
     </header>
     <br />
     <section>
-      <a href="#popup-form" class="button-type">
+      <!-- Changed from anchor with hash to button -->
+      <button type="button" class="button-type" id="open-add-batch">
         <img class="img-chr" src="images/plus.webp" alt="Icon" />
         Add New Batch
-      </a>
+      </button>
     </section>
 
     <!-- Add Batch Popup Form -->
@@ -48,9 +48,8 @@
       </div>
     </div>
 
-    <div class="main-content" id="batch-list">
-      <!-- Batches will be dynamically inserted here -->
-    </div>
+    <!-- Batches will be dynamically inserted here -->
+    <div class="main-content" id="batch-list"></div>
 
     <footer>
       <p class="footer-style">&copy; 2025, DPCSE</p>
@@ -59,4 +58,3 @@
     <script src="batch.js"></script>
   </body>
 </html>
-  
