@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  
+await checkAuthStatus();
   const roomList = document.getElementById("room-list");
   const roomForm = document.getElementById("roomForm");
 
