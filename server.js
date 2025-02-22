@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 const session = require("express-session");
+const multer = require("multer");
 
 // Connect to MongoDB
 
@@ -335,11 +336,11 @@ app.get("/dashboard", isAuthenticated, (req, res) => {
 
 app.post("/login", async (req, res) => {
   console.log(req.body);
-  const { username, password } = req.body;
+  const { userID, password } = req.body;
   try {
     // console.log("Login Successful");
 
-    const userfinal = await user.findOne({ U_name: username });
+    const userfinal = await user.findOne({ U_id: userID });
     if (userfinal) {
       if (userfinal.U_password === password) {
         req.session.user = {
@@ -632,7 +633,6 @@ app.delete("/api/modules/:id", async (req, res) => {
   }
 });
 
-app.listen(4000, () => console.log("Listening on port 4000..."));
 
 //SEATING ARRANGEMENT
 
@@ -749,3 +749,44 @@ function generateSeatingPDF(doc, arrangement) {
         doc.moveDown(1.5);
     });
 }
+
+
+
+
+// NOTIFY MESSAGE ,PDF,OTHER DATA UPLOAD TO msg SCHEMA
+
+const pdfSchema=new mongoose.Schema({
+  filename:String,
+  data:String,
+  from:String,
+  to:String,
+});
+
+const pdfmodel=mongoose.model("PDF",pdfSchema,"pdfs")
+
+// Multer Middleware for Handling File Uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.post("/upload",upload.single("pdfFile"),async (req,res)=>{
+  try {
+    console.log(req.file)
+      if(!req.file)
+        return res.status(400).json({message:"no file uploaded"})
+      const base64dta=req.file.buffer.toString("base64")
+      const from=req.body.from
+      const to=req.body.to
+      
+      const newpdf=new pdfmodel({
+        filename:req.file.originalname,
+        data:base64dta,
+        from:from,
+        to:to
+      });
+      await newpdf.save();
+      res.status(200).json({success:true,to})
+  } catch (error) {
+      res.status(400).json({success:false})
+  }
+})
+app.listen(4000, () => console.log("Listening on port 4000..."));
