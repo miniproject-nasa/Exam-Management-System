@@ -217,7 +217,7 @@ form button:hover {
 }
 
 .pdf-box-content {
-    margin-left: 25px;
+    margin-right: 25px;
     white-space: nowrap;
     font-size: 11px;
     color: rgba(112, 112, 112, 1);
@@ -275,7 +275,7 @@ form button:hover {
     display: block;
     margin-bottom: -40px;
 }
-input[type="file"] {
+input {
     display: none;
     color: rgb(255, 15, 15);
     background-color: white;
