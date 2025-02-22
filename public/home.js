@@ -27,23 +27,23 @@ document.addEventListener("DOMContentLoaded",async function () {
         if(data.isAuthenticated){
             const role=data.user.role;
 
-            if(role==='HOD'){
+            if(role.includes("HOD")){
                 mainContainer.querySelector('.user').style.display='flex';
                 mainContainer.querySelector('.module').style.display='flex';
  
             }
-            else if(role==='FC'){
+            if(role.includes('FC')){
                 mainContainer.querySelector('.upload').style.display='flex';
                 mainContainer.querySelector('.inbox').style.display='flex';
 
             }
-            else if(role==='MC'){
+            if(role.includes('MC')){
                 mainContainer.querySelector('.scutiny').style.display='flex';
                 mainContainer.querySelector('.inbox').style.display='flex';
                 mainContainer.querySelector('.upload').style.display='flex';
 
             }
-            else if(role==='EC'){
+            if(role.includes('EC')){
                 mainContainer.querySelector('.notify').style.display='flex';
                 mainContainer.querySelector('.seating').style.display='flex';
                 mainContainer.querySelector('.duty').style.display='flex';
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded",async function () {
                 mainContainer.querySelector('.inbox').style.display='flex';
                 
             }
-            else if(role==='AEC'){
+            if(role.includes('AEC')){
                 mainContainer.querySelector('.notify').style.display='flex';
                 mainContainer.querySelector('.seating').style.display='flex';
                 mainContainer.querySelector('.duty').style.display='flex';
