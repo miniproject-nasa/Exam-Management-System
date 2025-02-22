@@ -687,69 +687,166 @@ app.post("/api/generate-seating", async (req, res) => {
     }
 });
 
-// Helper function to generate seating arrangement
+// Helper function to shuffle array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Updated seating arrangement generation function
 function generateSeatingArrangement(batches, rooms) {
-    let arrangement = {};
-    
-    // Initialize rooms in arrangement
-    rooms.forEach(room => {
-        arrangement[room.R_code] = [];
-    });
-    
-    // Sort rooms by capacity (largest first)
-    rooms.sort((a, b) => parseInt(b.R_capacity) - parseInt(a.R_capacity));
-    
-    // Distribute students from each batch
-    batches.forEach(batchData => {
-        let studentsRemaining = parseInt(batchData.B_strenth);
-        let roomIndex = 0;
-        
-        while (studentsRemaining > 0 && roomIndex < rooms.length) {
-            let room = rooms[roomIndex];
-            let available = parseInt(room.R_capacity) - 
-                arrangement[room.R_code].reduce((sum, curr) => sum + curr.count, 0);
-            
-            if (available > 0) {
-                let toAssign = Math.min(available, studentsRemaining);
-                arrangement[room.R_code].push({
-                    batch: batchData.B_name,
-                    count: toAssign
-                });
-                studentsRemaining -= toAssign;
-            }
-            roomIndex++;
-        }
-    });
-    
-    return arrangement;
+  let shuffledBatches = shuffleArray([...batches]);
+  let shuffledRooms = shuffleArray([...rooms]);
+  
+  let arrangement = {};
+  let summary = {};
+  let batchRollNumbers = {};
+  
+  // Initialize roll numbers for each batch
+  shuffledBatches.forEach(batch => {
+      batchRollNumbers[batch.B_name] = 1;
+  });
+  
+  // Process each room
+  shuffledRooms.forEach(room => {
+      let roomCode = room.R_code;
+      let remainingCapacity = room.R_capacity;
+      
+      arrangement[roomCode] = {
+          capacity: room.R_capacity,
+          seatMatrix: [],
+          assignments: []
+      };
+      
+      summary[roomCode] = {};
+      
+      // Record starting roll numbers for this room
+      shuffledBatches.forEach(batch => {
+          summary[roomCode][batch.B_name] = {
+              start: batchRollNumbers[batch.B_name],
+              end: batchRollNumbers[batch.B_name]
+          };
+      });
+      
+      let globalSeatCounter = 1;  // Counter for sequential seat numbers
+      let currentRow = [];
+      let batchIndex = 0;
+      
+      // Fill seats using sequential numbering
+      while (remainingCapacity > 0) {
+          let currentBatch = shuffledBatches[batchIndex];
+          
+          if (batchRollNumbers[currentBatch.B_name] <= currentBatch.B_strenth) {
+              currentRow.push({
+                  seatNo: globalSeatCounter,
+                  batch: currentBatch.B_name,
+                  rollNo: batchRollNumbers[currentBatch.B_name]
+              });
+              
+              batchRollNumbers[currentBatch.B_name]++;
+              remainingCapacity--;
+              globalSeatCounter++;
+              
+              batchIndex = (batchIndex + 1) % shuffledBatches.length;
+              
+              // Start new row after processing all batches
+              if (batchIndex === 0 || currentRow.length === shuffledBatches.length) {
+                  arrangement[roomCode].seatMatrix.push([...currentRow]);
+                  currentRow = [];
+              }
+          } else {
+              batchIndex = (batchIndex + 1) % shuffledBatches.length;
+              if (batchIndex === 0) {
+                  if (currentRow.length > 0) {
+                      arrangement[roomCode].seatMatrix.push([...currentRow]);
+                  }
+                  break;
+              }
+          }
+      }
+      
+      // Push any remaining seats in the last row
+      if (currentRow.length > 0) {
+          arrangement[roomCode].seatMatrix.push(currentRow);
+      }
+      
+      // Update end roll numbers in summary
+      shuffledBatches.forEach(batch => {
+          summary[roomCode][batch.B_name].end = 
+              batchRollNumbers[batch.B_name] - 1;
+      });
+  });
+  
+  return { arrangement, summary };
 }
 
-// Helper function to generate PDF
-function generateSeatingPDF(doc, arrangement) {
-    // Add header
-    doc.fontSize(20).text('Seating Arrangement', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(new Date().toLocaleDateString(), { align: 'center' });
-    doc.moveDown(2);
-    
-    // Add room-wise arrangements
-    Object.entries(arrangement).forEach(([roomNo, assignments]) => {
-        doc.fontSize(16).text(`Room ${roomNo}`);
-        doc.moveDown(0.5);
-        
-        let totalStudents = assignments.reduce((sum, curr) => sum + curr.count, 0);
-        
-        assignments.forEach(assignment => {
-            doc.fontSize(12)
-               .text(`${assignment.batch}: ${assignment.count} students`);
-        });
-        
-        doc.fontSize(12)
-           .text(`Total students in room: ${totalStudents}`, { italic: true });
-        doc.moveDown(1.5);
-    });
+// Updated PDF generation function
+function generateSeatingPDF(doc, { arrangement, summary }) {
+  // Add title
+  doc.fontSize(24).text('Examination Seating Arrangement', { align: 'center' });
+  doc.moveDown();
+  doc.fontSize(12).text(new Date().toLocaleDateString(), { align: 'center' });
+  doc.moveDown(2);
+  
+  // Summary section
+  doc.fontSize(18).text('Room-wise Summary', { underline: true });
+  doc.moveDown();
+  
+  Object.entries(summary).forEach(([roomCode, batchRanges]) => {
+      doc.fontSize(14).text(`Room ${roomCode}`);
+      doc.moveDown(0.5);
+      
+      Object.entries(batchRanges).forEach(([batch, range]) => {
+          if (range.end >= range.start) {
+              doc.fontSize(12)
+                 .text(`${batch}: Roll Numbers ${range.start} - ${range.end}`);
+          }
+      });
+      doc.moveDown();
+  });
+  
+  // Detailed seating arrangements (one room per page)
+  Object.entries(arrangement).forEach(([roomCode, roomData]) => {
+      doc.addPage();
+      
+      // Room header
+      doc.fontSize(18).text(`Room ${roomCode} - Seating Arrangement`, { 
+          align: 'center',
+          underline: true 
+      });
+      doc.moveDown(2);
+      
+      // Batch headers
+      const batchHeaders = Object.keys(summary[roomCode]);
+      let xPos = 100;
+      batchHeaders.forEach(header => {
+          doc.text(header, xPos, doc.y);
+          xPos += 120;
+      });
+      doc.moveDown();
+      
+      // Seat matrix with sequential seat numbers
+      roomData.seatMatrix.forEach(row => {
+          const rowY = doc.y;
+          let xPos = 100;
+          
+          row.forEach(seat => {
+              if (seat) {
+                  doc.text(
+                      `${seat.seatNo}   ${seat.rollNo}`,
+                      xPos,
+                      rowY
+                  );
+              }
+              xPos += 120;
+          });
+          doc.moveDown();
+      });
+  });
 }
-
 
 
 
