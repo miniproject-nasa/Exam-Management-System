@@ -1,6 +1,23 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const batchList = document.getElementById("batch-list");
   const batchForm = document.getElementById("batchForm");
+  async function checkAuthStatus() {
+    try {
+        const response = await fetch("/check-auth");
+         data = await response.json();
+
+        if (!data.isAuthenticated) {
+            window.location.href = "/index.html"; 
+        }
+        else
+        {
+            return data;
+        }
+    } catch (error) {
+        console.error("Error checking auth status:", error);
+    }
+}
+await checkAuthStatus();
 
   // Helper functions to open/close popups by toggling the "active" class
   function openPopup(popupId) {

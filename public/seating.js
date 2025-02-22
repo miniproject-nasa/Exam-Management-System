@@ -1,7 +1,31 @@
+<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', function() {
     fetchBatchesAndRooms();
     document.querySelector('form').addEventListener('submit', handleFormSubmit);
 });
+=======
+async function addToDisplayBox(selectId, displayBoxId) {
+    async function checkAuthStatus() {
+        try {
+            const response = await fetch("/check-auth");
+             data = await response.json();
+
+            if (!data.isAuthenticated) {
+                window.location.href = "/index.html"; 
+            }
+            else
+            {
+                return data;
+            }
+        } catch (error) {
+            console.error("Error checking auth status:", error);
+        }
+    }
+    await checkAuthStatus();
+    let selectElement = document.getElementById(selectId);
+    let selectedValue = selectElement.value.trim();
+    let displayBox = document.getElementById(displayBoxId);
+>>>>>>> c190e42c15bb9d4c4d4adf3cd7d62a6ce1ad128c
 
 async function fetchBatchesAndRooms() {
     try {
