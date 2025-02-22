@@ -499,3 +499,7 @@ section {
     outline: none;
     cursor: text;
 }
+
+ul {
+    list-style: none;
+}

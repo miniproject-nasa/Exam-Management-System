@@ -483,3 +483,8 @@ form button:focus {
 .dropdown-item:hover {
     background-color: #f0f8ff;
 }
+
+
+ul {
+    list-style: none;
+}
