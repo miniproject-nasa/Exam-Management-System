@@ -1,6 +1,50 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  
+  async function checkAuthStatus() {
+    try {
+        const response = await fetch("/check-auth");
+         data = await response.json();
+
+        if (!data.isAuthenticated) {
+            window.location.href = "/index.html"; 
+        }
+        else
+        {
+            return data;
+        }
+    } catch (error) {
+        console.error("Error checking auth status:", error);
+    }
+}
+await checkAuthStatus();
   const roomList = document.getElementById("room-list");
   const roomForm = document.getElementById("roomForm");
+
+  // Helper functions to open and close popups without changing the URL hash
+  function openPopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.add("active");
+    }
+  }
+
+  function closePopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.remove("active");
+    }
+  }
+
+  // Event delegation for all close buttons in popups (works even for dynamically added ones)
+  document.addEventListener("click", function (e) {
+    if (e.target.matches(".popup .close")) {
+      e.preventDefault();
+      const popup = e.target.closest(".popup");
+      if (popup) {
+        popup.classList.remove("active");
+      }
+    }
+  });
 
   // Create update popup
   const updatePopupHtml = `

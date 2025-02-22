@@ -2,6 +2,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   const subjectList = document.querySelector(".main-content");
   const subjectForm = document.getElementById("subjectForm");
 
+  // Helper functions to open/close popups without changing the URL hash
+  function openPopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.add("active");
+    }
+  }
+
+  function closePopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.classList.remove("active");
+    }
+  }
+
+  // Event delegation for all close buttons (works for dynamically added popups)
+  document.addEventListener("click", function (e) {
+    if (e.target.matches(".popup .close")) {
+      e.preventDefault();
+      const popup = e.target.closest(".popup");
+      if (popup) {
+        popup.classList.remove("active");
+      }
+    }
+  });
+
   // --- Inject Update and Delete Popups ---
   const updatePopupHtml = `
     <div id="update-popup" class="popup">
@@ -102,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (response.ok) {
         await fetchSubjects();
         subjectForm.reset();
+        closePopup("popup-form");
       } else {
         const error = await response.json();
         alert(error.error);
@@ -118,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.getElementById("update-batch").value = batch;
     document.getElementById("update-module").value = module;
     document.getElementById("update-faculty").value = faculty;
-    window.location.href = "#update-popup";
+    openPopup("update-popup");
   };
 
   document
@@ -141,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
         if (response.ok) {
           await fetchSubjects();
-          window.location.href = "#"; // Close popup
+          closePopup("update-popup");
         } else {
           const error = await response.json();
           alert(error.error || "Failed to update subject");
@@ -162,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
         if (response.ok) {
           await fetchSubjects();
-          window.location.href = "#"; // Close popup
+          closePopup("delete-popup");
         } else {
           alert("Failed to delete subject");
         }
@@ -170,14 +197,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.error("Error deleting subject:", error);
       }
     };
-    window.location.href = "#delete-popup";
-    // Also handle cancel button:
+    openPopup("delete-popup");
+    // Handle cancel button:
     document.getElementById("cancel-delete").onclick = function () {
-      window.location.href = "#"; // Close popup
+      closePopup("delete-popup");
     };
   };
 
   // --- Event Listeners ---
   subjectForm.addEventListener("submit", addSubject);
+
+  // Event listener for opening add subject popup
+  document
+    .getElementById("open-add-subject")
+    .addEventListener("click", function () {
+      openPopup("popup-form");
+    });
+
   fetchSubjects();
 });

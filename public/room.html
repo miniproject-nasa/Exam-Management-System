@@ -27,12 +27,14 @@
     </header>
     <br />
     <section>
-      <a href="#popup-form" class="button-type">
+      <!-- Changed anchor to button to avoid URL hash navigation -->
+      <button type="button" class="button-type" id="open-add-room">
         <img class="img-chr" src="images/plus.webp" alt="Icon" />
         Add New Room
-      </a>
+      </button>
     </section>
 
+    <!-- Add Room Popup -->
     <div id="popup-form" class="popup">
       <div class="popup-content">
         <a href="#" class="close">&times;</a>

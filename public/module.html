@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="eng">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,32 +27,31 @@
     </header>
     <br />
     <section>
-      <a href="#popup-form" class="button-type">
+      <!-- Changed from anchor to button -->
+      <button type="button" class="button-type" id="open-add-module">
         <img class="img-chr" src="images/plus.webp" alt="Icon" />
         Add New Module
-      </a>
+      </button>
     </section>
 
+    <!-- Add Module Popup -->
     <div id="popup-form" class="popup">
       <div class="popup-content">
         <a href="#" class="close">&times;</a>
-        <form>
+        <form id="moduleForm">
           <label for="module-name">Module Name</label>
           <input type="text" id="module-name" name="module-name" required />
 
-          <label for="module-coordinator">Module coordinator</label>
-          <input
-            type="text"
-            id="module-coordinator"
-            name="module-coordinator"
-            required
-          />
+          <label for="module-coordinator">Module Coordinator</label>
+          <input type="text" id="module-coordinator" name="module-coordinator" required />
 
           <label for="subjects">Subjects</label>
-          <input type="text" id="subjects" name="subjects" required />
+          <input type="text" id="subjects" name="subjects" placeholder="Press Enter or comma to add multiple subjects" />
+          <div id="subjects-container" class="tags-container"></div>
 
           <label for="faculties">Faculties</label>
-          <input type="text" id="faculties" name="faculties" required />
+          <input type="text" id="faculties" name="faculties" placeholder="Press Enter or comma to add multiple faculties" />
+          <div id="faculties-container" class="tags-container"></div>
 
           <button type="submit">Save</button>
         </form>
@@ -60,49 +59,15 @@
     </div>
     <br /><br /><br />
 
-    <div class="main-content">
-      <div class="information-box">
-        <ul class="information-type">
-          <li>Module Coordinator : Anil Kumar</li>
-          <li>
-            Subject : Artificial Intelligence | Machine Learning | Generative AI
-          </li>
-          <li>Faculties : Shibhu Kumar | Unni Kirshnan</li>
-        </ul>
-
-        <div class="button-container">
-          <button class="square-btn">
-            <img class="small-button" src="images/edit.webp" alt="Edit" />
-          </button>
-          <button class="square-btn">
-            <img class="small-button-2" src="images/trash.webp" alt="Delete" />
-          </button>
-        </div>
-      </div>
-
-      <div class="information-box">
-        <ul class="information-type">
-          <li>Module Coordinator : Anu Bonia Francis</li>
-          <li>
-            Subject : Operating System | System Software | Compiler Design
-          </li>
-          <li>Faculties : Praveen Pillai Thulaseedharan | Alfred Thomas</li>
-        </ul>
-
-        <div class="button-container">
-          <button class="square-btn">
-            <img class="small-button" src="images/edit.webp" alt="Edit" />
-          </button>
-          <button class="square-btn">
-            <img class="small-button-2" src="images/trash.webp" alt="Delete" />
-          </button>
-        </div>
-      </div>
+    <div class="main-content" id="module-list">
+      <!-- Modules will be dynamically inserted here -->
     </div>
 
     <br /><br /><br />
     <footer>
       <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+
+    <script src="module.js"></script>
   </body>
 </html>
