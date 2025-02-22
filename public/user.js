@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const rolesInput = document.getElementById("roles");
   const rolesContainer = document.getElementById("roles-container");
   let rolesDropdown;
-  const fixedRoles = ["FC", "MC", "EC", "AEC"];
+  const fixedRoles = ["FC", "MC", "EC", "AEC","HOD"];
   let selectedRoles = [];
 
   // For roles dropdown in update form

@@ -1,21 +1,19 @@
 document.addEventListener("DOMContentLoaded", async function () {
   async function checkAuthStatus() {
     try {
-        const response = await fetch("/check-auth");
-         data = await response.json();
+      const response = await fetch("/check-auth");
+      data = await response.json();
 
-        if (!data.isAuthenticated) {
-            window.location.href = "/index.html"; 
-        }
-        else
-        {
-            return data;
-        }
+      if (!data.isAuthenticated) {
+        window.location.href = "/index.html";
+      } else {
+        return data;
+      }
     } catch (error) {
-        console.error("Error checking auth status:", error);
+      console.error("Error checking auth status:", error);
     }
-}
-await checkAuthStatus();
+  }
+  await checkAuthStatus();
   const moduleList = document.getElementById("module-list");
   const moduleForm = document.getElementById("moduleForm");
   const subjectsInput = document.getElementById("subjects");
@@ -163,7 +161,9 @@ await checkAuthStatus();
             <button class="square-btn" onclick="editModule('${module._id}')">
               <img class="small-button" src="images/edit.webp" alt="Edit">
             </button>
-            <button class="square-btn" onclick="deleteModule('${module._id}', '${module.moduleName}')">
+            <button class="square-btn" onclick="deleteModule('${
+              module._id
+            }', '${module.moduleName}')">
               <img class="small-button-2" src="images/trash.webp" alt="Delete">
             </button>
           </div>
@@ -179,7 +179,9 @@ await checkAuthStatus();
   moduleForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const moduleName = document.getElementById("module-name").value.trim();
-    const moduleCoordinator = document.getElementById("module-coordinator").value.trim();
+    const moduleCoordinator = document
+      .getElementById("module-coordinator")
+      .value.trim();
 
     if (
       !moduleName ||
@@ -187,7 +189,9 @@ await checkAuthStatus();
       selectedSubjects.length === 0 ||
       selectedFaculties.length === 0
     ) {
-      alert("Please fill in all fields and add at least one subject and faculty.");
+      alert(
+        "Please fill in all fields and add at least one subject and faculty."
+      );
       return;
     }
 
@@ -230,7 +234,9 @@ await checkAuthStatus();
   // Global removeTag function
   window.removeTag = function (element, index, containerId) {
     const container = document.getElementById(containerId);
-    const list = containerId.includes("subjects") ? selectedSubjects : selectedFaculties;
+    const list = containerId.includes("subjects")
+      ? selectedSubjects
+      : selectedFaculties;
     list.splice(index, 1);
     renderTags(container, list);
   };
@@ -272,31 +278,45 @@ await checkAuthStatus();
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const module = await response.json();
-      
+
       // Check if we received valid module data
       if (!module || !module.moduleName) {
-        throw new Error('Invalid module data received');
+        throw new Error("Invalid module data received");
       }
 
       currentModuleId = moduleId;
-      
-      // Update form fields with module data
-      const updateModuleNameInput = document.getElementById("update-module-name");
-      const updateCoordinatorInput = document.getElementById("update-coordinator");
-      const updateSubjectsContainer = document.getElementById("update-subjects-container");
-      const updateFacultiesContainer = document.getElementById("update-faculties-container");
 
-      if (!updateModuleNameInput || !updateCoordinatorInput || 
-          !updateSubjectsContainer || !updateFacultiesContainer) {
-        throw new Error('Required form elements not found');
+      // Update form fields with module data
+      const updateModuleNameInput =
+        document.getElementById("update-module-name");
+      const updateCoordinatorInput =
+        document.getElementById("update-coordinator");
+      const updateSubjectsContainer = document.getElementById(
+        "update-subjects-container"
+      );
+      const updateFacultiesContainer = document.getElementById(
+        "update-faculties-container"
+      );
+
+      if (
+        !updateModuleNameInput ||
+        !updateCoordinatorInput ||
+        !updateSubjectsContainer ||
+        !updateFacultiesContainer
+      ) {
+        throw new Error("Required form elements not found");
       }
 
       updateModuleNameInput.value = module.moduleName;
       updateCoordinatorInput.value = module.moduleCoordinator;
 
       // Reset and update the selected arrays
-      selectedSubjects = Array.isArray(module.subjects) ? [...module.subjects] : [];
-      selectedFaculties = Array.isArray(module.faculties) ? [...module.faculties] : [];
+      selectedSubjects = Array.isArray(module.subjects)
+        ? [...module.subjects]
+        : [];
+      selectedFaculties = Array.isArray(module.faculties)
+        ? [...module.faculties]
+        : [];
 
       // Render the tags
       renderTags(updateSubjectsContainer, selectedSubjects);
@@ -311,49 +331,55 @@ await checkAuthStatus();
   };
 
   // Modified update form submission handler with better error handling
-  document.getElementById("updateModuleForm").addEventListener("submit", async function (event) {
-    event.preventDefault();
-    
-    if (!currentModuleId) {
-      alert("No module selected for update");
-      return;
-    }
+  document
+    .getElementById("updateModuleForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-    const moduleCoordinator = document.getElementById("update-coordinator").value.trim();
-
-    if (!moduleCoordinator) {
-      alert("Module coordinator is required");
-      return;
-    }
-
-    if (selectedSubjects.length === 0 || selectedFaculties.length === 0) {
-      alert("At least one subject and one faculty are required");
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/modules/${currentModuleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          moduleCoordinator,
-          subjects: selectedSubjects,
-          faculties: selectedFaculties,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      if (!currentModuleId) {
+        alert("No module selected for update");
+        return;
       }
 
-      await fetchModules();
-      closePopup("update-popup");
-    } catch (error) {
-      console.error("Error updating module:", error);
-      alert(`Failed to update module: ${error.message}`);
-    }
-  });
+      const moduleCoordinator = document
+        .getElementById("update-coordinator")
+        .value.trim();
+
+      if (!moduleCoordinator) {
+        alert("Module coordinator is required");
+        return;
+      }
+
+      if (selectedSubjects.length === 0 || selectedFaculties.length === 0) {
+        alert("At least one subject and one faculty are required");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/modules/${currentModuleId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            moduleCoordinator,
+            subjects: selectedSubjects,
+            faculties: selectedFaculties,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        await fetchModules();
+        closePopup("update-popup");
+      } catch (error) {
+        console.error("Error updating module:", error);
+        alert(`Failed to update module: ${error.message}`);
+      }
+    });
 
   // Setup tag inputs for update form
   setupTagInput(
@@ -381,11 +407,11 @@ await checkAuthStatus();
     } catch (err) {
       console.error("Error fetching subjects:", err);
     }
-    subjectsList.forEach(subject => {
+    subjectsList.forEach((subject) => {
       const item = document.createElement("div");
       item.className = "dropdown-item";
       item.textContent = `${subject.S_code} - ${subject.S_name}`;
-      item.onclick = function() {
+      item.onclick = function () {
         const subjectStr = `${subject.S_code} - ${subject.S_name}`;
         if (!selectedSubjects.includes(subjectStr)) {
           selectedSubjects.push(subjectStr);
@@ -420,13 +446,13 @@ await checkAuthStatus();
   function positionDropdown() {
     const rect = subjectsInput.getBoundingClientRect();
     subjectsDropdown.style.left = rect.left + "px";
-    subjectsDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    subjectsDropdown.style.top = rect.bottom + window.scrollY + "px";
     subjectsDropdown.style.width = rect.width + "px";
   }
 
-  subjectsInput.addEventListener("input", function() {
+  subjectsInput.addEventListener("input", function () {
     const filter = subjectsInput.value.toLowerCase();
-    Array.from(subjectsDropdown.children).forEach(item => {
+    Array.from(subjectsDropdown.children).forEach((item) => {
       if (item.textContent.toLowerCase().includes(filter)) {
         item.style.display = "block";
       } else {
@@ -436,7 +462,7 @@ await checkAuthStatus();
   });
 
   subjectsInput.addEventListener("focus", showSubjectsDropdown);
-  subjectsInput.addEventListener("blur", function() {
+  subjectsInput.addEventListener("blur", function () {
     setTimeout(hideSubjectsDropdown, 200);
   });
 
@@ -455,15 +481,18 @@ await checkAuthStatus();
     } catch (err) {
       console.error("Error fetching subjects:", err);
     }
-    subjectsList.forEach(subject => {
+    subjectsList.forEach((subject) => {
       const item = document.createElement("div");
       item.className = "dropdown-item";
       item.textContent = `${subject.S_code} - ${subject.S_name}`;
-      item.onclick = function() {
+      item.onclick = function () {
         const subjectStr = `${subject.S_code} - ${subject.S_name}`;
         if (!selectedSubjects.includes(subjectStr)) {
           selectedSubjects.push(subjectStr);
-          renderTags(document.getElementById("update-subjects-container"), selectedSubjects);
+          renderTags(
+            document.getElementById("update-subjects-container"),
+            selectedSubjects
+          );
         }
         updateSubjectsInput.value = "";
         hideUpdateSubjectsDropdown();
@@ -494,14 +523,14 @@ await checkAuthStatus();
   function positionUpdateSubjectsDropdown() {
     const rect = updateSubjectsInput.getBoundingClientRect();
     updateSubjectsDropdown.style.left = rect.left + "px";
-    updateSubjectsDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    updateSubjectsDropdown.style.top = rect.bottom + window.scrollY + "px";
     updateSubjectsDropdown.style.width = rect.width + "px";
   }
 
-  updateSubjectsInput.addEventListener("input", function() {
+  updateSubjectsInput.addEventListener("input", function () {
     const filter = updateSubjectsInput.value.toLowerCase();
     if (updateSubjectsDropdown) {
-      Array.from(updateSubjectsDropdown.children).forEach(item => {
+      Array.from(updateSubjectsDropdown.children).forEach((item) => {
         if (item.textContent.toLowerCase().includes(filter)) {
           item.style.display = "block";
         } else {
@@ -511,15 +540,322 @@ await checkAuthStatus();
     }
   });
 
+  // --- Dropdown functionality for faculties in the update form ---
+let updateFacultiesDropdown;
+const updateFacultiesInput = document.getElementById("update-faculties");
+
+async function createUpdateFacultiesDropdown() {
+  if (updateFacultiesDropdown) return;
+  updateFacultiesDropdown = document.createElement("div");
+  updateFacultiesDropdown.className = "dropdown";
+  let usersList = [];
+  try {
+    const response = await fetch("/get-users");
+    usersList = await response.json();
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  }
+  // Create a dropdown item for each user
+  usersList.forEach(user => {
+    const item = document.createElement("div");
+    item.className = "dropdown-item";
+    // Display the user name (adjust if you need other details)
+    item.textContent = user.U_name;
+    item.onclick = function() {
+      const facultyStr = user.U_name;
+      // Assume selectedFaculties is the global array used to store faculties for update
+      if (!selectedFaculties.includes(facultyStr)) {
+        selectedFaculties.push(facultyStr);
+        // Render updated tags into the update form's faculties container
+        renderTags(document.getElementById("update-faculties-container"), selectedFaculties);
+      }
+      updateFacultiesInput.value = "";
+      hideUpdateFacultiesDropdown();
+    };
+    updateFacultiesDropdown.appendChild(item);
+  });
+  document.body.appendChild(updateFacultiesDropdown);
+}
+
+function positionUpdateFacultiesDropdown() {
+  const rect = updateFacultiesInput.getBoundingClientRect();
+  updateFacultiesDropdown.style.left = rect.left + "px";
+  updateFacultiesDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+  updateFacultiesDropdown.style.width = rect.width + "px";
+}
+
+function showUpdateFacultiesDropdown() {
+  if (!updateFacultiesDropdown) {
+    // Create then position and display the dropdown
+    createUpdateFacultiesDropdown().then(() => {
+      positionUpdateFacultiesDropdown();
+      updateFacultiesDropdown.style.display = "block";
+    });
+  } else {
+    positionUpdateFacultiesDropdown();
+    updateFacultiesDropdown.style.display = "block";
+  }
+}
+
+function hideUpdateFacultiesDropdown() {
+  if (updateFacultiesDropdown) {
+    updateFacultiesDropdown.style.display = "none";
+  }
+}
+
+// Search/filter functionality on input for the update form
+updateFacultiesInput.addEventListener("input", function() {
+  const filter = updateFacultiesInput.value.toLowerCase();
+  if (updateFacultiesDropdown) {
+    Array.from(updateFacultiesDropdown.children).forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(filter)
+        ? "block"
+        : "none";
+    });
+  }
+});
+
+updateFacultiesInput.addEventListener("focus", showUpdateFacultiesDropdown);
+updateFacultiesInput.addEventListener("blur", function() {
+  // Use a timeout to ensure clicks register before the dropdown hides
+  setTimeout(hideUpdateFacultiesDropdown, 200);
+});
+
   updateSubjectsInput.addEventListener("focus", showUpdateSubjectsDropdown);
-  updateSubjectsInput.addEventListener("blur", function() {
+  updateSubjectsInput.addEventListener("blur", function () {
     setTimeout(hideUpdateSubjectsDropdown, 200);
+  });
+  let facultiesDropdown;
+
+  async function createFacultiesDropdown() {
+    if (facultiesDropdown) return;
+    facultiesDropdown = document.createElement("div");
+    facultiesDropdown.className = "dropdown";
+    let usersList = [];
+    try {
+      const response = await fetch("/get-users");
+      usersList = await response.json();
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+    usersList.forEach((user) => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      // Display the user name; change this if you want to show additional info
+      item.textContent = user.U_name;
+      item.onclick = function () {
+        const facultyStr = user.U_name;
+        if (!selectedFaculties.includes(facultyStr)) {
+          selectedFaculties.push(facultyStr);
+          renderTags(facultiesContainer, selectedFaculties);
+        }
+        facultiesInput.value = "";
+        hideFacultiesDropdown();
+      };
+      facultiesDropdown.appendChild(item);
+    });
+    document.body.appendChild(facultiesDropdown);
+  }
+
+  function positionFacultiesDropdown() {
+    const rect = facultiesInput.getBoundingClientRect();
+    facultiesDropdown.style.left = rect.left + "px";
+    facultiesDropdown.style.top = rect.bottom + window.scrollY + "px";
+    facultiesDropdown.style.width = rect.width + "px";
+  }
+
+  function showFacultiesDropdown() {
+    if (!facultiesDropdown) {
+      createFacultiesDropdown().then(() => {
+        positionFacultiesDropdown();
+        facultiesDropdown.style.display = "block";
+      });
+    } else {
+      positionFacultiesDropdown();
+      facultiesDropdown.style.display = "block";
+    }
+  }
+
+  function hideFacultiesDropdown() {
+    if (facultiesDropdown) {
+      facultiesDropdown.style.display = "none";
+    }
+  }
+
+  // Search filtering on input for add form
+  facultiesInput.addEventListener("input", function () {
+    const filter = facultiesInput.value.toLowerCase();
+    if (facultiesDropdown) {
+      Array.from(facultiesDropdown.children).forEach((item) => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
+  });
+
+  facultiesInput.addEventListener("focus", showFacultiesDropdown);
+  facultiesInput.addEventListener("blur", function () {
+    // Slight delay to allow click event to register before hiding
+    setTimeout(hideFacultiesDropdown, 200);
+  });
+
+  const moduleCoordinatorInput = document.getElementById("module-coordinator");
+  let mcDropdown;
+
+  async function createMCDropdown() {
+    if (mcDropdown) return;
+    mcDropdown = document.createElement("div");
+    mcDropdown.className = "dropdown";
+    let usersList = [];
+    try {
+      const response = await fetch("/get-users");
+      usersList = await response.json();
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+    // Filter to only include users with a role containing "MC"
+    const mcUsers = usersList.filter(
+      (user) =>
+        Array.isArray(user.U_role) &&
+        user.U_role.some((role) => role.includes("MC"))
+    );
+    mcUsers.forEach((user) => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      // Display user name (modify if you prefer a different detail)
+      item.textContent = user.U_name;
+      item.onclick = function () {
+        // Set the input's value to the selected user's name
+        moduleCoordinatorInput.value = user.U_name;
+        hideMCDropdown();
+      };
+      mcDropdown.appendChild(item);
+    });
+    document.body.appendChild(mcDropdown);
+  }
+
+  function positionMCDropdown() {
+    const rect = moduleCoordinatorInput.getBoundingClientRect();
+    mcDropdown.style.left = rect.left + "px";
+    mcDropdown.style.top = rect.bottom + window.scrollY + "px";
+    mcDropdown.style.width = rect.width + "px";
+  }
+
+  function showMCDropdown() {
+    if (!mcDropdown) {
+      createMCDropdown().then(() => {
+        positionMCDropdown();
+        mcDropdown.style.display = "block";
+      });
+    } else {
+      positionMCDropdown();
+      mcDropdown.style.display = "block";
+    }
+  }
+
+  function hideMCDropdown() {
+    if (mcDropdown) {
+      mcDropdown.style.display = "none";
+    }
+  }
+
+  // Filter dropdown items based on user input
+  moduleCoordinatorInput.addEventListener("input", function () {
+    const filter = moduleCoordinatorInput.value.toLowerCase();
+    if (mcDropdown) {
+      Array.from(mcDropdown.children).forEach((item) => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
+  });
+
+  moduleCoordinatorInput.addEventListener("focus", showMCDropdown);
+  moduleCoordinatorInput.addEventListener("blur", function () {
+    // Delay hiding to allow click events to register
+    setTimeout(hideMCDropdown, 200);
   });
 
   // Event listener for opening add module popup
-  document.getElementById("open-add-module").addEventListener("click", function() {
-    openPopup("popup-form");
-  });
+  document
+    .getElementById("open-add-module")
+    .addEventListener("click", function () {
+      openPopup("popup-form");
+    });
+
+    const updateCoordinatorInput = document.getElementById("update-coordinator");
+    let updateMCDropdown;
+    
+    async function createUpdateMCDropdown() {
+      if (updateMCDropdown) return;
+      updateMCDropdown = document.createElement("div");
+      updateMCDropdown.className = "dropdown";
+      let usersList = [];
+      try {
+        const response = await fetch("/get-users");
+        usersList = await response.json();
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+      // Filter users whose role contains "MC"
+      const mcUsers = usersList.filter(user =>
+        Array.isArray(user.U_role) && user.U_role.some(role => role.includes("MC"))
+      );
+      mcUsers.forEach(user => {
+        const item = document.createElement("div");
+        item.className = "dropdown-item";
+        item.textContent = user.U_name;
+        item.onclick = function() {
+          updateCoordinatorInput.value = user.U_name;
+          hideUpdateMCDropdown();
+        };
+        updateMCDropdown.appendChild(item);
+      });
+      document.body.appendChild(updateMCDropdown);
+    }
+    
+    function positionUpdateMCDropdown() {
+      const rect = updateCoordinatorInput.getBoundingClientRect();
+      updateMCDropdown.style.left = rect.left + "px";
+      updateMCDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+      updateMCDropdown.style.width = rect.width + "px";
+    }
+    
+    function showUpdateMCDropdown() {
+      if (!updateMCDropdown) {
+        createUpdateMCDropdown().then(() => {
+          positionUpdateMCDropdown();
+          updateMCDropdown.style.display = "block";
+        });
+      } else {
+        positionUpdateMCDropdown();
+        updateMCDropdown.style.display = "block";
+      }
+    }
+    
+    function hideUpdateMCDropdown() {
+      if (updateMCDropdown) {
+        updateMCDropdown.style.display = "none";
+      }
+    }
+    
+    updateCoordinatorInput.addEventListener("input", function() {
+      const filter = updateCoordinatorInput.value.toLowerCase();
+      if (updateMCDropdown) {
+        Array.from(updateMCDropdown.children).forEach(item => {
+          item.style.display = item.textContent.toLowerCase().includes(filter)
+            ? "block"
+            : "none";
+        });
+      }
+    });
+    
+    updateCoordinatorInput.addEventListener("focus", showUpdateMCDropdown);
+    updateCoordinatorInput.addEventListener("blur", function() {
+      setTimeout(hideUpdateMCDropdown, 200);
+    });
 
   fetchModules(); // Initial load of modules
 });

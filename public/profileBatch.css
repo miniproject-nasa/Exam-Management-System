@@ -151,8 +151,8 @@ p {
 
 .button-type {
     position: absolute;
-    left: 5%;
-    margin-bottom: -40px;
+    left: 10%;
+    margin-bottom: -60px;
     margin-top: 7px;
     background: rgba(15, 98, 254, 1);
     color: white;
@@ -179,6 +179,41 @@ form button:focus {
     border: 1px solid rgba(15, 98, 254, 1);
 }
 
+#open-add-batch {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px; 
+    max-width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    gap: 8px;
+    margin: -10px 0 -45px 5%; /* Aligns with content */
+    transition: 0.5s;
+}
+
+#open-add-batch:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
+/* Responsive Fix */
+@media only screen and (max-width: 650px) {
+    #open-add-batch {
+        width: 80%; /* Adjust width on smaller screens */
+        font-size: 12px;
+        padding: 10px;
+        margin: 10px 0 0 3%; /* Adjust left margin */
+    }
+}
+
+
 /* Popup Styles */
 .popup {
     position: fixed;
@@ -192,6 +227,40 @@ form button:focus {
     align-items: center;
     transition: 0.3s ease-in-out;
     z-index: 1000;
+}
+
+.dropdown {
+    background: white;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 1001;
+}
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+.dropdown-item:hover {
+    background-color: #f0f8ff;
+}
+
+.tag {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 2px;
+    background-color: #e0f3ff; /* light blue background */
+    border: 1px solid #0f62fe; /* blue border */
+    border-radius: 3px;
+    color: #0f62fe;
+    font-size: 12px;
+}
+.delete-tag {
+    margin-left: 5px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 /* New rule: when a popup has the active class, display it */
@@ -270,7 +339,7 @@ form button:focus {
     transition: 0.2s;
 }
 
-.popup-content p {
+#delete-confirm{
     color: rgb(239, 11, 11);
 }
 

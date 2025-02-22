@@ -172,6 +172,40 @@ p {
     transform: scale(1.01);
 }
 
+#open-add-room {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px; 
+    max-width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    gap: 8px;
+    margin: 1% 0 0 5%; /* Aligns with content */
+    transition: 0.3s;
+}
+
+#open-add-room:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
+/* Responsive Fix */
+@media only screen and (max-width: 650px) {
+    #open-add-room {
+        width: 80%; /* Adjust width on smaller screens */
+        font-size: 12px;
+        padding: 10px;
+        margin: 10px 0 0 3%; /* Adjust left margin */
+    }
+}
+
 form input[type="text"]:focus,
 form button:focus {
     outline: none;
@@ -269,7 +303,7 @@ form button:focus {
     transition: 0.2s;
 }
 
-.popup-content p {
+#delete-confirm{
     color: rgb(239, 11, 11);
 }
 

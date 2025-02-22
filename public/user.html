@@ -6,20 +6,11 @@
     <meta name="description" content="Internal Exam Management" />
     <title>User Information</title>
     <link rel="icon" href="images/icon.ico" type="image/x-icon" />
-    <!-- Reuse your existing CSS -->
-    <link rel="stylesheet" href="profileRoom.css" />
+    <link rel="stylesheet" href="profileUser.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <!-- Override the floating style for the add user button -->
-    <style>
-      #open-add-user {
-        position: static !important;
-        margin: 20px auto;
-        display: block;
-      }
-    </style>
   </head>
 
   <body>
@@ -57,12 +48,7 @@
 
           <!-- Roles: Using text input with dropdown & tag container -->
           <label for="roles">Roles</label>
-          <input
-            type="text"
-            id="roles"
-            name="roles"
-            placeholder="Press Enter or comma to add roles"
-          />
+          <input type="text" id="roles" name="roles" />
           <div id="roles-container" class="tags-container"></div>
 
           <label for="username">Username</label>
@@ -83,7 +69,7 @@
             type="text"
             id="update-userName"
             readonly
-            style="background-color: #f0f0f0; cursor: not-allowed;"
+            style="background-color: #f0f0f0; cursor: not-allowed"
           />
 
           <label for="update-phone">Phone</label>
@@ -94,11 +80,7 @@
 
           <!-- Roles dropdown for update using text input with dropdown -->
           <label for="update-roles">Roles</label>
-          <input
-            type="text"
-            id="update-roles"
-            placeholder="Press Enter or comma to add roles"
-          />
+          <input type="text" id="update-roles" />
           <div id="update-roles-container" class="tags-container"></div>
 
           <label for="update-username">Username</label>
@@ -106,7 +88,7 @@
             type="text"
             id="update-username"
             readonly
-            style="background-color: #f0f0f0; cursor: not-allowed;"
+            style="background-color: #f0f0f0; cursor: not-allowed"
           />
 
           <button type="submit">Update</button>
@@ -119,7 +101,10 @@
       <div class="popup-content">
         <a href="#" class="close">&times;</a>
         <h3>Confirm Deletion</h3>
-        <p>Are you sure you want to delete user <span id="delete-user-id"></span>?</p>
+        <p id="delete-confirm">
+          Are you sure you want to delete user
+          <span id="delete-user-id"></span>?
+        </p>
         <div class="button-group">
           <button id="confirm-delete" class="danger">Delete</button>
           <button id="cancel-delete">Cancel</button>
@@ -136,7 +121,7 @@
       </div>
     </div>
 
-    <br /><br /><br />
+    <br />
     <!-- Main Content: List of Users -->
     <div class="main-content" id="user-list"></div>
 

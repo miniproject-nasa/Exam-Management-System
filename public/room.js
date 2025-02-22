@@ -2,21 +2,19 @@ document.addEventListener("DOMContentLoaded", async function () {
   
   async function checkAuthStatus() {
     try {
-        const response = await fetch("/check-auth");
-         data = await response.json();
+      const response = await fetch("/check-auth");
+      data = await response.json();
 
-        if (!data.isAuthenticated) {
-            window.location.href = "/index.html"; 
-        }
-        else
-        {
-            return data;
-        }
+      if (!data.isAuthenticated) {
+        window.location.href = "/index.html"; 
+      } else {
+        return data;
+      }
     } catch (error) {
-        console.error("Error checking auth status:", error);
+      console.error("Error checking auth status:", error);
     }
-}
-await checkAuthStatus();
+  }
+  await checkAuthStatus();
   const roomList = document.getElementById("room-list");
   const roomForm = document.getElementById("roomForm");
 
@@ -33,6 +31,14 @@ await checkAuthStatus();
     if (popup) {
       popup.classList.remove("active");
     }
+  }
+
+  // Event listener for the add new room button to open the add room popup
+  const addRoomButton = document.getElementById("open-add-room");
+  if (addRoomButton) {
+    addRoomButton.addEventListener("click", function () {
+      openPopup("popup-form");
+    });
   }
 
   // Event delegation for all close buttons in popups (works even for dynamically added ones)
@@ -70,7 +76,7 @@ await checkAuthStatus();
         <div class="popup-content">
           <a href="#" class="close">&times;</a>
           <h3>Confirm Deletion</h3>
-          <p>Are you sure you want to delete room <span id="delete-room-no"></span>?</p>
+          <p id="delete-confirm">Are you sure you want to delete room <span id="delete-room-no"></span>?</p>
           <div class="button-group">
             <button id="confirm-delete" class="danger">Delete</button>
             <button id="cancel-delete">Cancel</button>
@@ -152,7 +158,7 @@ await checkAuthStatus();
       if (response.ok) {
         await fetchRooms();
         roomForm.reset();
-        window.location.href = "#"; // Close popup
+        closePopup("popup-form"); // Close popup using helper
       } else {
         const error = await response.json();
         alert(error.error || "Failed to add room");
@@ -167,7 +173,7 @@ await checkAuthStatus();
   window.deleteRoom = function (roomCode) {
     // Show delete popup
     document.getElementById("delete-room-no").textContent = roomCode;
-    window.location.href = "#delete-popup";
+    openPopup("delete-popup");
 
     // Handle delete confirmation
     document.getElementById("confirm-delete").onclick = async function () {
@@ -178,7 +184,7 @@ await checkAuthStatus();
 
         if (response.ok) {
           await fetchRooms();
-          window.location.href = "#"; // Close popup
+          closePopup("delete-popup"); // Close popup using helper
         } else {
           const error = await response.json();
           alert(error.error || "Failed to delete room");
@@ -191,7 +197,7 @@ await checkAuthStatus();
 
     // Handle cancel
     document.getElementById("cancel-delete").onclick = function () {
-      window.location.href = "#"; // Close popup
+      closePopup("delete-popup"); // Close popup using helper
     };
   };
 
@@ -199,7 +205,7 @@ await checkAuthStatus();
     // Populate update form
     document.getElementById("update-room-no").value = roomCode;
     document.getElementById("update-capacity").value = currentCapacity;
-    window.location.href = "#update-popup";
+    openPopup("update-popup");
   };
 
   // Handle update form submission
@@ -219,7 +225,7 @@ await checkAuthStatus();
 
         if (response.ok) {
           await fetchRooms();
-          window.location.href = "#"; // Close popup
+          closePopup("update-popup"); // Close popup using helper
         } else {
           const error = await response.json();
           alert(error.error || "Failed to update room");
