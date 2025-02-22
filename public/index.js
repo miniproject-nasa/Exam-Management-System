@@ -45,7 +45,11 @@
 
         document.addEventListener("DOMContentLoaded", async function () {
             const loginForm = document.getElementById("loginForm");
-        
+            const showHide = document.querySelector(".input-icon");
+            const password = document.getElementById("password");
+            const username = document.getElementById("username");
+            const invalidCredentials = document.getElementById("invalid-credentials");
+
             async function checkAuthStatus() {
                 try {
                     const response = await fetch("/check-auth");
@@ -59,8 +63,28 @@
                 }
             }
         
-            checkAuthStatus();
-        
+            await checkAuthStatus();
+            password.addEventListener("click", function (e) {
+                invalidCredentials.innerHTML = "";
+                
+            });
+            username.addEventListener("click", function (e) {
+                invalidCredentials.innerHTML = "";
+                
+            });
+              
+            showHide.addEventListener("click", function (e) {
+                let input = document.getElementById("password");
+                if (input.type === "password") {
+                    input.type = "text";
+                    showHide.src = "/images/eye-open.webp";
+                } else {
+                    input.type = "password";
+                    showHide.src = "/images/eye-close.webp";
+                    
+                }
+            });
+            
             loginForm.addEventListener("submit", async function (event) {
                 event.preventDefault();
                 console.log("Form submitted");
