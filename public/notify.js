@@ -9,10 +9,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         if(file){
             const fileURL = URL.createObjectURL(file);
             pdfcotainer.innerHTML=`<div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content"><a href="${fileURL}"  target="_blank">${file.name} (${(file.size / 1024).toFixed(2)}</a>KB</p>`;
+                        
+                        <p class="pdf-box-content"><a href="${fileURL}"  target="_blank">${file.name} (${(file.size / 1024).toFixed(2)})KB</a></p>`;
                     
         }
         else{
