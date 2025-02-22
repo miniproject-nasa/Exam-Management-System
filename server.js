@@ -230,7 +230,7 @@ const userSchema = new mongoose.Schema({
   U_id: String,
   U_phone: String,
   U_email: String,
-  U_role: String,
+  U_role: [String],
   U_password: String,
 });
 const user = mongoose.model("user", userSchema, "users");
@@ -293,8 +293,8 @@ app.put("/update-user/:user_id", async (req, res) => {
   const { U_name, U_phone, U_email, U_role, U_password } = req.body;
   try {
     const updatedUser = await user.findOneAndUpdate(
-      { U_id },
-      { U_name, U_phone, U_email, U_role, U_password },
+      { U_id: U_id },
+      { U_name, U_phone, U_email, U_role, U_password },//req.body,
       { new: true }
     );
     if (!updatedUser) {
