@@ -635,6 +635,8 @@ app.delete("/api/modules/:id", async (req, res) => {
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
 
+//SEATING ARRANGEMENT
+
 // Add this near your other requires at the top
 const PDFDocument = require('pdfkit');
 
