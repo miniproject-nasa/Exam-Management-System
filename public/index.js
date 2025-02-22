@@ -45,11 +45,7 @@
 
         document.addEventListener("DOMContentLoaded", async function () {
             const loginForm = document.getElementById("loginForm");
-            const showHide = document.querySelector(".input-icon");
-            const password = document.getElementById("password");
-            const username = document.getElementById("username");
-            const invalidCredentials = document.getElementById("invalid-credentials");
-
+            
             async function checkAuthStatus() {
                 try {
                     const response = await fetch("/check-auth");
@@ -64,11 +60,15 @@
             }
         
             await checkAuthStatus();
+            const showHide = document.querySelector(".input-icon");
+            const password = document.getElementById("password");
+            const userID = document.getElementById("userID");
+            const invalidCredentials = document.getElementById("invalid-credentials");
             password.addEventListener("click", function (e) {
                 invalidCredentials.innerHTML = "";
                 
             });
-            username.addEventListener("click", function (e) {
+            userID.addEventListener("click", function (e) {
                 invalidCredentials.innerHTML = "";
                 
             });
@@ -89,10 +89,10 @@
                 event.preventDefault();
                 console.log("Form submitted");
         
-                const username = document.getElementById("username").value;
+                const userID = document.getElementById("userID").value;
                 const password = document.getElementById("password").value;
         
-                if (!username || !password) {
+                if (!userID || !password) {
                     document.getElementById("invalid-credentials").innerHTML = `<p id="invalid-msg">Enter both username and password</p>`;
                     return;
                 }
@@ -101,7 +101,7 @@
                     const response = await fetch("/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username, password })
+                        body: JSON.stringify({ userID, password })
                     });
         
                     const data = await response.json();
