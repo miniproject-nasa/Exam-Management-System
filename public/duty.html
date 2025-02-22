@@ -28,15 +28,6 @@
             <h2 class="upload-title">Duty</h2>
 
             <div class="form-group">
-                <label for="batches">Rooms</label>
-                <div class="dropdown">
-                    <select id="rooms" name="rooms">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
                 <label for="faculties">Available Faculties</label>
                 <div class="dropdown">
                     <select id="faculties" name="faculties">
@@ -44,28 +35,37 @@
                     </select>
                 </div>
             </div>
+            <button class="add-button" type="button" onclick="addToDisplayBox('faculties', 'faculty-box')">Add</button>
+            
+            <div class="form-group">
+                <div class="display-box" id="faculty-box"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="rooms">Rooms</label>
+                <div class="dropdown">
+                    <select id="rooms" name="rooms">
+                        <option value="" disabled selected>Select an option</option>
+                    </select>
+                </div>
+            </div>
+            <button class="add-button" type="button" onclick="addToDisplayBox('rooms', 'room-box')">Add</button>
+            
+            <div class="form-group">
+                <div class="display-box" id="room-box"></div>
+            </div>            
 
             <div class="flex-container">
                 <button type="submit">Generate</button>
-                <div class="pdf-container">
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Scrutiny.pdf</p>
-                    </div>
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Trial.pdf</p>
-                    </div>
-                </div>
             </div>
+            <br><br>
         </form>
     </section>
     <br>
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+
+    <script src="duty.js"></script>
 </body>
+</html>

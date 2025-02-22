@@ -887,3 +887,56 @@ app.post("/upload",upload.single("pdfFile"),async (req,res)=>{
   }
 })
 app.listen(4000, () => console.log("Listening on port 4000..."));
+
+
+// INVIGILATION DUTY ALLOCATION
+
+// Get faculties for duty allocation dropdown
+app.get("/api/duty/faculty", async (req, res) => {
+  try {
+    // Fetch users who have "faculty" as one of their roles
+    const faculties = await user.find({ U_role: { $in: ["FC"] } }, { U_name: 1, _id: 0 });
+    res.json(faculties);
+  } catch (error) {
+    console.error("Error fetching faculties:", error);
+    res.status(500).json({ error: "Error fetching faculties" });
+  }
+});
+
+// Get rooms for invigilation duty allocation dropdown
+app.get("/api/duty/rooms", async (req, res) => {
+  try {
+    // Fetch all room codes
+    const rooms = await room.find({}, "R_code");
+    res.json(rooms);
+  } catch (error) {
+    console.error("Error fetching rooms:", error);
+    res.status(500).json({ error: "Error fetching rooms" });
+  }
+});
+
+// Generate and return invigilation duty allocation
+app.post("/api/generate-invigilation", async (req, res) => {
+  try {
+    const { selectedFaculties, selectedRooms } = req.body;
+
+    if (!selectedFaculties || !selectedRooms || selectedFaculties.length === 0 || selectedRooms.length === 0) {
+      return res.status(400).json({ error: "Please select at least one faculty and one room" });
+    }
+
+    // Generate a simple text-based invigilation duty allocation
+    let allocationText = "Invigilation Duty Allocation:\n";
+    selectedFaculties.forEach((faculty, index) => {
+      const roomCode = selectedRooms[index % selectedRooms.length]; // Assign faculty to rooms evenly
+      allocationText += `${faculty} → ${roomCode}\n`;
+    });
+
+    // Convert the allocation text to a downloadable text file
+    res.setHeader("Content-Disposition", `attachment; filename=invigilation-duty.txt`);
+    res.setHeader("Content-Type", "text/plain");
+    res.send(allocationText);
+  } catch (error) {
+    console.error("Error generating invigilation duty allocation:", error);
+    res.status(500).json({ error: "Error generating invigilation duty allocation" });
+  }
+});
