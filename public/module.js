@@ -1,4 +1,21 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  async function checkAuthStatus() {
+    try {
+        const response = await fetch("/check-auth");
+         data = await response.json();
+
+        if (!data.isAuthenticated) {
+            window.location.href = "/index.html"; 
+        }
+        else
+        {
+            return data;
+        }
+    } catch (error) {
+        console.error("Error checking auth status:", error);
+    }
+}
+await checkAuthStatus();
   const moduleList = document.getElementById("module-list");
   const moduleForm = document.getElementById("moduleForm");
   const subjectsInput = document.getElementById("subjects");

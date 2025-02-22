@@ -1,4 +1,21 @@
-function addToDisplayBox(selectId, displayBoxId) {
+async function addToDisplayBox(selectId, displayBoxId) {
+    async function checkAuthStatus() {
+        try {
+            const response = await fetch("/check-auth");
+             data = await response.json();
+
+            if (!data.isAuthenticated) {
+                window.location.href = "/index.html"; 
+            }
+            else
+            {
+                return data;
+            }
+        } catch (error) {
+            console.error("Error checking auth status:", error);
+        }
+    }
+    await checkAuthStatus();
     let selectElement = document.getElementById(selectId);
     let selectedValue = selectElement.value.trim();
     let displayBox = document.getElementById(displayBoxId);
