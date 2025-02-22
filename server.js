@@ -634,3 +634,117 @@ app.delete("/api/modules/:id", async (req, res) => {
 });
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
+
+// Add this near your other requires at the top
+const PDFDocument = require('pdfkit');
+
+// Add these routes to your existing server.js
+
+// Get batches for seating dropdown
+app.get("/api/seating/batches", async (req, res) => {
+    try {
+        const batches = await batch.find({}, 'B_name B_strenth');
+        res.json(batches);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching batches' });
+    }
+});
+
+// Get rooms for seating dropdown
+app.get("/api/seating/rooms", async (req, res) => {
+    try {
+        const rooms = await room.find({}, 'R_code R_capacity');
+        res.json(rooms);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching rooms' });
+    }
+});
+
+// Generate seating arrangement
+app.post("/api/generate-seating", async (req, res) => {
+    try {
+        const { selectedBatches, selectedRooms } = req.body;
+        
+        // Fetch batch and room details
+        const batchDetails = await batch.find({ B_name: { $in: selectedBatches } });
+        const roomDetails = await room.find({ R_code: { $in: selectedRooms } });
+        
+        // Generate seating arrangement
+        const seatingArrangement = generateSeatingArrangement(batchDetails, roomDetails);
+        
+        // Generate PDF
+        const doc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=seating-arrangement.pdf');
+        
+        generateSeatingPDF(doc, seatingArrangement);
+        doc.pipe(res);
+        doc.end();
+        
+    } catch (error) {
+        res.status(500).json({ error: 'Error generating seating arrangement' });
+    }
+});
+
+// Helper function to generate seating arrangement
+function generateSeatingArrangement(batches, rooms) {
+    let arrangement = {};
+    
+    // Initialize rooms in arrangement
+    rooms.forEach(room => {
+        arrangement[room.R_code] = [];
+    });
+    
+    // Sort rooms by capacity (largest first)
+    rooms.sort((a, b) => parseInt(b.R_capacity) - parseInt(a.R_capacity));
+    
+    // Distribute students from each batch
+    batches.forEach(batchData => {
+        let studentsRemaining = parseInt(batchData.B_strenth);
+        let roomIndex = 0;
+        
+        while (studentsRemaining > 0 && roomIndex < rooms.length) {
+            let room = rooms[roomIndex];
+            let available = parseInt(room.R_capacity) - 
+                arrangement[room.R_code].reduce((sum, curr) => sum + curr.count, 0);
+            
+            if (available > 0) {
+                let toAssign = Math.min(available, studentsRemaining);
+                arrangement[room.R_code].push({
+                    batch: batchData.B_name,
+                    count: toAssign
+                });
+                studentsRemaining -= toAssign;
+            }
+            roomIndex++;
+        }
+    });
+    
+    return arrangement;
+}
+
+// Helper function to generate PDF
+function generateSeatingPDF(doc, arrangement) {
+    // Add header
+    doc.fontSize(20).text('Seating Arrangement', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(new Date().toLocaleDateString(), { align: 'center' });
+    doc.moveDown(2);
+    
+    // Add room-wise arrangements
+    Object.entries(arrangement).forEach(([roomNo, assignments]) => {
+        doc.fontSize(16).text(`Room ${roomNo}`);
+        doc.moveDown(0.5);
+        
+        let totalStudents = assignments.reduce((sum, curr) => sum + curr.count, 0);
+        
+        assignments.forEach(assignment => {
+            doc.fontSize(12)
+               .text(`${assignment.batch}: ${assignment.count} students`);
+        });
+        
+        doc.fontSize(12)
+           .text(`Total students in room: ${totalStudents}`, { italic: true });
+        doc.moveDown(1.5);
+    });
+}
