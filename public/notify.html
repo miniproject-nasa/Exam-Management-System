@@ -43,23 +43,15 @@
 
             <div class="flex-container">
                 <div class="content-section">
-                    <p class="information-type">
+                    <label for="inputFile" class="information-type">Choose File</label>
+                    <input type="file" name="inputFile" id="inputFile" class="information-type">
+                    
+                    <!-- <p class="information-type">
                         Select your files
-                    </p>
+                    </p> -->
                 </div>
                 <div class="pdf-container">
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Scrutiny.pdf</p>
-                    </div>
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Trial.pdf</p>
-                    </div>
+                    
                 </div>
                 <button type="submit">Send</button>
             </div>
@@ -70,4 +62,5 @@
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+    <script src="notify.js"></script>
 </body>
