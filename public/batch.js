@@ -68,7 +68,7 @@ await checkAuthStatus();
         <div class="popup-content">
           <a href="#" class="close">&times;</a>
           <h3>Confirm Deletion</h3>
-          <p>Are you sure you want to delete batch <span id="delete-batch-name"></span>?</p>
+          <p id="delete-confirm">Are you sure you want to delete batch <span id="delete-batch-name"></span>?</p>
           <div class="button-group">
             <button id="confirm-delete" class="danger">Delete</button>
             <button id="cancel-delete">Cancel</button>

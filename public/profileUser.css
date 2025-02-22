@@ -117,6 +117,40 @@ p {
     gap: 8px;
 }
 
+#open-add-user {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px; 
+    max-width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    gap: 8px;
+    margin: 1% 0 0 5%; /* Aligns with content */
+    transition: 0.3s;
+}
+
+#open-add-user:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
+/* Responsive Fix */
+@media only screen and (max-width: 650px) {
+    #open-add-user {
+        width: 80%; /* Adjust width on smaller screens */
+        font-size: 12px;
+        padding: 10px;
+        margin: 10px 0 0 3%; /* Adjust left margin */
+    }
+}
+
 .square-btn {
     width: 25px;
     height: 25px;
@@ -214,6 +248,16 @@ form button:focus {
     border-radius: 8px;
 }
 
+#credentials-text {
+    white-space: pre-line; /* Ensures line breaks are respected */
+    font-weight: bold;
+    font-size: 18px;
+    color: black;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+
 .close {
     position: absolute;
     top: 10px;
@@ -269,7 +313,7 @@ form button:focus {
     transition: 0.2s;
 }
 
-.popup-content p {
+#delete-confirm {
     color: rgb(239, 11, 11);
 }
 
@@ -483,6 +527,7 @@ form button:focus {
 .dropdown-item:hover {
     background-color: #f0f8ff;
 }
+
 
 ul {
     list-style: none;

@@ -149,7 +149,7 @@ p {
 }
 
 .button-type {
-    position: absolute;
+    position: static;
     left: 5%;
     margin-bottom: -40px;
     margin-top: 7px;
@@ -171,6 +171,31 @@ p {
     background: rgb(1, 83, 235);
     transform: scale(1.01);
 }
+
+#open-add-subject {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px; 
+    max-width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    gap: 8px;
+    margin: 1% 0 0 5%; /* Aligns with content */
+    transition: 0.3s;
+}
+
+#open-add-subject:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
 
 form input[type="text"]:focus,
 form button:focus {
@@ -270,7 +295,7 @@ form button:focus {
     transition: 0.2s;
 }
 
-.popup-content p {
+#delete-confirm{
     color: rgb(239, 11, 11);
 }
 
@@ -472,6 +497,23 @@ form button:focus {
     cursor: text;
 }
 
+.dropdown {
+    background: white;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 1001;
+}
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+.dropdown-item:hover {
+    background-color: #f0f8ff;
+}
 
 ul {
     list-style: none;
