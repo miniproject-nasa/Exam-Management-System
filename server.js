@@ -224,7 +224,6 @@ app.put("/update-room/:room_code", async (req, res) => {
 });
 
 // USER MANAGEMENT API'S
-
 const userSchema = new mongoose.Schema({
   U_name: String,
   U_id: String,
@@ -235,36 +234,73 @@ const userSchema = new mongoose.Schema({
 });
 const user = mongoose.model("user", userSchema, "users");
 
-// user insert
+// 1) GET ALL USERS
+app.get("/get-users", async (req, res) => {
+  try {
+    const users = await user.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to get users", details: error.message });
+  }
+});
 
+// 2) ADD USER (with default password)
 app.post("/add-user", async (req, res) => {
   try {
-    const { U_name, U_id, U_phone, U_email, U_role, U_password } = req.body;
+    const { U_name, U_id, U_phone, U_email, U_role } = req.body;
+    const defaultPassword = "abcd1234";
     const newUser = new user({
       U_name,
       U_id,
       U_phone,
       U_email,
       U_role,
-      U_password,
+      U_password: defaultPassword,
     });
     const savedUser = await newUser.save();
-    res
-      .status(200)
-      .json({ message: "User added successfully", data: savedUser });
+
+    res.status(200).json({
+      message: "User added successfully",
+      data: { ...savedUser._doc, generatedPassword: defaultPassword },
+    });
   } catch (error) {
-    res
-      .status(404)
-      .json({ error: "Failed to add user", details: error.message });
+    res.status(404).json({ error: "Failed to add user", details: error.message });
   }
 });
 
-// user delete
+// 3) UPDATE USER
+app.put("/update-user/:user_id", async (req, res) => {
+  const U_id = req.params.user_id;
+  const { U_name, U_phone, U_email, U_role } = req.body;
+  try {
+    const updatedUser = await user.findOneAndUpdate(
+      { U_id },
+      { U_name, U_phone, U_email, U_role },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "User updated successfully", data: updatedUser });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ error: "Failed to update user", details: error.message });
+  }
+});
 
+// 4) DELETE USER
 app.delete("/delete-user/:user_id", async (req, res) => {
   try {
     const U_id = req.params.user_id;
-    const deleteUser = await user.findOneAndDelete(U_id);
+    const deleteUser = await user.findOneAndDelete({ U_id });
+    if (!deleteUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
     res
       .status(200)
       .json({ message: "User deleted successfully", data: deleteUser });
@@ -272,43 +308,6 @@ app.delete("/delete-user/:user_id", async (req, res) => {
     res
       .status(404)
       .json({ error: "Failed to delete user", details: error.message });
-  }
-});
-
-// all users
-app.get("/get-users", async (req, res) => {
-  try {
-    const users = await user.find();
-    res.status(200).json(users);
-  } catch (error) {
-    res
-      .status(404)
-      .json({ error: "Failed to get users", details: error.message });
-  }
-});
-
-// update a user
-app.put("/update-user/:user_id", async (req, res) => {
-  const U_id = req.params.user_id;
-  const { U_name, U_phone, U_email, U_role, U_password } = req.body;
-  try {
-    const updatedUser = await user.findOneAndUpdate(
-      { U_id: U_id },
-      { U_name, U_phone, U_email, U_role, U_password },//req.body,
-      { new: true }
-    );
-    if (!updatedUser) {
-      return res.status(400).json({ error: "User not found" });
-    }
-    res.status(200).json({
-      success: true,
-      message: "User updated successfully",
-      data: updatedUser,
-    });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ error: "Failed to update user", details: error.message });
   }
 });
 
