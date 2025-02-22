@@ -523,4 +523,3 @@ await checkAuthStatus();
 
   fetchModules(); // Initial load of modules
 });
-    
