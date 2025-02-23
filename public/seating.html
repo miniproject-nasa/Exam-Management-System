@@ -26,34 +26,31 @@
     <section class="main">
         <form>
             <h2 class="upload-title">Seating</h2>
-
+            <div class="form-group">
+                <label for="exam-name">Examination Name</label>
+                <input type="text" id="exam-name" name="exam-name"><br>
+            </div>            
             <div class="form-group">
                 <label for="batches">Batches</label>
                 <div class="dropdown">
                     <select id="batches" name="batches">
                         <option value="" disabled selected>Select an option</option>
-
                     </select>
                 </div>
             </div>
-            <button class="add-button" type="button" onclick="addToDisplayBox('batches', 'batch-box')">Add</button>
-            
+            <button class="add-button" type="button" onclick="addToDisplayBox('batches', 'batch-box')">Add</button>   
             <div class="form-group">
                 <div class="display-box" id="batch-box"></div>
             </div>
-            
             <div class="form-group">
                 <label for="rooms">Available Rooms</label>
                 <div class="dropdown">
                     <select id="rooms" name="rooms">
                         <option value="" disabled selected>Select an option</option>
-
                     </select>
                 </div>
             </div>
-            
             <button class="add-button" type="button" onclick="addToDisplayBox('rooms', 'room-box')">Add</button>
-            
             <div class="form-group">
                 <div class="display-box" id="room-box"></div>
             </div>            
