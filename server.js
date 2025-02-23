@@ -317,7 +317,7 @@ app.get("/dashboard", isAuthenticated, (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { userID, password } = req.body;
   try {
     // console.log("Login Successful");
@@ -326,9 +326,10 @@ app.post("/login", async (req, res) => {
     if (userfinal) {
       if (userfinal.U_password === password) {
         req.session.user = {
-          id: userfinal._id,
+          id: userfinal.U_id,
           username: userfinal.U_name,
           role: userfinal.U_role,
+          pass:userfinal.U_password,
         };
         console.log("Login Successful");
         res.status(200).json({
@@ -355,8 +356,30 @@ app.get("/logout", (req, res) => {
       return res.status(500).json({ error: "Logout failed" });
     }
     res.json({ success: true, message: "Logged out successfully" });
+    console.log("logout")
   });
 });
+
+// CHANGE PASSWORD
+
+app.put("/update-password",async (req,res)=>{
+  const {id,password}=req.body
+  console.log(req.body)
+  try {
+    const olduser=await user.findOneAndUpdate(
+      {U_id:id},
+      {U_password:password},
+      {new:true}
+    );
+  } catch (error) {
+    console.log(error);
+    
+  }
+  if(!user)
+    return res.status(400).json({success:false,message:"user not found"});
+  return res.status(200).json({success:true,message:"updated"});
+})
+
 
 // MODULE MANAGEMENT API'S
 const moduleSchema = new mongoose.Schema({

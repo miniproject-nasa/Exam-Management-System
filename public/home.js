@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded",async function () {
             else
             {
                 return data;
+                console.log(data)
             }
         } catch (error) {
             console.error("Error checking auth status:", error);
@@ -139,4 +140,5 @@ document.addEventListener("DOMContentLoaded",async function () {
                     
             })
             
-});
+    });
+        
