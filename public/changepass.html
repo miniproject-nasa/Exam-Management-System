@@ -24,12 +24,17 @@
     </header>
     <br>
     <section>
-        <form>
+        <form id="changePassFrm">
             <h2 class="changepass-title">Change Password</h2>
 
             <div class="form-group">
+                <label for="old-password">Old Password</label>
+                <input type="text" id="old-password" name="old-password" required><br><br>
+            
                 <label for="new-password">New Password</label>
-                <input type="text" id="new-password" name="new-password"><br><br>
+                <input type="text" id="new-password"  name="new-password" required><br><br>
+                <label for="Cinform-password">Confirm Password</label>
+                <input type="text" id="Confirm-password"  name="Confirm-password" required><br><br>
             </div>
 
             <button type="submit">Change</button><br><br>
@@ -39,4 +44,5 @@
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+    <script src="changepass.js"></script>
 </body>
