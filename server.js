@@ -868,6 +868,21 @@ const pdfmodel = mongoose.model("PDF", pdfSchema, "pdfs");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// Get faculties for sending notifications
+app.get("/api/notify/faculty", async (req, res) => {
+  try {
+    // Fetch users who have "faculty" as one of their roles
+    const faculties = await user.find(
+      { U_role: { $in: ["FC"] } },
+      { U_name: 1, _id: 0 }
+    );
+    res.json(faculties);
+  } catch (error) {
+    console.error("Error fetching faculties:", error);
+    res.status(500).json({ error: "Error fetching faculties" });
+  }
+});
+
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
     console.log(req.file);
