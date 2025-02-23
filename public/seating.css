@@ -458,3 +458,19 @@ input[type="date"]:focus {
     border-color: rgba(15, 98, 254, 1);
     outline: none;
 }
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: rgba(112, 112, 112, 1);
+    box-sizing: border-box;
+}
+
+input[type="text"]::placeholder {
+    color: rgba(112, 112, 112, 0.7);
+    font-size: 14px;
+}
