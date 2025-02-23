@@ -106,3 +106,9 @@ async function handleFormSubmit(event) {
         alert('Error generating seating arrangement');
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    let dateInput = document.getElementById("duty-date");
+    let today = new Date().toISOString().split("T")[0];
+    dateInput.value = today; // Set default value to today's date
+});

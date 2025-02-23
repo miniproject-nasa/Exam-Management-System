@@ -89,7 +89,7 @@ async function handleFormSubmit(event) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `invigilation-duty-allocation-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `invigilation-duty-allocation-${new Date().toISOString().split('T')[0]}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -102,3 +102,9 @@ async function handleFormSubmit(event) {
         alert('Error generating invigilation duty allocation');
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    let dateInput = document.getElementById("duty-date");
+    let today = new Date().toISOString().split("T")[0];
+    dateInput.value = today; // Set default value to today's date
+});
