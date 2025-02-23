@@ -63,6 +63,7 @@ async function handleFormSubmit(event) {
     
     const facultyBox = document.getElementById('faculty-box');
     const roomBox = document.getElementById('room-box');
+    const dateInput = document.getElementById('duty-date');
     
     const selectedFaculties = Array.from(facultyBox.children)
         .map(span => span.textContent.trim().replace('×', '').trim())
@@ -81,7 +82,11 @@ async function handleFormSubmit(event) {
         const response = await fetch('/api/generate-invigilation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ selectedFaculties, selectedRooms })
+            body: JSON.stringify({
+                selectedFaculties,
+                selectedRooms,
+                dutyDate: dateInput.value
+            })
         });
         
         if (response.ok) {
@@ -89,7 +94,7 @@ async function handleFormSubmit(event) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `invigilation-duty-allocation-${new Date().toISOString().split('T')[0]}.pdf`;
+            a.download = `invigilation-duty-${dateInput.value}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
