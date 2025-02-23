@@ -45,15 +45,70 @@
           <input type="text" id="subject-code" name="subject-code" required />
 
           <label for="batch">Batch</label>
-          <input type="text" id="batch" name="batch" required />
 
-          <label for="module">Module</label>
-          <input type="text" id="module" name="module" required />
+          <input
+            type="text"
+            id="batch"
+            name="batch"
+            required
+          />
+          <div id="batch-container" class="tags-container"></div>
 
           <label for="faculty">Subject Faculty</label>
-          <input type="text" id="faculty" name="faculty" required />
+          <input
+            type="text"
+            id="faculty"
+            name="faculty"
+            required
+          />
+          <div id="faculty-container" class="tags-container"></div>
 
           <button type="submit">Save</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Update Subject Popup -->
+    <div id="update-popup" class="popup">
+      <div class="popup-content">
+        <a href="#" class="close">&times;</a>
+        <form id="updateSubjectForm">
+          <label for="update-subject-code">Subject Code</label>
+          <input
+            type="text"
+            id="update-subject-code"
+            name="update-subject-code"
+            readonly
+            style="background-color: #f0f0f0; cursor: not-allowed"
+          />
+
+          <label for="update-subject-name">Subject Name</label>
+          <input
+            type="text"
+            id="update-subject-name"
+            name="update-subject-name"
+            required
+          />
+
+          <label for="update-batch">Batch</label>
+          <input
+            type="text"
+            id="update-batch"
+            name="update-batch"
+            required
+          />
+          <div id="update-batch-container" class="tags-container"></div>
+
+          <label for="update-faculty">Subject Faculty</label>
+          <input
+            type="text"
+            id="update-faculty"
+            name="update-faculty"
+            required
+          />
+          <div id="update-faculty-container" class="tags-container"></div>
+
+          <button type="submit">Update</button>
         </form>
       </div>
     </div>

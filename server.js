@@ -53,9 +53,8 @@ app.get("/modulemanagement", (req, res) => {
 const subjectSchema = new mongoose.Schema({
   S_name: String,
   S_code: String,
-  S_module: String,
-  S_batch: String,
-  S_faculty: String,
+  S_batch: [String], 
+  S_faculty: [String], 
 });
 
 const Subject = mongoose.model("Subject", subjectSchema, "subjects");
@@ -63,7 +62,7 @@ const Subject = mongoose.model("Subject", subjectSchema, "subjects");
 // --- Add Subject ---
 app.post("/add-subject", async (req, res) => {
   try {
-    const { S_name, S_code, S_module, S_batch, S_faculty } = req.body;
+    const { S_name, S_code, S_batch, S_faculty } = req.body;
 
     // Check if a subject with the same S_code already exists
     const existingSubject = await Subject.findOne({ S_code });
@@ -71,22 +70,12 @@ app.post("/add-subject", async (req, res) => {
       return res.status(400).json({ error: "Subject code already exists" });
     }
 
-    const newSubject = new Subject({
-      S_name,
-      S_code,
-      S_module,
-      S_batch,
-      S_faculty,
-    });
-
+    const newSubject = new Subject({ S_name, S_code, S_batch, S_faculty });
     await newSubject.save();
-    res
-      .status(201)
-      .json({ message: "Subject added successfully", data: newSubject });
+
+    res.status(201).json({ message: "Subject added successfully", data: newSubject });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to add subject", details: error.message });
+    res.status(500).json({ error: "Failed to add subject", details: error.message });
   }
 });
 
@@ -96,9 +85,7 @@ app.get("/get-subjects", async (req, res) => {
     const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to get subjects", details: error.message });
+    res.status(500).json({ error: "Failed to get subjects", details: error.message });
   }
 });
 
@@ -112,13 +99,9 @@ app.delete("/delete-subject/:S_code", async (req, res) => {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    res
-      .status(200)
-      .json({ message: "Subject deleted successfully", data: deletedSubject });
+    res.status(200).json({ message: "Subject deleted successfully", data: deletedSubject });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to delete subject", details: error.message });
+    res.status(500).json({ error: "Failed to delete subject", details: error.message });
   }
 });
 
@@ -126,11 +109,11 @@ app.delete("/delete-subject/:S_code", async (req, res) => {
 app.put("/update-subject/:S_code", async (req, res) => {
   try {
     const { S_code } = req.params;
-    const { S_name, S_module, S_batch, S_faculty } = req.body;
+    const { S_name, S_batch, S_faculty } = req.body;
 
     const updatedSubject = await Subject.findOneAndUpdate(
       { S_code },
-      { S_name, S_module, S_batch, S_faculty },
+      { S_name, S_batch, S_faculty },
       { new: true }
     );
 
@@ -138,15 +121,12 @@ app.put("/update-subject/:S_code", async (req, res) => {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    res
-      .status(200)
-      .json({ message: "Subject updated successfully", data: updatedSubject });
+    res.status(200).json({ message: "Subject updated successfully", data: updatedSubject });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to update subject", details: error.message });
+    res.status(500).json({ error: "Failed to update subject", details: error.message });
   }
 });
+
 
 // ROOM MANAGMEWNT  API'S
 
@@ -267,7 +247,9 @@ app.post("/add-user", async (req, res) => {
       data: { ...savedUser._doc, generatedPassword: defaultPassword },
     });
   } catch (error) {
-    res.status(404).json({ error: "Failed to add user", details: error.message });
+    res
+      .status(404)
+      .json({ error: "Failed to add user", details: error.message });
   }
 });
 
@@ -580,9 +562,9 @@ app.get("/api/modules/:id", async (req, res) => {
     }
     res.status(200).json(module);
   } catch (error) {
-    res.status(500).json({ 
-      error: "Failed to fetch module", 
-      details: error.message 
+    res.status(500).json({
+      error: "Failed to fetch module",
+      details: error.message,
     });
   }
 });
@@ -591,13 +573,13 @@ app.get("/api/modules/:id", async (req, res) => {
 app.put("/api/modules/:id", async (req, res) => {
   try {
     const { moduleCoordinator, subjects, faculties } = req.body;
-    
+
     const updatedModule = await Module.findByIdAndUpdate(
       req.params.id,
       {
         moduleCoordinator,
         subjects,
-        faculties
+        faculties,
       },
       { new: true, runValidators: true }
     );
@@ -608,9 +590,9 @@ app.put("/api/modules/:id", async (req, res) => {
 
     res.status(200).json(updatedModule);
   } catch (error) {
-    res.status(500).json({ 
-      error: "Failed to update module", 
-      details: error.message 
+    res.status(500).json({
+      error: "Failed to update module",
+      details: error.message,
     });
   }
 });
@@ -619,79 +601,83 @@ app.put("/api/modules/:id", async (req, res) => {
 app.delete("/api/modules/:id", async (req, res) => {
   try {
     const deletedModule = await Module.findByIdAndDelete(req.params.id);
-    
+
     if (!deletedModule) {
       return res.status(404).json({ error: "Module not found" });
     }
 
     res.status(200).json({ message: "Module deleted successfully" });
   } catch (error) {
-    res.status(500).json({ 
-      error: "Failed to delete module", 
-      details: error.message 
+    res.status(500).json({
+      error: "Failed to delete module",
+      details: error.message,
     });
   }
 });
 
-
 //SEATING ARRANGEMENT
 
 // Add this near your other requires at the top
-const PDFDocument = require('pdfkit');
+const PDFDocument = require("pdfkit");
 
 // Add these routes to your existing server.js
 
 // Get batches for seating dropdown
 app.get("/api/seating/batches", async (req, res) => {
-    try {
-        const batches = await batch.find({}, 'B_name B_strenth');
-        res.json(batches);
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching batches' });
-    }
+  try {
+    const batches = await batch.find({}, "B_name B_strenth");
+    res.json(batches);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching batches" });
+  }
 });
 
 // Get rooms for seating dropdown
 app.get("/api/seating/rooms", async (req, res) => {
-    try {
-        const rooms = await room.find({}, 'R_code R_capacity');
-        res.json(rooms);
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching rooms' });
-    }
+  try {
+    const rooms = await room.find({}, "R_code R_capacity");
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching rooms" });
+  }
 });
 
 // Generate seating arrangement
 app.post("/api/generate-seating", async (req, res) => {
-    try {
-        const { selectedBatches, selectedRooms } = req.body;
-        
-        // Fetch batch and room details
-        const batchDetails = await batch.find({ B_name: { $in: selectedBatches } });
-        const roomDetails = await room.find({ R_code: { $in: selectedRooms } });
-        
-        // Generate seating arrangement
-        const seatingArrangement = generateSeatingArrangement(batchDetails, roomDetails);
-        
-        // Generate PDF
-        const doc = new PDFDocument();
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=seating-arrangement.pdf');
-        
-        generateSeatingPDF(doc, seatingArrangement);
-        doc.pipe(res);
-        doc.end();
-        
-    } catch (error) {
-        res.status(500).json({ error: 'Error generating seating arrangement' });
-    }
+  try {
+    const { selectedBatches, selectedRooms } = req.body;
+
+    // Fetch batch and room details
+    const batchDetails = await batch.find({ B_name: { $in: selectedBatches } });
+    const roomDetails = await room.find({ R_code: { $in: selectedRooms } });
+
+    // Generate seating arrangement
+    const seatingArrangement = generateSeatingArrangement(
+      batchDetails,
+      roomDetails
+    );
+
+    // Generate PDF
+    const doc = new PDFDocument();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=seating-arrangement.pdf"
+    );
+
+    generateSeatingPDF(doc, seatingArrangement);
+    doc.pipe(res);
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ error: "Error generating seating arrangement" });
+  }
 });
 
 // Helper function to shuffle array
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 }
@@ -700,194 +686,186 @@ function shuffleArray(array) {
 function generateSeatingArrangement(batches, rooms) {
   let shuffledBatches = shuffleArray([...batches]);
   let shuffledRooms = shuffleArray([...rooms]);
-  
+
   let arrangement = {};
   let summary = {};
   let batchRollNumbers = {};
-  
+
   // Initialize roll numbers for each batch
-  shuffledBatches.forEach(batch => {
-      batchRollNumbers[batch.B_name] = 1;
+  shuffledBatches.forEach((batch) => {
+    batchRollNumbers[batch.B_name] = 1;
   });
-  
+
   // Process each room
-  shuffledRooms.forEach(room => {
-      let roomCode = room.R_code;
-      let remainingCapacity = room.R_capacity;
-      
-      arrangement[roomCode] = {
-          capacity: room.R_capacity,
-          seatMatrix: [],
-          assignments: []
+  shuffledRooms.forEach((room) => {
+    let roomCode = room.R_code;
+    let remainingCapacity = room.R_capacity;
+
+    arrangement[roomCode] = {
+      capacity: room.R_capacity,
+      seatMatrix: [],
+      assignments: [],
+    };
+
+    summary[roomCode] = {};
+
+    // Record starting roll numbers for this room
+    shuffledBatches.forEach((batch) => {
+      summary[roomCode][batch.B_name] = {
+        start: batchRollNumbers[batch.B_name],
+        end: batchRollNumbers[batch.B_name],
       };
-      
-      summary[roomCode] = {};
-      
-      // Record starting roll numbers for this room
-      shuffledBatches.forEach(batch => {
-          summary[roomCode][batch.B_name] = {
-              start: batchRollNumbers[batch.B_name],
-              end: batchRollNumbers[batch.B_name]
-          };
-      });
-      
-      let globalSeatCounter = 1;  // Counter for sequential seat numbers
-      let currentRow = [];
-      let batchIndex = 0;
-      
-      // Fill seats using sequential numbering
-      while (remainingCapacity > 0) {
-          let currentBatch = shuffledBatches[batchIndex];
-          
-          if (batchRollNumbers[currentBatch.B_name] <= currentBatch.B_strenth) {
-              currentRow.push({
-                  seatNo: globalSeatCounter,
-                  batch: currentBatch.B_name,
-                  rollNo: batchRollNumbers[currentBatch.B_name]
-              });
-              
-              batchRollNumbers[currentBatch.B_name]++;
-              remainingCapacity--;
-              globalSeatCounter++;
-              
-              batchIndex = (batchIndex + 1) % shuffledBatches.length;
-              
-              // Start new row after processing all batches
-              if (batchIndex === 0 || currentRow.length === shuffledBatches.length) {
-                  arrangement[roomCode].seatMatrix.push([...currentRow]);
-                  currentRow = [];
-              }
-          } else {
-              batchIndex = (batchIndex + 1) % shuffledBatches.length;
-              if (batchIndex === 0) {
-                  if (currentRow.length > 0) {
-                      arrangement[roomCode].seatMatrix.push([...currentRow]);
-                  }
-                  break;
-              }
+    });
+
+    let globalSeatCounter = 1; // Counter for sequential seat numbers
+    let currentRow = [];
+    let batchIndex = 0;
+
+    // Fill seats using sequential numbering
+    while (remainingCapacity > 0) {
+      let currentBatch = shuffledBatches[batchIndex];
+
+      if (batchRollNumbers[currentBatch.B_name] <= currentBatch.B_strenth) {
+        currentRow.push({
+          seatNo: globalSeatCounter,
+          batch: currentBatch.B_name,
+          rollNo: batchRollNumbers[currentBatch.B_name],
+        });
+
+        batchRollNumbers[currentBatch.B_name]++;
+        remainingCapacity--;
+        globalSeatCounter++;
+
+        batchIndex = (batchIndex + 1) % shuffledBatches.length;
+
+        // Start new row after processing all batches
+        if (batchIndex === 0 || currentRow.length === shuffledBatches.length) {
+          arrangement[roomCode].seatMatrix.push([...currentRow]);
+          currentRow = [];
+        }
+      } else {
+        batchIndex = (batchIndex + 1) % shuffledBatches.length;
+        if (batchIndex === 0) {
+          if (currentRow.length > 0) {
+            arrangement[roomCode].seatMatrix.push([...currentRow]);
           }
+          break;
+        }
       }
-      
-      // Push any remaining seats in the last row
-      if (currentRow.length > 0) {
-          arrangement[roomCode].seatMatrix.push(currentRow);
-      }
-      
-      // Update end roll numbers in summary
-      shuffledBatches.forEach(batch => {
-          summary[roomCode][batch.B_name].end = 
-              batchRollNumbers[batch.B_name] - 1;
-      });
+    }
+
+    // Push any remaining seats in the last row
+    if (currentRow.length > 0) {
+      arrangement[roomCode].seatMatrix.push(currentRow);
+    }
+
+    // Update end roll numbers in summary
+    shuffledBatches.forEach((batch) => {
+      summary[roomCode][batch.B_name].end = batchRollNumbers[batch.B_name] - 1;
+    });
   });
-  
+
   return { arrangement, summary };
 }
 
 // Updated PDF generation function
 function generateSeatingPDF(doc, { arrangement, summary }) {
   // Add title
-  doc.fontSize(24).text('Examination Seating Arrangement', { align: 'center' });
+  doc.fontSize(24).text("Examination Seating Arrangement", { align: "center" });
   doc.moveDown();
-  doc.fontSize(12).text(new Date().toLocaleDateString(), { align: 'center' });
+  doc.fontSize(12).text(new Date().toLocaleDateString(), { align: "center" });
   doc.moveDown(2);
-  
+
   // Summary section
-  doc.fontSize(18).text('Room-wise Summary', { underline: true });
+  doc.fontSize(18).text("Room-wise Summary", { underline: true });
   doc.moveDown();
-  
+
   Object.entries(summary).forEach(([roomCode, batchRanges]) => {
-      doc.fontSize(14).text(`Room ${roomCode}`);
-      doc.moveDown(0.5);
-      
-      Object.entries(batchRanges).forEach(([batch, range]) => {
-          if (range.end >= range.start) {
-              doc.fontSize(12)
-                 .text(`${batch}: Roll Numbers ${range.start} - ${range.end}`);
-          }
-      });
-      doc.moveDown();
+    doc.fontSize(14).text(`Room ${roomCode}`);
+    doc.moveDown(0.5);
+
+    Object.entries(batchRanges).forEach(([batch, range]) => {
+      if (range.end >= range.start) {
+        doc
+          .fontSize(12)
+          .text(`${batch}: Roll Numbers ${range.start} - ${range.end}`);
+      }
+    });
+    doc.moveDown();
   });
-  
+
   // Detailed seating arrangements (one room per page)
   Object.entries(arrangement).forEach(([roomCode, roomData]) => {
-      doc.addPage();
-      
-      // Room header
-      doc.fontSize(18).text(`Room ${roomCode} - Seating Arrangement`, { 
-          align: 'center',
-          underline: true 
-      });
-      doc.moveDown(2);
-      
-      // Batch headers
-      const batchHeaders = Object.keys(summary[roomCode]);
+    doc.addPage();
+
+    // Room header
+    doc.fontSize(18).text(`Room ${roomCode} - Seating Arrangement`, {
+      align: "center",
+      underline: true,
+    });
+    doc.moveDown(2);
+
+    // Batch headers
+    const batchHeaders = Object.keys(summary[roomCode]);
+    let xPos = 100;
+    batchHeaders.forEach((header) => {
+      doc.text(header, xPos, doc.y);
+      xPos += 120;
+    });
+    doc.moveDown();
+
+    // Seat matrix with sequential seat numbers
+    roomData.seatMatrix.forEach((row) => {
+      const rowY = doc.y;
       let xPos = 100;
-      batchHeaders.forEach(header => {
-          doc.text(header, xPos, doc.y);
-          xPos += 120;
+
+      row.forEach((seat) => {
+        if (seat) {
+          doc.text(`${seat.seatNo}   ${seat.rollNo}`, xPos, rowY);
+        }
+        xPos += 120;
       });
       doc.moveDown();
-      
-      // Seat matrix with sequential seat numbers
-      roomData.seatMatrix.forEach(row => {
-          const rowY = doc.y;
-          let xPos = 100;
-          
-          row.forEach(seat => {
-              if (seat) {
-                  doc.text(
-                      `${seat.seatNo}   ${seat.rollNo}`,
-                      xPos,
-                      rowY
-                  );
-              }
-              xPos += 120;
-          });
-          doc.moveDown();
-      });
+    });
   });
 }
 
-
-
 // NOTIFY MESSAGE ,PDF,OTHER DATA UPLOAD TO msg SCHEMA
 
-const pdfSchema=new mongoose.Schema({
-  filename:String,
-  data:String,
-  from:String,
-  to:String,
+const pdfSchema = new mongoose.Schema({
+  filename: String,
+  data: String,
+  from: String,
+  to: String,
 });
 
-const pdfmodel=mongoose.model("PDF",pdfSchema,"pdfs")
+const pdfmodel = mongoose.model("PDF", pdfSchema, "pdfs");
 
 // Multer Middleware for Handling File Uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-app.post("/upload",upload.single("pdfFile"),async (req,res)=>{
+app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
-    console.log(req.file)
-      if(!req.file)
-        return res.status(400).json({message:"no file uploaded"})
-      const base64dta=req.file.buffer.toString("base64")
-      const from=req.body.from
-      const to=req.body.to
-      
-      const newpdf=new pdfmodel({
-        filename:req.file.originalname,
-        data:base64dta,
-        from:from,
-        to:to
-      });
-      await newpdf.save();
-      res.status(200).json({success:true,to})
-  } catch (error) {
-      res.status(400).json({success:false})
-  }
-})
-app.listen(4000, () => console.log("Listening on port 4000..."));
+    console.log(req.file);
+    if (!req.file) return res.status(400).json({ message: "no file uploaded" });
+    const base64dta = req.file.buffer.toString("base64");
+    const from = req.body.from;
+    const to = req.body.to;
 
+    const newpdf = new pdfmodel({
+      filename: req.file.originalname,
+      data: base64dta,
+      from: from,
+      to: to,
+    });
+    await newpdf.save();
+    res.status(200).json({ success: true, to });
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+});
+app.listen(4000, () => console.log("Listening on port 4000..."));
 
 // INVIGILATION DUTY ALLOCATION
 
@@ -895,7 +873,10 @@ app.listen(4000, () => console.log("Listening on port 4000..."));
 app.get("/api/duty/faculty", async (req, res) => {
   try {
     // Fetch users who have "faculty" as one of their roles
-    const faculties = await user.find({ U_role: { $in: ["FC"] } }, { U_name: 1, _id: 0 });
+    const faculties = await user.find(
+      { U_role: { $in: ["FC"] } },
+      { U_name: 1, _id: 0 }
+    );
     res.json(faculties);
   } catch (error) {
     console.error("Error fetching faculties:", error);
@@ -920,8 +901,15 @@ app.post("/api/generate-invigilation", async (req, res) => {
   try {
     const { selectedFaculties, selectedRooms } = req.body;
 
-    if (!selectedFaculties || !selectedRooms || selectedFaculties.length === 0 || selectedRooms.length === 0) {
-      return res.status(400).json({ error: "Please select at least one faculty and one room" });
+    if (
+      !selectedFaculties ||
+      !selectedRooms ||
+      selectedFaculties.length === 0 ||
+      selectedRooms.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please select at least one faculty and one room" });
     }
 
     // Generate a simple text-based invigilation duty allocation
@@ -932,11 +920,16 @@ app.post("/api/generate-invigilation", async (req, res) => {
     });
 
     // Convert the allocation text to a downloadable text file
-    res.setHeader("Content-Disposition", `attachment; filename=invigilation-duty.txt`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invigilation-duty.txt`
+    );
     res.setHeader("Content-Type", "text/plain");
     res.send(allocationText);
   } catch (error) {
     console.error("Error generating invigilation duty allocation:", error);
-    res.status(500).json({ error: "Error generating invigilation duty allocation" });
+    res
+      .status(500)
+      .json({ error: "Error generating invigilation duty allocation" });
   }
 });

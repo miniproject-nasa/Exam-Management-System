@@ -2,19 +2,63 @@ document.addEventListener("DOMContentLoaded", async function () {
   const subjectList = document.querySelector(".main-content");
   const subjectForm = document.getElementById("subjectForm");
 
-  // Helper functions to open/close popups without changing the URL hash
+  // --- Tag Functionality Setup ---
+  // Global arrays for Add form tags
+  let selectedBatches = [];
+  let selectedFaculties = [];
+  // Global arrays for Update form tags
+  let updateSelectedBatches = [];
+  let updateSelectedFaculties = [];
+
+  function setupTagInput(inputElement, containerElement, itemsList) {
+    inputElement.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === ",") {
+        e.preventDefault();
+        const value = inputElement.value.trim();
+        if (value && !itemsList.includes(value)) {
+          itemsList.push(value);
+          renderTags(containerElement, itemsList);
+          inputElement.value = "";
+        }
+      }
+    });
+  }
+
+  function renderTags(container, items) {
+    container.innerHTML = "";
+    items.forEach((item, index) => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.innerHTML = `${item} <span class="delete-tag" onclick="removeTag(${index}, '${container.id}')">&times;</span>`;
+      container.appendChild(tag);
+    });
+  }
+
+  window.removeTag = function (index, containerId) {
+    if (containerId === "batch-container") {
+      selectedBatches.splice(index, 1);
+      renderTags(document.getElementById("batch-container"), selectedBatches);
+    } else if (containerId === "faculty-container") {
+      selectedFaculties.splice(index, 1);
+      renderTags(document.getElementById("faculty-container"), selectedFaculties);
+    } else if (containerId === "update-batch-container") {
+      updateSelectedBatches.splice(index, 1);
+      renderTags(document.getElementById("update-batch-container"), updateSelectedBatches);
+    } else if (containerId === "update-faculty-container") {
+      updateSelectedFaculties.splice(index, 1);
+      renderTags(document.getElementById("update-faculty-container"), updateSelectedFaculties);
+    }
+  };
+
+  // --- Popup Helper Functions ---
   function openPopup(popupId) {
     const popup = document.getElementById(popupId);
-    if (popup) {
-      popup.classList.add("active");
-    }
+    if (popup) popup.classList.add("active");
   }
 
   function closePopup(popupId) {
     const popup = document.getElementById(popupId);
-    if (popup) {
-      popup.classList.remove("active");
-    }
+    if (popup) popup.classList.remove("active");
   }
 
   // Event delegation for all close buttons (works for dynamically added popups)
@@ -22,9 +66,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (e.target.matches(".popup .close")) {
       e.preventDefault();
       const popup = e.target.closest(".popup");
-      if (popup) {
-        popup.classList.remove("active");
-      }
+      if (popup) popup.classList.remove("active");
     }
   });
 
@@ -42,12 +84,11 @@ document.addEventListener("DOMContentLoaded", async function () {
           
           <label for="update-batch">Batch</label>
           <input type="text" id="update-batch" name="update-batch" required />
-          
-          <label for="update-module">Module</label>
-          <input type="text" id="update-module" name="update-module" required />
+          <div id="update-batch-container" class="tags-container"></div>
           
           <label for="update-faculty">Subject Faculty</label>
           <input type="text" id="update-faculty" name="update-faculty" required />
+          <div id="update-faculty-container" class="tags-container"></div>
           
           <button type="submit">Update</button>
         </form>
@@ -88,11 +129,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             <li>Subject Name: ${subject.S_name}</li>
             <li>Subject Code: ${subject.S_code}</li>
             <li>Batch: ${subject.S_batch}</li>
-            <li>Module: ${subject.S_module}</li>
             <li>Faculty: ${subject.S_faculty}</li>
           </ul>
           <div class="button-container">
-            <button class="square-btn" onclick="editSubject('${subject.S_code}', '${subject.S_name}', '${subject.S_batch}', '${subject.S_module}', '${subject.S_faculty}')">
+            <button class="square-btn" onclick="editSubject('${subject.S_code}', '${subject.S_name}', '${subject.S_batch}', '${subject.S_faculty}')">
               <img class="small-button" src="images/edit.webp" alt="Edit">
             </button>
             <button class="square-btn" onclick="confirmDeleteSubject('${subject.S_code}', '${subject.S_name}')">
@@ -113,9 +153,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const formData = {
       S_name: document.getElementById("subject-name").value.trim(),
       S_code: document.getElementById("subject-code").value.trim(),
-      S_batch: document.getElementById("batch").value.trim(),
-      S_module: document.getElementById("module").value.trim(),
-      S_faculty: document.getElementById("faculty").value.trim(),
+      // Use the tag arrays instead of single text values
+      S_batch: selectedBatches,
+      S_faculty: selectedFaculties,
     };
 
     try {
@@ -128,6 +168,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (response.ok) {
         await fetchSubjects();
         subjectForm.reset();
+        // Reset tag arrays and clear tag containers
+        selectedBatches = [];
+        selectedFaculties = [];
+        renderTags(document.getElementById("batch-container"), selectedBatches);
+        renderTags(document.getElementById("faculty-container"), selectedFaculties);
         closePopup("popup-form");
       } else {
         const error = await response.json();
@@ -138,46 +183,50 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  subjectForm.addEventListener("submit", addSubject);
+
   // --- Update Subject ---
-  window.editSubject = function (code, name, batch, module, faculty) {
+  window.editSubject = function (code, name, batch, faculty) {
     document.getElementById("update-subject-code").value = code;
     document.getElementById("update-subject-name").value = name;
-    document.getElementById("update-batch").value = batch;
-    document.getElementById("update-module").value = module;
-    document.getElementById("update-faculty").value = faculty;
+    // Convert comma-separated values into arrays for tags
+    updateSelectedBatches = batch ? batch.split(",").map(item => item.trim()).filter(Boolean) : [];
+    updateSelectedFaculties = faculty ? faculty.split(",").map(item => item.trim()).filter(Boolean) : [];
+    renderTags(document.getElementById("update-batch-container"), updateSelectedBatches);
+    renderTags(document.getElementById("update-faculty-container"), updateSelectedFaculties);
+    // Clear the update input fields to allow additional entries
+    document.getElementById("update-batch").value = "";
+    document.getElementById("update-faculty").value = "";
     openPopup("update-popup");
   };
 
-  document
-    .getElementById("updateSubjectForm")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault();
-      const formData = {
-        S_code: document.getElementById("update-subject-code").value.trim(),
-        S_name: document.getElementById("update-subject-name").value.trim(),
-        S_batch: document.getElementById("update-batch").value.trim(),
-        S_module: document.getElementById("update-module").value.trim(),
-        S_faculty: document.getElementById("update-faculty").value.trim(),
-      };
+  document.getElementById("updateSubjectForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const formData = {
+      S_code: document.getElementById("update-subject-code").value.trim(),
+      S_name: document.getElementById("update-subject-name").value.trim(),
+      S_batch: updateSelectedBatches,
+      S_faculty: updateSelectedFaculties,
+    };
 
-      try {
-        const response = await fetch(`/update-subject/${formData.S_code}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (response.ok) {
-          await fetchSubjects();
-          closePopup("update-popup");
-        } else {
-          const error = await response.json();
-          alert(error.error || "Failed to update subject");
-        }
-      } catch (error) {
-        console.error("Error updating subject:", error);
-        alert("Failed to update subject. Please try again.");
+    try {
+      const response = await fetch(`/update-subject/${formData.S_code}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        await fetchSubjects();
+        closePopup("update-popup");
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to update subject");
       }
-    });
+    } catch (error) {
+      console.error("Error updating subject:", error);
+      alert("Failed to update subject. Please try again.");
+    }
+  });
 
   // --- Delete Subject ---
   window.confirmDeleteSubject = function (code, name) {
@@ -204,453 +253,315 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   };
 
-  // --- Event Listeners ---
-  subjectForm.addEventListener("submit", addSubject);
+  // --- Dropdown Functionality for Add Form Faculty ---
+  let facultyDropdown;
+  const facultyInput = document.getElementById("faculty");
 
-  // Event listener for opening add subject popup
-  document
-    .getElementById("open-add-subject")
-    .addEventListener("click", function () {
-      openPopup("popup-form");
+  async function createFacultyDropdown() {
+    if (facultyDropdown) return;
+    facultyDropdown = document.createElement("div");
+    facultyDropdown.className = "dropdown";
+    let usersList = [];
+    try {
+      const response = await fetch("/get-users");
+      usersList = await response.json();
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+    // Create a dropdown item for each user and tag on click
+    usersList.forEach(user => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.textContent = user.U_name;
+      item.onclick = function() {
+        if (!selectedFaculties.includes(user.U_name)) {
+          selectedFaculties.push(user.U_name);
+          renderTags(document.getElementById("faculty-container"), selectedFaculties);
+        }
+        facultyInput.value = "";
+        hideFacultyDropdown();
+      };
+      facultyDropdown.appendChild(item);
     });
-
-  // ==========================
-// For the Add Form Faculty
-// ==========================
-let facultyDropdown;
-const facultyInput = document.getElementById("faculty");
-
-async function createFacultyDropdown() {
-  if (facultyDropdown) return;
-  facultyDropdown = document.createElement("div");
-  facultyDropdown.className = "dropdown";
-  let usersList = [];
-  try {
-    const response = await fetch("/get-users");
-    usersList = await response.json();
-  } catch (err) {
-    console.error("Error fetching users:", err);
+    document.body.appendChild(facultyDropdown);
   }
-  // Create a dropdown item for each user
-  usersList.forEach(user => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    item.textContent = user.U_name; // Modify if needed
-    item.onclick = function() {
-      facultyInput.value = user.U_name;
-      hideFacultyDropdown();
-    };
-    facultyDropdown.appendChild(item);
-  });
-  document.body.appendChild(facultyDropdown);
-}
 
-function positionFacultyDropdown() {
-  const rect = facultyInput.getBoundingClientRect();
-  facultyDropdown.style.left = rect.left + "px";
-  facultyDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  facultyDropdown.style.width = rect.width + "px";
-}
+  function positionFacultyDropdown() {
+    const rect = facultyInput.getBoundingClientRect();
+    facultyDropdown.style.left = rect.left + "px";
+    facultyDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    facultyDropdown.style.width = rect.width + "px";
+  }
 
-function showFacultyDropdown() {
-  if (!facultyDropdown) {
-    createFacultyDropdown().then(() => {
+  function showFacultyDropdown() {
+    if (!facultyDropdown) {
+      createFacultyDropdown().then(() => {
+        positionFacultyDropdown();
+        facultyDropdown.style.display = "block";
+      });
+    } else {
       positionFacultyDropdown();
       facultyDropdown.style.display = "block";
-    });
-  } else {
-    positionFacultyDropdown();
-    facultyDropdown.style.display = "block";
+    }
   }
-}
 
-function hideFacultyDropdown() {
-  if (facultyDropdown) {
-    facultyDropdown.style.display = "none";
+  function hideFacultyDropdown() {
+    if (facultyDropdown) {
+      facultyDropdown.style.display = "none";
+    }
   }
-}
 
-// Filter dropdown items as user types
-facultyInput.addEventListener("input", function() {
-  const filter = facultyInput.value.toLowerCase();
-  if (facultyDropdown) {
-    Array.from(facultyDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
-
-facultyInput.addEventListener("focus", showFacultyDropdown);
-facultyInput.addEventListener("blur", function() {
-  // Delay hiding to allow click events to register
-  setTimeout(hideFacultyDropdown, 200);
-});
-
-
-// ==============================
-// For the Update Form Faculty
-// ==============================
-let updateFacultyDropdown;
-const updateFacultyInput = document.getElementById("update-faculty");
-
-async function createUpdateFacultyDropdown() {
-  if (updateFacultyDropdown) return;
-  updateFacultyDropdown = document.createElement("div");
-  updateFacultyDropdown.className = "dropdown";
-  let usersList = [];
-  try {
-    const response = await fetch("/get-users");
-    usersList = await response.json();
-  } catch (err) {
-    console.error("Error fetching users:", err);
-  }
-  // Create a dropdown item for each user
-  usersList.forEach(user => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    item.textContent = user.U_name;
-    item.onclick = function() {
-      updateFacultyInput.value = user.U_name;
-      hideUpdateFacultyDropdown();
-    };
-    updateFacultyDropdown.appendChild(item);
+  facultyInput.addEventListener("input", function() {
+    const filter = facultyInput.value.toLowerCase();
+    if (facultyDropdown) {
+      Array.from(facultyDropdown.children).forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
   });
-  document.body.appendChild(updateFacultyDropdown);
-}
 
-function positionUpdateFacultyDropdown() {
-  const rect = updateFacultyInput.getBoundingClientRect();
-  updateFacultyDropdown.style.left = rect.left + "px";
-  updateFacultyDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  updateFacultyDropdown.style.width = rect.width + "px";
-}
+  facultyInput.addEventListener("focus", showFacultyDropdown);
+  facultyInput.addEventListener("blur", function() {
+    setTimeout(hideFacultyDropdown, 200);
+  });
 
-function showUpdateFacultyDropdown() {
-  if (!updateFacultyDropdown) {
-    createUpdateFacultyDropdown().then(() => {
+  // --- Dropdown Functionality for Update Form Faculty ---
+  let updateFacultyDropdown;
+  const updateFacultyInput = document.getElementById("update-faculty");
+
+  async function createUpdateFacultyDropdown() {
+    if (updateFacultyDropdown) return;
+    updateFacultyDropdown = document.createElement("div");
+    updateFacultyDropdown.className = "dropdown";
+    let usersList = [];
+    try {
+      const response = await fetch("/get-users");
+      usersList = await response.json();
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+    usersList.forEach(user => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.textContent = user.U_name;
+      item.onclick = function() {
+        if (!updateSelectedFaculties.includes(user.U_name)) {
+          updateSelectedFaculties.push(user.U_name);
+          renderTags(document.getElementById("update-faculty-container"), updateSelectedFaculties);
+        }
+        updateFacultyInput.value = "";
+        hideUpdateFacultyDropdown();
+      };
+      updateFacultyDropdown.appendChild(item);
+    });
+    document.body.appendChild(updateFacultyDropdown);
+  }
+
+  function positionUpdateFacultyDropdown() {
+    const rect = updateFacultyInput.getBoundingClientRect();
+    updateFacultyDropdown.style.left = rect.left + "px";
+    updateFacultyDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    updateFacultyDropdown.style.width = rect.width + "px";
+  }
+
+  function showUpdateFacultyDropdown() {
+    if (!updateFacultyDropdown) {
+      createUpdateFacultyDropdown().then(() => {
+        positionUpdateFacultyDropdown();
+        updateFacultyDropdown.style.display = "block";
+      });
+    } else {
       positionUpdateFacultyDropdown();
       updateFacultyDropdown.style.display = "block";
-    });
-  } else {
-    positionUpdateFacultyDropdown();
-    updateFacultyDropdown.style.display = "block";
+    }
   }
-}
 
-function hideUpdateFacultyDropdown() {
-  if (updateFacultyDropdown) {
-    updateFacultyDropdown.style.display = "none";
+  function hideUpdateFacultyDropdown() {
+    if (updateFacultyDropdown) {
+      updateFacultyDropdown.style.display = "none";
+    }
   }
-}
 
-// Filter dropdown items for update form
-updateFacultyInput.addEventListener("input", function() {
-  const filter = updateFacultyInput.value.toLowerCase();
-  if (updateFacultyDropdown) {
-    Array.from(updateFacultyDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
-
-updateFacultyInput.addEventListener("focus", showUpdateFacultyDropdown);
-updateFacultyInput.addEventListener("blur", function() {
-  setTimeout(hideUpdateFacultyDropdown, 200);
-});
-
-const moduleInput = document.getElementById("module");
-let moduleDropdown;
-
-async function createModuleDropdown() {
-  if (moduleDropdown) return;
-  moduleDropdown = document.createElement("div");
-  moduleDropdown.className = "dropdown";
-  let modulesList = [];
-  try {
-    const response = await fetch("/api/modules"); // Adjust endpoint if needed
-    modulesList = await response.json();
-  } catch (err) {
-    console.error("Error fetching modules:", err);
-  }
-  // Create a dropdown item for each module
-  modulesList.forEach(module => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    // Display the module name; adjust if you want additional info
-    item.textContent = module.moduleName;
-    item.onclick = function() {
-      moduleInput.value = module.moduleName;
-      hideModuleDropdown();
-    };
-    moduleDropdown.appendChild(item);
+  updateFacultyInput.addEventListener("input", function() {
+    const filter = updateFacultyInput.value.toLowerCase();
+    if (updateFacultyDropdown) {
+      Array.from(updateFacultyDropdown.children).forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
   });
-  document.body.appendChild(moduleDropdown);
-}
 
-function positionModuleDropdown() {
-  const rect = moduleInput.getBoundingClientRect();
-  moduleDropdown.style.left = rect.left + "px";
-  moduleDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  moduleDropdown.style.width = rect.width + "px";
-}
-
-function showModuleDropdown() {
-  if (!moduleDropdown) {
-    createModuleDropdown().then(() => {
-      positionModuleDropdown();
-      moduleDropdown.style.display = "block";
-    });
-  } else {
-    positionModuleDropdown();
-    moduleDropdown.style.display = "block";
-  }
-}
-
-function hideModuleDropdown() {
-  if (moduleDropdown) {
-    moduleDropdown.style.display = "none";
-  }
-}
-
-// Filter dropdown items as user types
-moduleInput.addEventListener("input", function() {
-  const filter = moduleInput.value.toLowerCase();
-  if (moduleDropdown) {
-    Array.from(moduleDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
-
-moduleInput.addEventListener("focus", showModuleDropdown);
-moduleInput.addEventListener("blur", function() {
-  // Use a short delay to allow click events to register before hiding
-  setTimeout(hideModuleDropdown, 200);
-});
-
-const updateModuleInput = document.getElementById("update-module");
-let updateModuleDropdown;
-
-async function createUpdateModuleDropdown() {
-  if (updateModuleDropdown) return;
-  updateModuleDropdown = document.createElement("div");
-  updateModuleDropdown.className = "dropdown";
-  let modulesList = [];
-  try {
-    const response = await fetch("/api/modules"); // Adjust endpoint if needed
-    modulesList = await response.json();
-  } catch (err) {
-    console.error("Error fetching modules:", err);
-  }
-  // Create a dropdown item for each module
-  modulesList.forEach(module => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    // Display the module name; adjust if you want more details
-    item.textContent = module.moduleName;
-    item.onclick = function() {
-      updateModuleInput.value = module.moduleName;
-      hideUpdateModuleDropdown();
-    };
-    updateModuleDropdown.appendChild(item);
+  updateFacultyInput.addEventListener("focus", showUpdateFacultyDropdown);
+  updateFacultyInput.addEventListener("blur", function() {
+    setTimeout(hideUpdateFacultyDropdown, 200);
   });
-  document.body.appendChild(updateModuleDropdown);
-}
 
-function positionUpdateModuleDropdown() {
-  const rect = updateModuleInput.getBoundingClientRect();
-  updateModuleDropdown.style.left = rect.left + "px";
-  updateModuleDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  updateModuleDropdown.style.width = rect.width + "px";
-}
-
-function showUpdateModuleDropdown() {
-  if (!updateModuleDropdown) {
-    createUpdateModuleDropdown().then(() => {
-      positionUpdateModuleDropdown();
-      updateModuleDropdown.style.display = "block";
+  // --- Dropdown Functionality for Batches in Add Form ---
+  const batchInput = document.getElementById("batch");
+  let batchDropdown;
+  async function createBatchDropdown() {
+    if (batchDropdown) return;
+    batchDropdown = document.createElement("div");
+    batchDropdown.className = "dropdown";
+    let batchesList = [];
+    try {
+      const response = await fetch("/get-batches");
+      batchesList = await response.json();
+    } catch (err) {
+      console.error("Error fetching batches:", err);
+    }
+    batchesList.forEach(batch => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.textContent = batch.B_name;
+      item.onclick = function() {
+        if (!selectedBatches.includes(batch.B_name)) {
+          selectedBatches.push(batch.B_name);
+          renderTags(document.getElementById("batch-container"), selectedBatches);
+        }
+        batchInput.value = "";
+        hideBatchDropdown();
+      };
+      batchDropdown.appendChild(item);
     });
-  } else {
-    positionUpdateModuleDropdown();
-    updateModuleDropdown.style.display = "block";
+    document.body.appendChild(batchDropdown);
   }
-}
 
-function hideUpdateModuleDropdown() {
-  if (updateModuleDropdown) {
-    updateModuleDropdown.style.display = "none";
+  function positionBatchDropdown() {
+    const rect = batchInput.getBoundingClientRect();
+    batchDropdown.style.left = rect.left + "px";
+    batchDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    batchDropdown.style.width = rect.width + "px";
   }
-}
 
-// Filter dropdown items as user types
-updateModuleInput.addEventListener("input", function() {
-  const filter = updateModuleInput.value.toLowerCase();
-  if (updateModuleDropdown) {
-    Array.from(updateModuleDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
-
-updateModuleInput.addEventListener("focus", showUpdateModuleDropdown);
-updateModuleInput.addEventListener("blur", function() {
-  // Delay hiding to allow click events to register before hiding the dropdown
-  setTimeout(hideUpdateModuleDropdown, 200);
-});
-
-// ==========================
-// Batches Dropdown for Add Form
-// ==========================
-const batchInput = document.getElementById("batch");
-let batchDropdown;
-
-async function createBatchDropdown() {
-  if (batchDropdown) return;
-  batchDropdown = document.createElement("div");
-  batchDropdown.className = "dropdown";
-  let batchesList = [];
-  try {
-    const response = await fetch("/get-batches"); // Using your endpoint
-    batchesList = await response.json();
-  } catch (err) {
-    console.error("Error fetching batches:", err);
-  }
-  // Create a dropdown item for each batch using B_name
-  batchesList.forEach(batch => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    item.textContent = batch.B_name;
-    item.onclick = function() {
-      batchInput.value = batch.B_name;
-      hideBatchDropdown();
-    };
-    batchDropdown.appendChild(item);
-  });
-  document.body.appendChild(batchDropdown);
-}
-
-function positionBatchDropdown() {
-  const rect = batchInput.getBoundingClientRect();
-  batchDropdown.style.left = rect.left + "px";
-  batchDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  batchDropdown.style.width = rect.width + "px";
-}
-
-function showBatchDropdown() {
-  if (!batchDropdown) {
-    createBatchDropdown().then(() => {
+  function showBatchDropdown() {
+    if (!batchDropdown) {
+      createBatchDropdown().then(() => {
+        positionBatchDropdown();
+        batchDropdown.style.display = "block";
+      });
+    } else {
       positionBatchDropdown();
       batchDropdown.style.display = "block";
-    });
-  } else {
-    positionBatchDropdown();
-    batchDropdown.style.display = "block";
+    }
   }
-}
 
-function hideBatchDropdown() {
-  if (batchDropdown) {
-    batchDropdown.style.display = "none";
+  function hideBatchDropdown() {
+    if (batchDropdown) {
+      batchDropdown.style.display = "none";
+    }
   }
-}
 
-// Filter dropdown items as user types
-batchInput.addEventListener("input", function() {
-  const filter = batchInput.value.toLowerCase();
-  if (batchDropdown) {
-    Array.from(batchDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
-
-batchInput.addEventListener("focus", showBatchDropdown);
-batchInput.addEventListener("blur", function() {
-  setTimeout(hideBatchDropdown, 200);
-});
-
-// ==========================
-// Batches Dropdown for Update Form
-// ==========================
-const updateBatchInput = document.getElementById("update-batch");
-let updateBatchDropdown;
-
-async function createUpdateBatchDropdown() {
-  if (updateBatchDropdown) return;
-  updateBatchDropdown = document.createElement("div");
-  updateBatchDropdown.className = "dropdown";
-  let batchesList = [];
-  try {
-    const response = await fetch("/get-batches");
-    batchesList = await response.json();
-  } catch (err) {
-    console.error("Error fetching batches:", err);
-  }
-  // Create a dropdown item for each batch using B_name
-  batchesList.forEach(batch => {
-    const item = document.createElement("div");
-    item.className = "dropdown-item";
-    item.textContent = batch.B_name;
-    item.onclick = function() {
-      updateBatchInput.value = batch.B_name;
-      hideUpdateBatchDropdown();
-    };
-    updateBatchDropdown.appendChild(item);
+  batchInput.addEventListener("input", function() {
+    const filter = batchInput.value.toLowerCase();
+    if (batchDropdown) {
+      Array.from(batchDropdown.children).forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
   });
-  document.body.appendChild(updateBatchDropdown);
-}
 
-function positionUpdateBatchDropdown() {
-  const rect = updateBatchInput.getBoundingClientRect();
-  updateBatchDropdown.style.left = rect.left + "px";
-  updateBatchDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-  updateBatchDropdown.style.width = rect.width + "px";
-}
+  batchInput.addEventListener("focus", showBatchDropdown);
+  batchInput.addEventListener("blur", function() {
+    setTimeout(hideBatchDropdown, 200);
+  });
 
-function showUpdateBatchDropdown() {
-  if (!updateBatchDropdown) {
-    createUpdateBatchDropdown().then(() => {
+  // --- Dropdown Functionality for Batches in Update Form ---
+  const updateBatchInput = document.getElementById("update-batch");
+  let updateBatchDropdown;
+  async function createUpdateBatchDropdown() {
+    if (updateBatchDropdown) return;
+    updateBatchDropdown = document.createElement("div");
+    updateBatchDropdown.className = "dropdown";
+    let batchesList = [];
+    try {
+      const response = await fetch("/get-batches");
+      batchesList = await response.json();
+    } catch (err) {
+      console.error("Error fetching batches:", err);
+    }
+    batchesList.forEach(batch => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.textContent = batch.B_name;
+      item.onclick = function() {
+        if (!updateSelectedBatches.includes(batch.B_name)) {
+          updateSelectedBatches.push(batch.B_name);
+          renderTags(document.getElementById("update-batch-container"), updateSelectedBatches);
+        }
+        updateBatchInput.value = "";
+        hideUpdateBatchDropdown();
+      };
+      updateBatchDropdown.appendChild(item);
+    });
+    document.body.appendChild(updateBatchDropdown);
+  }
+
+  function positionUpdateBatchDropdown() {
+    const rect = updateBatchInput.getBoundingClientRect();
+    updateBatchDropdown.style.left = rect.left + "px";
+    updateBatchDropdown.style.top = (rect.bottom + window.scrollY) + "px";
+    updateBatchDropdown.style.width = rect.width + "px";
+  }
+
+  function showUpdateBatchDropdown() {
+    if (!updateBatchDropdown) {
+      createUpdateBatchDropdown().then(() => {
+        positionUpdateBatchDropdown();
+        updateBatchDropdown.style.display = "block";
+      });
+    } else {
       positionUpdateBatchDropdown();
       updateBatchDropdown.style.display = "block";
-    });
-  } else {
-    positionUpdateBatchDropdown();
-    updateBatchDropdown.style.display = "block";
+    }
   }
-}
 
-function hideUpdateBatchDropdown() {
-  if (updateBatchDropdown) {
-    updateBatchDropdown.style.display = "none";
+  function hideUpdateBatchDropdown() {
+    if (updateBatchDropdown) {
+      updateBatchDropdown.style.display = "none";
+    }
   }
-}
 
-// Filter dropdown items for update form as user types
-updateBatchInput.addEventListener("input", function() {
-  const filter = updateBatchInput.value.toLowerCase();
-  if (updateBatchDropdown) {
-    Array.from(updateBatchDropdown.children).forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(filter)
-        ? "block"
-        : "none";
-    });
-  }
-});
+  updateBatchInput.addEventListener("input", function() {
+    const filter = updateBatchInput.value.toLowerCase();
+    if (updateBatchDropdown) {
+      Array.from(updateBatchDropdown.children).forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(filter)
+          ? "block"
+          : "none";
+      });
+    }
+  });
 
-updateBatchInput.addEventListener("focus", showUpdateBatchDropdown);
-updateBatchInput.addEventListener("blur", function() {
-  setTimeout(hideUpdateBatchDropdown, 200);
-});
+  updateBatchInput.addEventListener("focus", showUpdateBatchDropdown);
+  updateBatchInput.addEventListener("blur", function() {
+    setTimeout(hideUpdateBatchDropdown, 200);
+  });
 
+  // --- Attach Tag Functionality to Input Fields ---
+  // For Add form:
+  const batchTagContainer = document.getElementById("batch-container");
+  const facultyTagContainer = document.getElementById("faculty-container");
+  setupTagInput(batchInput, batchTagContainer, selectedBatches);
+  setupTagInput(facultyInput, facultyTagContainer, selectedFaculties);
+
+  // For Update form:
+  const updateBatchTagContainer = document.getElementById("update-batch-container");
+  const updateFacultyTagContainer = document.getElementById("update-faculty-container");
+  setupTagInput(updateBatchInput, updateBatchTagContainer, updateSelectedBatches);
+  setupTagInput(updateFacultyInput, updateFacultyTagContainer, updateSelectedFaculties);
+
+  // --- Event Listener for Opening Add Subject Popup ---
+  document.getElementById("open-add-subject").addEventListener("click", function () {
+    openPopup("popup-form");
+  });
+
+  // ----- Initial Load -----
   fetchSubjects();
 });
