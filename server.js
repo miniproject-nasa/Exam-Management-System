@@ -1193,6 +1193,10 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
 });
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
+
+const path = require('path');
+const { generateInvigilationPDF } = require(path.join(__dirname, 'pdfGenerator.js'));
+
 app.get("/api/duty/faculty", async (req, res) => {
   try {
     const faculties = await user.find(
@@ -1218,33 +1222,25 @@ app.get("/api/duty/rooms", async (req, res) => {
 
 app.post("/api/generate-invigilation", async (req, res) => {
   try {
-    const { selectedFaculties, selectedRooms } = req.body;
-    if (
-      !selectedFaculties ||
-      !selectedRooms ||
-      selectedFaculties.length === 0 ||
-      selectedRooms.length === 0
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Please select at least one faculty and one room" });
+    const { selectedFaculties, selectedRooms, dutyDate } = req.body;
+
+    if (!selectedFaculties || !selectedRooms || selectedFaculties.length === 0 || selectedRooms.length === 0) {
+      return res.status(400).json({ error: "Please select at least one faculty and one room" });
     }
-    let allocationText = "Invigilation Duty Allocation:\n";
-    selectedFaculties.forEach((faculty, index) => {
-      const roomCode = selectedRooms[index % selectedRooms.length];
-      allocationText += `${faculty} → ${roomCode}\n`;
-    });
+
+    // Generate PDF
+    const pdfBytes = await generateInvigilationPDF(selectedFaculties, selectedRooms, dutyDate);
+
+    // Send the PDF as a response
+    res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=invigilation-duty.txt`
+      'Content-Disposition',
+      `attachment; filename=invigilation-duty-${dutyDate}.pdf`
     );
-    res.setHeader("Content-Type", "text/plain");
-    res.send(allocationText);
+    res.send(Buffer.from(pdfBytes));
   } catch (error) {
     console.error("Error generating invigilation duty allocation:", error);
-    res
-      .status(500)
-      .json({ error: "Error generating invigilation duty allocation" });
+    res.status(500).json({ error: "Error generating invigilation duty allocation" });
   }
 });
 
