@@ -1,73 +1,72 @@
 <!DOCTYPE html>
-<html lang="eng">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Internal Exam Management">
-    <title>Seating</title>
-    <link rel="icon" href="images/icon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="seating.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Internal Exam Management">
+  <title>Seating</title>
+  <link rel="icon" href="images/icon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="seating.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-
 <body>
-    <header>
-        <img src="images/logo.webp" alt="logo">
-            <div class="title-head">
-                <h2>Internal Exam</h2>
-                <p>Management</p>
-            </div>
-
-        <div class="menu-container">
-            <a href="home.html"><p class="menu">Home</p></a>
+  <header>
+    <img src="images/logo.webp" alt="logo">
+    <div class="title-head">
+      <h2>Internal Exam</h2>
+      <p>Management</p>
+    </div>
+    <div class="menu-container">
+      <a href="home.html"><p class="menu">Home</p></a>
+    </div>
+  </header>
+  <br>
+  <section class="main">
+    <form>
+      <h2 class="upload-title">Seating</h2>
+      <div class="form-group">
+        <label for="batches">Batches</label>
+        <div class="dropdown">
+          <select id="batches" name="batches">
+            <option value="" disabled selected>Select an option</option>
+          </select>
         </div>
-    </header>
-    <br>
-    <section class="main">
-        <form>
-            <h2 class="upload-title">Seating</h2>
-            <div class="form-group">
-                <label for="exam-name">Examination Name</label>
-                <input type="text" id="exam-name" name="exam-name"><br>
-            </div>            
-            <div class="form-group">
-                <label for="batches">Batches</label>
-                <div class="dropdown">
-                    <select id="batches" name="batches">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
-                </div>
-            </div>
-            <button class="add-button" type="button" onclick="addToDisplayBox('batches', 'batch-box')">Add</button>   
-            <div class="form-group">
-                <div class="display-box" id="batch-box"></div>
-            </div>
-            <div class="form-group">
-                <label for="rooms">Available Rooms</label>
-                <div class="dropdown">
-                    <select id="rooms" name="rooms">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
-                </div>
-            </div>
-            <button class="add-button" type="button" onclick="addToDisplayBox('rooms', 'room-box')">Add</button>
-            <div class="form-group">
-                <div class="display-box" id="room-box"></div>
-            </div>            
-            <div class="form-group">
-                <label for="duty-date">Select Date</label>
-                <input type="date" id="duty-date" name="duty-date">
-            </div>    
-            <div class="flex-container">
-                <button type="submit">Generate</button>
-            </div>
-            <br><br>
-        </form>
-    </section>
-    <br>
-    <footer>
-        <p class="footer-style">&copy; 2025, DPCSE</p>
-    </footer>
-
-    <script src="seating.js"></script>
+      </div>
+      <button class="add-button" type="button" onclick="addToDisplayBox('batches', 'batch-box')">Add</button>
+      <div class="form-group">
+        <div class="display-box" id="batch-box"></div>
+      </div>
+      <div class="form-group">
+        <label for="rooms">Available Rooms</label>
+        <div class="dropdown">
+          <select id="rooms" name="rooms">
+            <option value="" disabled selected>Select an option</option>
+          </select>
+        </div>
+      </div>
+      <button class="add-button" type="button" onclick="addToDisplayBox('rooms', 'room-box')">Add</button>
+      <div class="form-group">
+        <div class="display-box" id="room-box"></div>
+      </div>
+      <!-- New input for exam name -->
+      <div class="form-group">
+        <label for="exam-name">Exam Name</label>
+        <input type="text" id="exam-name" name="exam-name" placeholder="Enter Exam Name">
+      </div>
+      <div class="form-group">
+        <label for="duty-date">Select Exam Date</label>
+        <input type="date" id="duty-date" name="duty-date">
+      </div>
+      <div class="flex-container">
+        <button type="submit">Generate</button>
+      </div>
+      <br><br>
+    </form>
+  </section>
+  <br>
+  <footer>
+    <p class="footer-style">&copy; 2025, DPCSE</p>
+  </footer>
+  <script src="seating.js"></script>
 </body>
+</html>
