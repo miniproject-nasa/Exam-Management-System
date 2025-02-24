@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Internal Exam Management">
-    <title>Scrutiny Allocation</title>
+    <title>Scrutiny</title>
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
     <link rel="stylesheet" href="scrutiny.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -23,68 +23,43 @@
         </div>
     </header>
     <br>
-    <section class="main">
-        <form>
-            <h2 class="upload-title">Scrutiny</h2>
-
-            <div class="form-group">
-                <label for="mode">Module</label>
-                <div class="dropdown">
-                    <select id="module" name="module">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
+    <div class="main-content">
+        <section class="content-section">
+            <div class="allocated-container">
+                <img src="images/allocated.webp" alt="Allocated" class="allocated-image">
+            </div>
+        
+            <ul class="information-type">
+                <li><span class="highlight-text">Exam Coordinator, 11:54 PM, June 10</span></li>
+                <li>S2 & S3 examinations will commence on July 20, 2025. The timetable is shared below.</li>
+            </ul>
+        
+            <div class="pdf-container">
+                <div class="pdf-box">
+                    <p class="pdf-box-content">Time Table S2.pdf</p>
+                </div>
+                <div class="pdf-box">
+                    <p class="pdf-box-content">Time Table S4.pdf</p>
+                </div>
+                <div class="pdf-box">
+                    <p class="pdf-box-content">Time Table S6.pdf</p>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label for="subject">Subject</label>
-                <div class="dropdown">
-                    <select id="subject" name="subject">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="batch">Faculty</label>
-                <div class="dropdown">
-                    <select id="faculty" name="faculty">
-                        <option value="" disabled selected>Select an option</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="textmessage">Text Message</label>
-                <input type="text" id="textmessage" name="textmessage"><br><br>
-            </div>
-
-            <div class="flex-container">
-                <div class="content-section">
-                    <p class="information-type">
-                        Select your files
-                    </p>
-                </div>
-                <div class="pdf-container">
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Scrutiny.pdf</p>
-                    </div>
-                    <div class="pdf-box">
-                        <div class="pdf-box-small">
-                            <p class="info-new-type">PDF</p>
-                        </div>
-                        <p class="pdf-box-content">OS Trial.pdf</p>
+        
+            <div class="bottom-right-container">
+                <div class="form-group">
+                    <div class="dropdown">
+                        <select id="faculties" name="faculties">
+                            <option value="" disabled selected>Select an option</option>
+                        </select>
                     </div>
                 </div>
-                <button type="submit">Send</button>
+                <button class="send-button">Allocate</button>
             </div>
-            <br><br><br>         
-        </form>
-    </section>
-    <br>
+        </section>        
+    </div>    
+    
+    <br><br><br>
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>

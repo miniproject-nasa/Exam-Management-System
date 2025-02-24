@@ -64,191 +64,12 @@ p {
     margin: 0;
 }
 
-.main {
-    flex: 1;
-}
-
-form {
-    margin: 20px auto;
-    padding: 50px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 1px 15px rgba(0,0,0,0.05);
-    background: white;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.upload-title {
-    text-align: center;
-    color: rgba(15, 98, 254, 1);
-    font-size: 22px;
-    margin-bottom: 40px;
-    margin-top: -10px;
-}
-
-.form-group {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 30px;
-}
-
-.form-group label {
-    margin-bottom: 5px;
-    font-size: 15px;
-    font-weight: 500;
-    color: rgba(112, 112, 112, 1);
-}
-
-select {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background-color: white;
-    color: rgba(112, 112, 112, 1);
-    cursor: pointer;
-    appearance: none;
-}
-
-select option[disabled] {
-    display: none;
-}
-
-form button {
-    display: block;
-    width: 100%;
-    background: rgba(15, 98, 254, 1);
-    color: white;
-    margin-top: 10px;
-    border: none;
-    padding: 16px 30px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 20px;
-    margin-bottom: -50px;
-}
-
-form button:hover {
-    background: rgb(1, 83, 235);
-    transform: scale(1.01);
-}
-
-.content-section {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    height: 40px;
-    margin: 0 auto;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background-color: white;
-    padding: 15px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.information-type {
-    cursor: pointer;
-    text-align: center;
-    font-size: 11px;
-    color: rgb(1, 83, 235);
-    letter-spacing: .6px;
-    line-height: 1.6;
-    font-weight: 550;
-}
-
-.information-type:hover {
-    transform: scale(1.01);
-}
-
-.flex-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-}
-
-.pdf-container {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.pdf-box {
-    background: #ffffff;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid rgb(208, 207, 207);
-    width: fit-content;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    gap: 7px;
-    position: relative;
-    align-items: center;
-    padding-left: 35px;
-}
-
-.pdf-box-small {
-    background: rgb(1, 83, 235);
-    height: 100%;
-    border-radius: 4.2px;
-    width: auto;
-    min-width: 30px;
-    padding: 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-
-.pdf-box-content {
-    margin-right: 25px;
-    white-space: nowrap;
-    font-size: 11px;
-    color: rgba(112, 112, 112, 1);
-    letter-spacing: .6px;
-    line-height: 1.6;
-}
-
-.pdf-box:hover {
-    transform: scale(1.01);
-}
-
-.info-new-type {
-    font-size: 10px;
-    color: rgb(255, 255, 255);
-    letter-spacing: .6px;
-    line-height: 1.6;
-    white-space: nowrap;
-}
-
 .menu-container {
     position: absolute;
     top: 38px;
     right: 30px;
     display: flex;
     gap: 40px;
-}
-
-.dropdown {
-    display: flex;
-    justify-content: center;
-    width: 100%
 }
 
 .menu {
@@ -262,24 +83,149 @@ form button:hover {
     transform: scale(1.05);
 }
 
-#textmessage {
-    width: 100%;
-    max-width: 500px;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background-color: white;
-    color: rgba(112, 112, 112, 1);
-    box-sizing: border-box;
-    display: block;
-    margin-bottom: -40px;
+.main-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }
-input {
+
+.content-section {
+    position: relative;
+    width: 90%;
+    margin: 0 auto;
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.1);
+}
+
+.allocated-container {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+}
+
+.allocated-image {
+    width: 40px;
+    height: auto;
+}
+
+.bottom-right-container {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.pdf-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.pdf-box {
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgb(208, 207, 207);
+    width: 150px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.pdf-box-content {
+    white-space: nowrap;
+    font-size: 11px;
+    color: rgba(112, 112, 112, 1);
+    letter-spacing: .6px;
+    line-height: 1.6;
+    text-align: center;
+    display: block;
+    width: 100%;
+}
+
+.pdf-box:hover {
+    transform: scale(1.01);
+}
+
+.information-type {
+    font-size: 12px;
+    color: rgba(112, 112, 112, 1);
+    letter-spacing: .6px;
+    line-height: 1.6;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-new-type {
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    letter-spacing: .6px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.highlight-text {
+    font-size: 10px;
+    color: rgb(141, 141, 141);
+}
+
+.form-group {
+    margin: 0;
+    padding: 10px;
+    width: auto;
+    max-width: 260px;
+    box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.dropdown select {
+    padding: 8px;
+    font-size: 13px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    color: rgba(112, 112, 112, 1);
+    appearance: none;
+}
+
+select option[disabled] {
     display: none;
-    color: rgb(255, 15, 15);
-    background-color: white;
+}
+
+.send-button {
+    background: rgba(15, 98, 254, 1);
+    color: white;
     border: none;
+    padding: 8px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.send-button:hover {
+    transform: scale(1.01);
+}
+
+form input[type="text"]:focus,
+form button:focus {
+    outline: none;
+    border: 1px solid rgba(15, 98, 254, 1);
 }
 
 @media only screen and (max-width: 650px) {
@@ -310,89 +256,12 @@ input {
         font-size: 16px;
     }
 
-    form button {
-        padding: 8px 15px;
-        font-size: 12px;
-    }
-
-    form input[type="text"] {
-        padding: 4px;
-        font-size: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 10px;
-        margin-top: 10px;
-    }
-
-    .form-group label {
-        margin-top: -5px;
-        margin-bottom: 2px;
-        font-size: 9px;
-    }
-
-    .upload-title {
-        font-size: 15px;
-        margin-bottom: 25px;
-        margin-top: 10px;
-    }
-
     p {
         font-size: 11px;
     }
     
     .footer-style {
         font-size: 7px;
-    }
-
-    .content-section {
-        height: 10px;
-    }
-    
-    .information-type {
-        font-size: 7.5px;
-        font-weight: 550;
-    }
-    
-    .flex-container {
-        gap: 10px;
-        width: 100%;
-        margin-top: 15px;
-    }
-    
-    .pdf-container {
-        gap: 10px;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .pdf-box {
-        padding: 10px;
-        border-radius: 5px;
-        gap: 7px;
-        padding-left: 35px;
-    }
-    
-    .pdf-box-small {
-        height: 100%;
-        border-radius: 4.2px;
-        min-width: 30px;
-        padding: 0 10px;
-    }
-    
-    .pdf-box-content {
-        margin-left: 25px;
-        font-size: 7.5px;
-    }
-    
-    .info-new-type {
-        font-size: 7px;
-    }
-
-    select {
-        padding: 12px;
-        font-size: 9.5px;
-        border-radius: 5px;
     }
 
     .menu {
@@ -406,8 +275,32 @@ input {
         gap: 15px;
     }
 
-    #textmessage {
+    .highlight-text {
+        font-size: 6.5px;
+    }
+    
+    .main-content {
+        gap: 7px;
+    }
+    
+    .content-section {
+        margin-top: -5px;
+        width: 85%;
+        padding: 7.5px;
+        border-radius: 2px;
+    }
+    
+    .pdf-container {
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+    .pdf-box {
+        padding: 5px;
+        border-radius: 2px;
+    }
+    
+    .information-type {
         font-size: 9.5px;
-        margin-bottom: -40px;
     }
 }
