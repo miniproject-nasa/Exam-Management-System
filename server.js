@@ -308,9 +308,10 @@ app.post("/login", async (req, res) => {
     if (userfinal) {
       if (userfinal.U_password === password) {
         req.session.user = {
-          id: userfinal._id,
+          id: userfinal.U_id,
           username: userfinal.U_name,
           role: userfinal.U_role,
+          pass:userfinal.U_password,
         };
         console.log("Login Successful");
         res.status(200).json({
@@ -337,6 +338,25 @@ app.get("/logout", (req, res) => {
     res.json({ success: true, message: "Logged out successfully" });
   });
 });
+
+// -------------------CHANGE PASSWOD--------------
+app.put("/update-password",async (req,res)=>{
+  const {id,password}=req.body
+  console.log(req.body)
+  try {
+    const olduser=await user.findOneAndUpdate(
+      {U_id:id},
+      {U_password:password},
+      {new:true}
+    );
+  } catch (error) {
+    console.log(error);
+    
+  }
+  if(!user)
+    return res.status(400).json({success:false,message:"user not found"});
+  return res.status(200).json({success:true,message:"updated"});
+})
 
 // ------------------- MODULE MANAGEMENT -------------------
 const moduleSchema = new mongoose.Schema({
@@ -1064,6 +1084,51 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   }
 });
 
+
+// ------------------FETCHING FACULTY----------------------
+
+app.get("/api/notify/faculty", async (req, res) => {
+  try {
+    // Fetch users who have "faculty" as one of their roles
+    const faculties = await user.find(
+      { U_role: { $in: ["FC"] } },
+      { U_name: 1, _id: 0 }
+    );
+    res.json(faculties);
+  } catch (error) {
+    console.error("Error fetching faculties:", error);
+    res.status(500).json({ error: "Error fetching faculties" });
+  }
+});
+
+
+
+// -------------------DISPLAY PDF-------------------------
+
+app.get("/get-pdfs/:to",async(req,res)=>{
+  try{
+      const {to}=req.params;
+
+      const pdfdoc=await pdfmodel.find({to});
+
+      if(!pdfdoc.length)
+        return res.status(400).json({message:"no inbox found"});
+
+      const responcepdf=pdfdoc.map((doc)=>({
+
+        filename:doc.filename,
+        from:doc.from,
+        to:doc.to,
+        data:`data:application/pdf;base64,${doc.data}`,
+      }));
+      res.json(responcepdf)
+  }
+  catch(error){
+    console.log(error);
+    res.status(400).json({message:"error in retriving pdfs"})
+  }
+})
+
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
 const path = require('path');
@@ -1115,5 +1180,7 @@ app.post("/api/generate-invigilation", async (req, res) => {
     res.status(500).json({ error: "Error generating invigilation duty allocation" });
   }
 });
+
+
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
