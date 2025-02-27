@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded",async function () {
         }
     }
     await checkAuthStatus();
+    console.log(data);
+    
     console.log(data.user.id);
     
     document.querySelector("#changePassFrm").addEventListener("submit",async (event)=>{
