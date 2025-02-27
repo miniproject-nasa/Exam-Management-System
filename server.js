@@ -500,7 +500,7 @@ app.put("/update-batch/:batch_name", async (req, res) => {
       .json({ error: "Failed to update batch", details: error.message });
   }
 });
-// ------------------- SEATING ARRANGEMENT -------------------
+ // ------------------- SEATING ARRANGEMENT -------------------
 // Use pdf-lib instead of pdfkit
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
@@ -531,6 +531,51 @@ function shuffleArray(array) {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+}
+// -------------- FUNCTION: Build Front Page Rows --------------
+// (Your earlier provided function, integrated here.)
+function buildFrontPageRows(summaryObject) {
+  const tableData = [];
+  let serialNo = 1;
+  const roomCodes = Object.keys(summaryObject);
+
+  // Collect all batch names from summary data
+  const batches = new Set();
+  roomCodes.forEach(room => {
+    Object.keys(summaryObject[room]).forEach(batch => {
+      batches.add(batch);
+    });
+  });
+
+  // Process each batch in the order they appear (or you can sort them as needed)
+  batches.forEach(batchName => {
+    let firstRow = true;
+    roomCodes.forEach(roomCode => {
+      if (summaryObject[roomCode][batchName]) {
+        if (firstRow) {
+          tableData.push({
+            slNo: serialNo,
+            className: batchName,
+            rollRange: summaryObject[roomCode][batchName],
+            room: roomCode,
+          });
+          firstRow = false;
+        } else {
+          tableData.push({
+            slNo: "",
+            className: "",
+            rollRange: summaryObject[roomCode][batchName],
+            room: roomCode,
+          });
+        }
+      }
+    });
+    if (!firstRow) {
+      serialNo++;
+    }
+  });
+
+  return tableData;
 }
 
 // -------------- HELPER: Split an Array into N Contiguous Chunks --------------
@@ -569,6 +614,7 @@ function formatRollRange(rolls) {
     .map(seq => (seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`))
     .join(" || ");
 }
+
 
 // -------------- ADJUSTED SEATING-ASSIGNMENT LOGIC --------------
 function generateSeatingArrangement(batches, rooms) {
@@ -632,40 +678,26 @@ function generateSeatingArrangement(batches, rooms) {
     let chunkCopies = blocks.map(obj => ({
       batch: obj.batch,
       rolls: [...obj.block],
-      index: 0
+      index: 0,
     }));
     let seats = [];
     let totalSeatsAssigned = 0;
-    
-    // First round: fill by round-robin.
-    while (totalSeatsAssigned < roomCapacity && chunkCopies.some(c => c.index < c.rolls.length)) {
-      for (let i = 0; i < chunkCopies.length; i++) {
+
+    // Continuously cycle through chunkCopies until room is full.
+    while (totalSeatsAssigned < roomCapacity) {
+      let seatAssignedInCycle = false;
+      for (let i = 0; i < chunkCopies.length && totalSeatsAssigned < roomCapacity; i++) {
         let c = chunkCopies[i];
-        if (c.index < c.rolls.length && totalSeatsAssigned < roomCapacity) {
+        if (c.index < c.rolls.length) {
           seats.push({ batch: c.batch, rollNo: c.rolls[c.index] });
           c.index++;
           totalSeatsAssigned++;
-          if (totalSeatsAssigned >= roomCapacity) break;
+          seatAssignedInCycle = true;
         }
       }
+      // Break if no seat was assigned in a full cycle (to avoid infinite loop)
+      if (!seatAssignedInCycle) break;
     }
-    
-    // Second round (optional): if room still not full but some batches still have unassigned roll numbers,
-    // you could try to pull additional seats. (Be aware that this may break the contiguous range summary.)
-    // Uncomment the following block if you want to attempt filling extra capacity.
-    /*
-    while (totalSeatsAssigned < roomCapacity && chunkCopies.some(c => c.index < c.rolls.length)) {
-      for (let i = 0; i < chunkCopies.length; i++) {
-        let c = chunkCopies[i];
-        if (c.index < c.rolls.length && totalSeatsAssigned < roomCapacity) {
-          seats.push({ batch: c.batch, rollNo: c.rolls[c.index] });
-          c.index++;
-          totalSeatsAssigned++;
-          if (totalSeatsAssigned >= roomCapacity) break;
-        }
-      }
-    }
-    */
 
     seats.forEach((seat, idx) => { seat.seatNo = idx + 1; });
 
@@ -684,6 +716,7 @@ function generateSeatingArrangement(batches, rooms) {
       usedGroups.add(group);
     });
     if (currentRow.length > 0) seatMatrix.push(currentRow);
+
     return seatMatrix;
   }
 
@@ -712,402 +745,249 @@ function generateSeatingArrangement(batches, rooms) {
   return { arrangement, summary };
 }
 
-
-
-// -------------- HELPER: Build Rows for Front Page Table --------------
-function buildFrontPageRows(summaryObject, orderedBatchNames) {
-  const roomCodes = Object.keys(summaryObject); 
-  let rows = [];
-  let slNo = 1;
-
-  for (const batchName of orderedBatchNames) {
-    let chunkList = [];
-
-    // Gather all roll-range chunks from each room
-    for (const roomCode of roomCodes) {
-      const rangeString = summaryObject[roomCode][batchName];
-      if (rangeString && rangeString !== "-") {
-        // e.g. "1-24 || 25-45"
-        const ranges = rangeString.split(" || ");
-        for (const r of ranges) {
-          chunkList.push({ rollRange: r, room: roomCode });
-        }
-      }
-    }
-
-    // Sort chunks to ensure roll numbers appear in ascending order
-    chunkList.sort((a, b) => {
-      const aStart = parseInt(a.rollRange.split('-')[0]);
-      const bStart = parseInt(b.rollRange.split('-')[0]);
-      return aStart - bStart;
-    });
-
-    // Print the first chunk with SlNo & Class, subsequent chunks get blank in those columns
-    let firstLine = true;
-    chunkList.forEach(({ rollRange, room }) => {
-      if (firstLine) {
-        rows.push({
-          slNo,
-          className: batchName,
-          rollRange,
-          room,
-        });
-        firstLine = false;
-      } else {
-        rows.push({
-          slNo: "",
-          className: "",
-          rollRange,
-          room,
-        });
-      }
-    });
-
-    // Only increment SlNo if we actually assigned something to this batch
-    if (chunkList.length > 0) {
-      slNo++;
-    }
-  }
-
-  return rows;
-}
-
-async function generateSeatingPDF({ arrangement, summary }, examName, examDate) {
+// ------------------- PDF GENERATION -------------------
+// Generate PDF with pdf-lib using the updated structure and naming
+async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   // Create a new PDF document
   const pdfDoc = await PDFDocument.create();
-  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  // ---------------------------
-  // 1) FIRST PAGE (SUMMARY)
-  // ---------------------------
-  let currentPage = pdfDoc.addPage();
-  let { width, height } = currentPage.getSize();
-  const margin = 50;
-  let yPos = height - margin;
-
-  // Helper to add a new page and reset yPos.
+  // ----- Helper functions -----
+  // Add a new page and return it
   function addNewPage() {
-    currentPage = pdfDoc.addPage();
-    const size = currentPage.getSize();
-    width = size.width;
-    height = size.height;
-    yPos = height - margin;
+    return pdfDoc.addPage();
   }
 
-  // Heading section for summary
-  const headingFontSize = 14;
-  currentPage.drawText("Rajiv Gandhi Institute of Technology, Kottayam", {
-    x: width / 2 - 180,
+  // Draw header for a page and return the updated y position
+// ----- Helper function: Draw header for a page -----
+// Now accepts a third parameter `includeInstitutionHeader` (default true)
+function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
+  const { width, height } = page.getSize();
+  let yPos = height - 50;
+  const leftMargin = 50;
+
+  // Draw institution header only if required.
+  if (includeInstitutionHeader) {
+    const lines = [
+      "Rajiv Gandhi Institute of Technology, Kottayam",
+      "Department of Computer Science and Engineering",
+      "B. Tech Computer Science and Engineering",
+    ];
+    lines.forEach((line) => {
+      page.drawText(line, {
+        x: leftMargin,
+        y: yPos,
+        size: 12,
+        font: helveticaBold,
+      });
+      yPos -= 20;
+    });
+  }
+
+  // Draw title.
+  yPos -= 10;
+  page.drawText(title || "Seating Arrangement", {
+    x: leftMargin,
     y: yPos,
-    size: headingFontSize,
-    font: timesRomanFont,
+    size: 14,
+    font: helveticaBold,
   });
   yPos -= 20;
-  currentPage.drawText("Department of Computer Science and Engineering", {
-    x: width / 2 - 170,
-    y: yPos,
-    size: headingFontSize,
-    font: timesRomanFont,
-  });
-  yPos -= 20;
-  currentPage.drawText("B. Tech Computer Science and Engineering", {
-    x: width / 2 - 150,
-    y: yPos,
-    size: headingFontSize,
-    font: timesRomanFont,
-  });
-  yPos -= 20;
-  currentPage.drawText(examName, {
-    x: width / 2 - 150,
-    y: yPos,
-    size: headingFontSize,
-    font: timesRomanFont,
-  });
-  yPos -= 20;
-  currentPage.drawText("Seating Arrangement", {
-    x: width / 2 - 80,
-    y: yPos,
-    size: headingFontSize,
-    font: timesRomanFont,
-  });
-  yPos -= 20;
-  currentPage.drawText(`Date: ${examDate}`, {
-    x: width / 2 - 30,
+
+  // Draw exam name if provided.
+  if (examName) {
+    page.drawText(examName, {
+      x: leftMargin,
+      y: yPos,
+      size: 12,
+      font: helvetica,
+    });
+    yPos -= 20;
+  }
+
+  // Draw date.
+  const dateString = examDate || new Date().toLocaleDateString();
+  page.drawText(`Date: ${dateString}`, {
+    x: leftMargin,
     y: yPos,
     size: 12,
-    font: timesRomanFont,
+    font: helvetica,
   });
-  yPos -= 40;
+  yPos -= 30;
 
-  // --- SUMMARY TABLE ---
-  // Define column widths and use their sum for table width.
-  const colWidths = [80, 100, 150, 150]; // SI No, Class, Roll No, Classroom
-  const tableWidth = colWidths.reduce((sum, w) => sum + w, 0);
+  return yPos;
+}
 
-  // Draw header row borders
-  currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin + tableWidth, y: yPos }, thickness: 1 });
-  currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin, y: yPos - 40 }, thickness: 1 });
-  let xPos = margin;
-  for (const colWidth of colWidths) {
-    xPos += colWidth;
-    currentPage.drawLine({ start: { x: xPos, y: yPos }, end: { x: xPos, y: yPos - 40 }, thickness: 1 });
-  }
-  currentPage.drawLine({ start: { x: margin, y: yPos - 40 }, end: { x: margin + tableWidth, y: yPos - 40 }, thickness: 1 });
 
-  // Table header text
-  const headerY = yPos - 25;
-  currentPage.drawText("SI No", { x: margin + 25, y: headerY, size: 12, font: timesRomanFont });
-  currentPage.drawText("Class", { x: margin + colWidths[0] + 30, y: headerY, size: 12, font: timesRomanFont });
-  currentPage.drawText("Roll No", { x: margin + colWidths[0] + colWidths[1] + 35, y: headerY, size: 12, font: timesRomanFont });
-  currentPage.drawText("Classroom", { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + 35, y: headerY, size: 12, font: timesRomanFont });
+  // Draw a table row with cell borders and return the new y position
+  function drawTableRow(page, y, values, columnWidths, rowHeight, font, isHeader = false) {
+    let x = 50; // Left margin
+    const borderWidth = 0.5;
+    const padding = 5;
+    const textSize = isHeader ? 11 : 10;
 
-  yPos -= 40; // Move down for table content
+    for (let i = 0; i < values.length; i++) {
+      // Draw cell border
+      page.drawRectangle({
+        x,
+        y: y - rowHeight,
+        width: columnWidths[i],
+        height: rowHeight,
+        borderColor: rgb(0, 0, 0),
+        borderWidth,
+        color: isHeader ? rgb(0.95, 0.95, 0.95) : rgb(1, 1, 1),
+      });
 
-  // Build summary data grouping by batch name.
-  const batchSummary = {};
-  for (const [roomCode, batchRanges] of Object.entries(summary)) {
-    for (const [batchName, rangeStr] of Object.entries(batchRanges)) {
-      if (!batchSummary[batchName]) {
-        batchSummary[batchName] = [];
-      }
-      batchSummary[batchName].push({ roomCode, range: rangeStr });
+      // Draw cell text
+      page.drawText(values[i] || "", {
+        x: x + padding,
+        y: y - rowHeight + padding,
+        size: textSize,
+        font,
+      });
+
+      x += columnWidths[i];
     }
+
+    return y - rowHeight;
   }
 
-  // Draw summary table rows (using a reduced row height for compactness)
-  let slNo = 1;
-  const rowHeight = 25; // slightly reduced from 30
-  for (const [batchName, roomRanges] of Object.entries(batchSummary)) {
-    for (const { roomCode, range } of roomRanges) {
-      currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin, y: yPos - rowHeight }, thickness: 1 });
-      currentPage.drawText(String(slNo), { x: margin + 25, y: yPos - 15, size: 12, font: timesRomanFont });
-      currentPage.drawText(batchName, { x: margin + colWidths[0] + 30, y: yPos - 15, size: 12, font: timesRomanFont });
-      currentPage.drawText(range, { x: margin + colWidths[0] + colWidths[1] + 35, y: yPos - 15, size: 12, font: timesRomanFont });
-      currentPage.drawText(roomCode, { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + 45, y: yPos - 15, size: 12, font: timesRomanFont });
-      
-      xPos = margin + colWidths[0];
-      currentPage.drawLine({ start: { x: xPos, y: yPos }, end: { x: xPos, y: yPos - rowHeight }, thickness: 1 });
-      xPos += colWidths[1];
-      currentPage.drawLine({ start: { x: xPos, y: yPos }, end: { x: xPos, y: yPos - rowHeight }, thickness: 1 });
-      xPos += colWidths[2];
-      currentPage.drawLine({ start: { x: xPos, y: yPos }, end: { x: xPos, y: yPos - rowHeight }, thickness: 1 });
-      xPos += colWidths[3];
-      currentPage.drawLine({ start: { x: xPos, y: yPos }, end: { x: xPos, y: yPos - rowHeight }, thickness: 1 });
-      
-      currentPage.drawLine({ start: { x: margin, y: yPos - rowHeight }, end: { x: margin + tableWidth, y: yPos - rowHeight }, thickness: 1 });
-      
-      yPos -= rowHeight;
-      slNo++;
-      
-      if (yPos < margin + 50) {
-        addNewPage();
-        yPos = height - margin - 40;
-        currentPage.drawLine({ start: { x: margin, y: yPos + 40 }, end: { x: margin + tableWidth, y: yPos + 40 }, thickness: 1 });
-        xPos = margin;
-        currentPage.drawLine({ start: { x: xPos, y: yPos + 40 }, end: { x: xPos, y: yPos }, thickness: 1 });
-        for (const colWidth of colWidths) {
-          xPos += colWidth;
-          currentPage.drawLine({ start: { x: xPos, y: yPos + 40 }, end: { x: xPos, y: yPos }, thickness: 1 });
-        }
-        currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin + tableWidth, y: yPos }, thickness: 1 });
-        const headerY = yPos + 15;
-        currentPage.drawText("SI No", { x: margin + 25, y: headerY, size: 12, font: timesRomanFont });
-        currentPage.drawText("Class", { x: margin + colWidths[0] + 30, y: headerY, size: 12, font: timesRomanFont });
-        currentPage.drawText("Roll No", { x: margin + colWidths[0] + colWidths[1] + 35, y: headerY, size: 12, font: timesRomanFont });
-        currentPage.drawText("Classroom", { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + 35, y: headerY, size: 12, font: timesRomanFont });
-      }
+  // ----- 1. SUMMARY PAGE -----
+  let currentPage = addNewPage();
+  let currentY = drawPageHeader(currentPage);
+
+  // Define summary table headers and column widths
+  const summaryColumnWidths = [40, 100, 120, 120]; // S.No, Class, Roll No, Classroom
+  const summaryHeaders = ["S. No", "Class", "Roll No", "Classroom"];
+  const rowHeight = 20;
+
+  // Draw summary table header row
+  currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
+
+  // Build table data from the summary object using buildFrontPageRows
+  const tableData = buildFrontPageRows(seatingArrangement.summary);
+
+  // Draw each summary row
+  tableData.forEach((rowData) => {
+    const rowArray = [
+      String(rowData.slNo),
+      rowData.className,
+      rowData.rollRange,
+      rowData.room,
+    ];
+
+    // Start a new page if near the bottom
+    if (currentY < 50) {
+      currentPage = addNewPage();
+      currentY = drawPageHeader(currentPage, "Seating Arrangement (continued)");
+      currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
     }
-  }
 
-  // -------------------------------
-  // 2) DETAILED SEATING (DETAILS)
-  // -------------------------------
-  // The detailed seating pages now use a similar boxed table system.
-  // Spacing has been reduced to try to keep a room’s seating on one page.
-  for (const [roomCode, roomData] of Object.entries(arrangement)) {
-    addNewPage();
-    yPos = height - margin;
-    
-    // Room header
-    currentPage.drawText("Rajiv Gandhi Institute of Technology, Kottayam", {
-      x: width / 2 - 180,
-      y: yPos,
-      size: headingFontSize,
-      font: timesRomanFont,
-    });
-    yPos -= 25;
-    currentPage.drawText("Department of Computer Science and Engineering", {
-      x: width / 2 - 170,
-      y: yPos,
-      size: headingFontSize,
-      font: timesRomanFont,
-    });
-    yPos -= 25;
-    currentPage.drawText(`Room No. ${roomCode}`, {
-      x: width / 2 - 60,
-      y: yPos,
-      size: 14,
-      font: timesRomanFont,
-    });
-    yPos -= 40;
-    
-    // Group seats by batch from seatMatrix or assignments.
+    currentY = drawTableRow(currentPage, currentY, rowArray, summaryColumnWidths, rowHeight, helvetica);
+  });
+
+  // ----- 2. DETAILED SEATING PAGES -----
+  // For each room, create a detailed seating page
+  Object.entries(seatingArrangement.arrangement).forEach(([roomCode, roomData]) => {
+    currentPage = addNewPage();
+    currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating`, false);
+
+    // Group seats by batch from seatMatrix
     const batchGroups = {};
     if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
-      for (const row of roomData.seatMatrix) {
-        for (const seat of row) {
+      roomData.seatMatrix.forEach(row => {
+        row.forEach(seat => {
           if (!batchGroups[seat.batch]) {
             batchGroups[seat.batch] = [];
           }
           batchGroups[seat.batch].push(seat);
-        }
-      }
-    } else if (roomData.assignments && roomData.assignments.length > 0) {
-      for (const seat of roomData.assignments) {
-        if (!batchGroups[seat.batch]) {
-          batchGroups[seat.batch] = [];
-        }
-        batchGroups[seat.batch].push(seat);
-      }
+        });
+      });
     }
-    
-    // For each batch, draw a table.
-    for (const [batchName, seats] of Object.entries(batchGroups)) {
-      seats.sort((a, b) => a.rollNo - b.rollNo);
-      currentPage.drawText(batchName, { x: margin, y: yPos, size: 12, font: timesRomanFont });
-      yPos -= 20; // reduced gap before table
-      
-      // Decide layout: use double column if more than 10 seats.
-      const useDoubleColumn = seats.length > 10;
-      const colWidth = 90; // cell width per column
-      let tableWidth;
-      if (useDoubleColumn) {
-        tableWidth = 4 * colWidth;
-      } else {
-        tableWidth = 2 * colWidth;
-      }
-      
-      // Draw table header borders (top row)
-      currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin + tableWidth, y: yPos }, thickness: 1 });
-      currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin, y: yPos - 30 }, thickness: 1 });
-      if (useDoubleColumn) {
-        currentPage.drawLine({ start: { x: margin + colWidth, y: yPos }, end: { x: margin + colWidth, y: yPos - 30 }, thickness: 1 });
-        currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - 30 }, thickness: 1 });
-        currentPage.drawLine({ start: { x: margin + 3 * colWidth, y: yPos }, end: { x: margin + 3 * colWidth, y: yPos - 30 }, thickness: 1 });
-        currentPage.drawLine({ start: { x: margin + 4 * colWidth, y: yPos }, end: { x: margin + 4 * colWidth, y: yPos - 30 }, thickness: 1 });
-      } else {
-        currentPage.drawLine({ start: { x: margin + colWidth, y: yPos }, end: { x: margin + colWidth, y: yPos - 30 }, thickness: 1 });
-        currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - 30 }, thickness: 1 });
-      }
-      currentPage.drawLine({ start: { x: margin, y: yPos - 30 }, end: { x: margin + tableWidth, y: yPos - 30 }, thickness: 1 });
-      
-      const headerY = yPos - 20;
-      currentPage.drawText("Seat No.", { x: margin + 15, y: headerY, size: 12, font: timesRomanFont });
-      currentPage.drawText("Roll No.", { x: margin + colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-      if (useDoubleColumn) {
-        currentPage.drawText("Seat No.", { x: margin + 2 * colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-        currentPage.drawText("Roll No.", { x: margin + 3 * colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-      }
-      
-      yPos -= 30;
-      // Use a slightly reduced row height for detailed seating
-      const rowHeight = 20;
-      let firstColumnItems, secondColumnItems;
-      if (useDoubleColumn) {
-        const halfLength = Math.ceil(seats.length / 2);
-        firstColumnItems = seats.slice(0, halfLength);
-        secondColumnItems = seats.slice(halfLength);
-      } else {
-        firstColumnItems = seats;
-        secondColumnItems = [];
-      }
-      
-      const maxRows = Math.max(firstColumnItems.length, secondColumnItems.length);
-      for (let i = 0; i < maxRows; i++) {
-        currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin, y: yPos - rowHeight }, thickness: 1 });
-        if (i < firstColumnItems.length) {
-          const seat = firstColumnItems[i];
-          currentPage.drawText(String(seat.seatNo || "-"), { x: margin + 15, y: yPos - 15, size: 12, font: timesRomanFont });
-          currentPage.drawText(String(seat.rollNo || "-"), { x: margin + colWidth + 15, y: yPos - 15, size: 12, font: timesRomanFont });
-        }
-        if (useDoubleColumn) {
-          currentPage.drawLine({ start: { x: margin + colWidth, y: yPos }, end: { x: margin + colWidth, y: yPos - rowHeight }, thickness: 1 });
-        }
-        if (useDoubleColumn) {
-          if (i < secondColumnItems.length) {
-            const seat = secondColumnItems[i];
-            currentPage.drawText(String(seat.seatNo || "-"), { x: margin + 2 * colWidth + 15, y: yPos - 15, size: 12, font: timesRomanFont });
-            currentPage.drawText(String(seat.rollNo || "-"), { x: margin + 3 * colWidth + 15, y: yPos - 15, size: 12, font: timesRomanFont });
-          }
-          currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - rowHeight }, thickness: 1 });
-          currentPage.drawLine({ start: { x: margin + 3 * colWidth, y: yPos }, end: { x: margin + 3 * colWidth, y: yPos - rowHeight }, thickness: 1 });
-          currentPage.drawLine({ start: { x: margin + 4 * colWidth, y: yPos }, end: { x: margin + 4 * colWidth, y: yPos - rowHeight }, thickness: 1 });
-        } else {
-          currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - rowHeight }, thickness: 1 });
-        }
-        currentPage.drawLine({ start: { x: margin, y: yPos - rowHeight }, end: { x: margin + tableWidth, y: yPos - rowHeight }, thickness: 1 });
-        yPos -= rowHeight;
-        
-        if (yPos < margin + 50 && i < maxRows - 1) {
-          addNewPage();
-          yPos = height - margin;
-          currentPage.drawText("Rajiv Gandhi Institute of Technology, Kottayam", {
-            x: width / 2 - 180,
-            y: yPos,
-            size: headingFontSize,
-            font: timesRomanFont,
-          });
-          yPos -= 25;
-          currentPage.drawText("Department of Computer Science and Engineering", {
-            x: width / 2 - 170,
-            y: yPos,
-            size: headingFontSize,
-            font: timesRomanFont,
-          });
-          yPos -= 25;
-          currentPage.drawText(`Room No. ${roomCode} - ${batchName} (continued)`, {
-            x: width / 2 - 120,
-            y: yPos,
-            size: 14,
-            font: timesRomanFont,
-          });
-          yPos -= 40;
-          currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin + tableWidth, y: yPos }, thickness: 1 });
-          currentPage.drawLine({ start: { x: margin, y: yPos }, end: { x: margin, y: yPos - 30 }, thickness: 1 });
-          if (useDoubleColumn) {
-            currentPage.drawLine({ start: { x: margin + colWidth, y: yPos }, end: { x: margin + colWidth, y: yPos - 30 }, thickness: 1 });
-            currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - 30 }, thickness: 1 });
-            currentPage.drawLine({ start: { x: margin + 3 * colWidth, y: yPos }, end: { x: margin + 3 * colWidth, y: yPos - 30 }, thickness: 1 });
-            currentPage.drawLine({ start: { x: margin + 4 * colWidth, y: yPos }, end: { x: margin + 4 * colWidth, y: yPos - 30 }, thickness: 1 });
-          } else {
-            currentPage.drawLine({ start: { x: margin + colWidth, y: yPos }, end: { x: margin + colWidth, y: yPos - 30 }, thickness: 1 });
-            currentPage.drawLine({ start: { x: margin + 2 * colWidth, y: yPos }, end: { x: margin + 2 * colWidth, y: yPos - 30 }, thickness: 1 });
-          }
-          currentPage.drawLine({ start: { x: margin, y: yPos - 30 }, end: { x: margin + tableWidth, y: yPos - 30 }, thickness: 1 });
-          const headerY = yPos - 20;
-          currentPage.drawText("Seat No.", { x: margin + 15, y: headerY, size: 12, font: timesRomanFont });
-          currentPage.drawText("Roll No.", { x: margin + colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-          if (useDoubleColumn) {
-            currentPage.drawText("Seat No.", { x: margin + 2 * colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-            currentPage.drawText("Roll No.", { x: margin + 3 * colWidth + 15, y: headerY, size: 12, font: timesRomanFont });
-          }
-          yPos -= 30;
-        }
-      }
-      
-      yPos -= 20; // reduced gap between batch tables
-      if (yPos < margin + 50) {
-        addNewPage();
-        yPos = height - margin;
-      }
-    }
-  }
 
-  // Finalize and return PDF bytes
+    // For each batch in this room, render the detailed seating table
+    Object.entries(batchGroups).forEach(([batchName, seats]) => {
+      if (currentY < 100) {
+        currentPage = addNewPage();
+        currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating (continued)`, false);
+      }
+
+      // Batch header
+      currentPage.drawText(batchName, {
+        x: 50,
+        y: currentY,
+        size: 12,
+        font: helveticaBold,
+      });
+      currentY -= 20;
+
+      // Decide on single or double column layout based on the number of seats
+      const useDoubleColumn = seats.length > 15;
+      const seatColumnWidths = useDoubleColumn ? [60, 60, 60, 60] : [120, 120];
+      const seatHeaders = useDoubleColumn
+        ? ["Seat No.", "Roll No.", "Seat No.", "Roll No."]
+        : ["Seat No.", "Roll No."];
+
+      // Draw seating table header row for the batch
+      currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+
+      // Sort seats by roll number
+      seats.sort((a, b) => a.rollNo - b.rollNo);
+
+      if (useDoubleColumn) {
+        // Split seats into two columns
+        const halfLength = Math.ceil(seats.length / 2);
+        const firstColumn = seats.slice(0, halfLength);
+        const secondColumn = seats.slice(halfLength);
+        const maxRows = Math.max(firstColumn.length, secondColumn.length);
+
+        for (let i = 0; i < maxRows; i++) {
+          if (currentY < 50) {
+            currentPage = addNewPage();
+            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
+            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+          }
+
+          const rowValues = [];
+          // First column data
+          if (i < firstColumn.length) {
+            rowValues.push(String(firstColumn[i].seatNo));
+            rowValues.push(String(firstColumn[i].rollNo));
+          } else {
+            rowValues.push("");
+            rowValues.push("");
+          }
+          // Second column data
+          if (i < secondColumn.length) {
+            rowValues.push(String(secondColumn[i].seatNo));
+            rowValues.push(String(secondColumn[i].rollNo));
+          } else {
+            rowValues.push("");
+            rowValues.push("");
+          }
+
+          currentY = drawTableRow(currentPage, currentY, rowValues, seatColumnWidths, rowHeight, helvetica);
+        }
+      } else {
+        // Single column layout
+        for (const seat of seats) {
+          if (currentY < 50) {
+            currentPage = addNewPage();
+            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
+            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+          }
+          currentY = drawTableRow(currentPage, currentY, [String(seat.seatNo), String(seat.rollNo)], seatColumnWidths, rowHeight, helvetica);
+        }
+      }
+
+      currentY -= 20; // Space after each batch table
+    });
+  });
+
+  // Return the PDF document as a buffer
   return await pdfDoc.save();
 }
-
-
 
 // -------------- EXPRESS ROUTE --------------
 app.post("/api/generate-seating", async (req, res) => {
@@ -1133,21 +1013,13 @@ app.post("/api/generate-seating", async (req, res) => {
         .json({ error: "Insufficient room capacity to seat all students." });
     }
 
-    // 3) Generate arrangement
+    // 3) Generate seating arrangement
     const seatingArrangement = generateSeatingArrangement(batchDetails, roomDetails);
-    
-    // 4) Decide the order of batches for the front-page table
-    const orderedBatchNames = selectedBatches;
 
-    // 5) Generate PDF (front page + seat-by-seat)
-    const pdfBytes = await generateSeatingPDF(
-      seatingArrangement,
-      examDate,
-      examName,
-      orderedBatchNames
-    );
+    // 4) Generate PDF with correct parameter order: seatingArrangement, examName, examDate
+    const pdfBytes = await generateSeatingPDF(seatingArrangement, examName, examDate);
 
-    // 6) Send PDF
+    // 5) Send PDF
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
