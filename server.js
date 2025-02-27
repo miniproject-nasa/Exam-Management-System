@@ -1058,24 +1058,28 @@ const pdfSchema = new mongoose.Schema({
   data: String,
   from: String,
   to: String,
+  textmessage:String,
 });
-const pdfmodel = mongoose.model("PDF", pdfSchema, "pdfs");
+const pdfmodel = mongoose.model("PDF", pdfSchema, "notify");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
-    console.log(req.file);
+    // console.log(req.file);
     if (!req.file) return res.status(400).json({ message: "no file uploaded" });
     const base64dta = req.file.buffer.toString("base64");
     const from = req.body.from;
+    const textmessage=req.body.textmessage;
+
     const to = req.body.to;
     const newpdf = new pdfmodel({
       filename: req.file.originalname,
       data: base64dta,
       from: from,
       to: to,
+      textmessage:textmessage,
     });
     await newpdf.save();
     res.status(200).json({ success: true, to });
@@ -1119,6 +1123,7 @@ app.get("/get-pdfs/:to",async(req,res)=>{
         filename:doc.filename,
         from:doc.from,
         to:doc.to,
+        textmessage:doc.textmessage,
         data:`data:application/pdf;base64,${doc.data}`,
       }));
       res.json(responcepdf)

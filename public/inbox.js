@@ -31,29 +31,34 @@ document.addEventListener("DOMContentLoaded",  async function () {
             mainContainer.innerHTML=''
             console.log(inboxs)
             inboxs.forEach((inbox)=>{
-                console.log(inbox)
+
+                // base64 to blob url
+                const byteCharacters = atob(inbox.data.split(',')[1]); 
+                const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+                const byteArray = new Uint8Array(byteNumbers);
+                const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
                 mainContainer.innerHTML+=`
                 <section class="content-section">
-            <ul class="information-type">
-                <li>
-                    <span class="highlight-text">${inbox.from}</span>
-                    <p>${inbox.textmessage}</p>
+                <ul class="information-type">
+                    <li>
+                        <span class="highlight-text">${inbox.from}</span>
+                        <p>${inbox.textmessage}</p>
 
-                    <ul class="pdf-container">
-                        <li class="pdf-box">
-                            <div class="pdf-box-small">
-                                <p class="info-new-type">PDF</p>
-                            </div>
-                            <p class="pdf-box-content"><iframe src="${inbox.data}" width="100%" height="300px"></iframe>
-        <br>
-        <a href="${inbox.data}" download="${inbox.filename}">Download ${inbox.filename}</a>
-        <hr</p>
-                        </li>
+                        <ul class="pdf-container">
+                            <li class="pdf-box">
+                                <div class="pdf-box-small">
+                                    <p class="info-new-type">PDF</p>
+                                </div>  
+                            
+                                <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${inbox.filename}</a>
+                            
+                            </li>
                         
-                    </ul>
-                </li>
-            </ul>            
-        </section>
+                        </ul>
+                    </li>
+                </ul>            
+                </section>
                 `
             })
         } catch (error) {

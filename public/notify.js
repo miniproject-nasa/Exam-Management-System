@@ -81,6 +81,9 @@ document.addEventListener("DOMContentLoaded",  async function () {
                     
                 }
             );
+            alert("send successfully");
+            notifyForm.reset();
+            inputFile.value = null;
             
         }
         catch(error){
