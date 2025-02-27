@@ -6,7 +6,7 @@
     <meta name="description" content="Internal Exam Management">
     <title>Notify</title>
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="scrutiny.css">
+    <link rel="stylesheet" href="notify.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
@@ -35,6 +35,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="form-group">
                 <label for="textmessage">Text Message</label>
                 <input type="text" id="textmessage" name="textmessage"><br><br>
@@ -43,7 +44,7 @@
             <div class="flex-container">
                 <div class="content-section">
                     <label for="inputFile" class="information-type">Choose File</label>
-                    <input type="file" name="inputFile" id="inputFile" class="information-type">
+                    <input type="file" name="inputFile" id="inputFile" class="information-type" hidden>
                     
                     <!-- <p class="information-type">
                         Select your files
