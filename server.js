@@ -1107,13 +1107,40 @@ app.get("/api/notify/faculty", async (req, res) => {
 
 
 
-// -------------------DISPLAY PDF-------------------------
+// -------------------DISPLAY INBOX-------------------------
 
-app.get("/get-pdfs/:to",async(req,res)=>{
+app.get("/get-pdfs-to/:to",async(req,res)=>{
   try{
       const {to}=req.params;
 
       const pdfdoc=await pdfmodel.find({to});
+
+      if(!pdfdoc.length)
+        return res.status(400).json({message:"no inbox found"});
+
+      const responcepdf=pdfdoc.map((doc)=>({
+
+        filename:doc.filename,
+        from:doc.from,
+        to:doc.to,
+        textmessage:doc.textmessage,
+        data:`data:application/pdf;base64,${doc.data}`,
+      }));
+      res.json(responcepdf)
+  }
+  catch(error){
+    console.log(error);
+    res.status(400).json({message:"error in retriving pdfs"})
+  }
+})
+
+//---------------------DISPLAY SEND--------------------
+
+app.get("/get-pdfs-from/:from",async(req,res)=>{
+  try{
+      const {from}=req.params;
+
+      const pdfdoc=await pdfmodel.find({from:from});
 
       if(!pdfdoc.length)
         return res.status(400).json({message:"no inbox found"});
