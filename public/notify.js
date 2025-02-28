@@ -81,15 +81,14 @@ document.addEventListener("DOMContentLoaded",  async function () {
                     
                 }
             );
-            alert("send successfully");
-            notifyForm.reset();
-            inputFile.value = null;
+            
             
         }
         catch(error){
             console.log(error);
         }
-
+        alert("send successfully")
+        location.reload(true)
     });
 
 

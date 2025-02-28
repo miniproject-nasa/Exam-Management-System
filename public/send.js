@@ -1,5 +1,5 @@
-document.addEventListener("DOMContentLoaded",  async function () {
-    let data =[]
+document.addEventListener("DOMContentLoaded",async function() {
+   
     async function checkAuthStatus() {
         try {
             const response = await fetch("/check-auth");
@@ -18,32 +18,33 @@ document.addEventListener("DOMContentLoaded",  async function () {
     }
     await checkAuthStatus();
 
-    async function inbox(to) {
+    async function send(from) {
         try {
-            const responce=await fetch(`/get-pdfs-to/${to}`);
+            const responce=await fetch(`/get-pdfs-from/${from}`);
             if(!responce.ok)
                 return console.log("failed to load inbox");
 
-            const inboxs=await responce.json();
+            const sends=await responce.json();
 
             const mainContainer=document.querySelector(".main-content")
 
             mainContainer.innerHTML=''
-            console.log(inboxs)
-            inboxs.forEach((inbox)=>{
-
+            console.log(sends)
+            sends.forEach((send)=>{
                 // base64 to blob url
-                const byteCharacters = atob(inbox.data.split(',')[1]); 
+                const byteCharacters = atob(send.data.split(',')[1]); 
                 const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
                 const byteArray = new Uint8Array(byteNumbers);
                 const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
+                console.log("hai");
+                
                 mainContainer.innerHTML+=`
                 <section class="content-section">
                 <ul class="information-type">
                     <li>
-                        <span class="highlight-text">From:${inbox.from}</span>
-                        <p>${inbox.textmessage}</p>
+                        <span class="highlight-text">To:${send.to}</span>
+                        <p>${send.textmessage}</p>
 
                         <ul class="pdf-container">
                             <li class="pdf-box">
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                                     <p class="info-new-type">PDF</p>
                                 </div>  
                             
-                                <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${inbox.filename}</a>
+                                <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${send.filename}</a>
                             
                             </li>
                         
@@ -60,12 +61,13 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 </ul>            
                 </section>
                 `
+                console.log("hai");
+                
             })
         } catch (error) {
             
         }
     }
     console.log(data.user.username)
-    inbox(data.user.username)
-
+    send(data.user.username)
 });
