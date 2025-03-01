@@ -1052,7 +1052,7 @@ app.post("/api/generate-seating", async (req, res) => {
   }
 });
 
-// ------------------- PDF UPLOAD & NOTIFICATION -------------------
+// ______________________ PDF UPLOAD & NOTIFICATION ______________________
 const pdfSchema = new mongoose.Schema({
   filename: String,
   data: String,
@@ -1089,7 +1089,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
 });
 
 
-// ------------------FETCHING FACULTY----------------------
+// ______________________FETCHING FACULTY______________________
 
 app.get("/api/notify/faculty", async (req, res) => {
   try {
@@ -1107,7 +1107,7 @@ app.get("/api/notify/faculty", async (req, res) => {
 
 
 
-// -------------------DISPLAY INBOX-------------------------
+// ______________________DISPLAY INBOX______________________
 
 app.get("/get-pdfs-to/:to",async(req,res)=>{
   try{
@@ -1138,7 +1138,7 @@ app.get("/get-pdfs-to/:to",async(req,res)=>{
   }
 })
 
-//---------------------DISPLAY SEND--------------------
+//______________________DISPLAY SEND______________________
 
 app.get("/get-pdfs-from/:from",async(req,res)=>{
   try{
@@ -1164,6 +1164,61 @@ app.get("/get-pdfs-from/:from",async(req,res)=>{
     res.status(400).json({message:"error in retriving pdfs"})
   }
 })
+
+
+//______________________TRIAL SCHEMA_______________________
+
+const trialSchema=new mongoose.Schema({
+    mode:String,
+    subject:String,
+    batch:String,
+    fileName:String,
+    data:String,
+})
+
+const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
+//_______________________TRIAL UPLOAD_______________________
+
+
+app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
+    try {
+      const data=req.file.buffer.toString("base64")
+      const mode=req.body.mode;
+      const subject=req.body.subject;
+      const batch=req.body.batch;
+      const newtrial= new trialModel({
+        mode:mode,
+        subject:subject,
+        batch:batch,
+        fileName:req.file.originalname,
+        data:data,
+      })
+      await newtrial.save();  
+      res.status(200).json({success:true})
+    } catch (error) {
+      console.log(error);
+      
+      res.status(400).json({success:false})
+    }
+
+})
+
+//______________________TRIAL TO_______________________
+
+
+app.get("/get-trial/:to",async(req,res)=>{
+  try {
+
+      const {to}=req.params;
+      const module=await Module.findOne({moduleCoordinator:to})
+      const subjects=await module.subjects
+      const trial=await trialModel.find({subject:{$in:subjects}})
+      res.status(200).json(trial)
+  } catch (error) {
+    res.status(400).json({message:"error"})
+  }
+})
+
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 

@@ -24,13 +24,13 @@
     </header>
     <br>
     <section class="main">
-        <form>
+        <form id="upload">
             <h2 class="upload-title">Upload</h2>
 
             <div class="form-group">
                 <label for="mode">Mode</label>
                 <div class="dropdown">
-                    <select id="mode" name="mode">
+                    <select id="mode" name="mode" required>
                         <option value="" disabled selected>Select an option</option>
                         <option value="trial">Trial</option>
                         <option value="final">Final</option>
@@ -43,7 +43,7 @@
             <div class="form-group">
                 <label for="subject">Subject</label>
                 <div class="dropdown">
-                    <select id="subject" name="subject">
+                    <select id="subject" name="subject" required>
                         <option value="" disabled selected>Select an option</option>
                     </select>
                 </div>
@@ -52,7 +52,7 @@
             <div class="form-group">
                 <label for="batch">Batch</label>
                 <div class="dropdown">
-                    <select id="batch" name="batch">
+                    <select id="batch" name="batch" required>
                         <option value="" disabled selected>Select an option</option>
                     </select>
                 </div>
@@ -60,9 +60,8 @@
 
             <div class="flex-container">
                 <div class="content-section">
-                    <p class="information-type">
-                        Select your files
-                    </p>
+                    <label for="inputFile" class="information-type">Choose File</label>
+                    <input type="file" name="inputFile" id="inputFile" class="information-type" hidden required>
                 </div>
                 <div class="pdf-container">
                     <div class="pdf-box">
@@ -87,4 +86,5 @@
     <footer>
         <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
+    <script src="upload.js"></script>
 </body>
