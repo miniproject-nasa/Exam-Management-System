@@ -636,136 +636,152 @@ function formatRollRange(rolls) {
 }
 
 
-// -------------- ADJUSTED SEATING-ASSIGNMENT LOGIC --------------
-function generateSeatingArrangement(batches, rooms) {
-  // 1) Randomize the order of rooms
-  let shuffledRooms = shuffleArray([...rooms]);
-
-  // 2) Build sequential roll arrays for each batch
-  let batchRollArrays = {};
-  batches.forEach(batch => {
-    const strength = parseInt(batch.B_strenth, 10);
-    let arr = [];
-    for (let i = 1; i <= strength; i++) {
-      arr.push(i);
+function generateSeatingArrangement(batchDetails, rooms) {
+  // ----------------------------------------------------------
+  // 1) MERGE BATCHES BY PREFIX
+  //    e.g., S1A and S1B both become { B_name: "S1", B_strenth: sumOfBoth }
+  // ----------------------------------------------------------
+  let mergedBatchesMap = {};
+  batchDetails.forEach((b) => {
+    const prefix = b.B_name.substring(0, 2);
+    const strength = parseInt(b.B_strenth, 10);
+    if (!mergedBatchesMap[prefix]) {
+      mergedBatchesMap[prefix] = { B_name: prefix, B_strenth: 0 };
     }
-    batchRollArrays[batch.B_name] = arr;
+    mergedBatchesMap[prefix].B_strenth += strength;
   });
 
-  // 3) Decide which rooms each batch can use (store in batchRoomsMap)
-  let batchRoomsMap = {};
-  batches.forEach(batch => {
-    batchRoomsMap[batch.B_name] = [];
-  });
-  shuffledRooms.forEach(room => {
-    let availableBatches = batches.filter(b =>
-      batchRollArrays[b.B_name].length > 0 &&
-      !batchRoomsMap[b.B_name].includes(room.R_code)
-    );
-    if (availableBatches.length === 0) return;
-    availableBatches = shuffleArray(availableBatches);
-    availableBatches.forEach(batch => {
-      batchRoomsMap[batch.B_name].push(room.R_code);
-    });
-  });
+  // Convert to an array
+  const mergedBatches = Object.values(mergedBatchesMap); 
+  // e.g. [ { B_name: "S1", B_strenth: 50 }, { B_name: "S3", B_strenth: 40 }, ...]
 
-  // 4) Build chunk-based blocks for summary.
-  //    arrangementBlocks[roomCode] = [ { batch, block: [rollNos] }, ... ]
-  let arrangementBlocks = {};
-  rooms.forEach(r => {
-    arrangementBlocks[r.R_code] = [];
-  });
-  batches.forEach(batch => {
-    const bName = batch.B_name;
-    const rolls = batchRollArrays[bName];
-    const assignedRooms = batchRoomsMap[bName];
-    if (!assignedRooms || assignedRooms.length === 0) return;
-    const chunks = chunkify(rolls, assignedRooms.length);
-    const shuffledRoomCodes = shuffleArray([...assignedRooms]);
-    chunks.forEach((chunk, i) => {
-      const roomCode = shuffledRoomCodes[i];
-      arrangementBlocks[roomCode].push({ batch: bName, block: chunk });
-    });
-  });
+  // This array's order determines which batch is considered B1, B2, ...
+  // If you want a specific order, sort them. Otherwise, they stay in the insertion order.
+  // Example: mergedBatches.sort((a, b) => a.B_name.localeCompare(b.B_name));
 
-  // 5) Build the detailed seating arrangement (seat matrix) per room.
+  // M = total distinct merged batches
+  const M = mergedBatches.length;
+
+
+  // ----------------------------------------------------------
+  // 2) PREPARE A DATA STRUCTURE FOR ROOMS & SEATS
+  //    We'll store for each room an array of seat objects, each with:
+  //      { seatIndex, batch: null, rollNo: null }
+  // ----------------------------------------------------------
   let arrangement = {};
-  let summary = {};
-
-  // Helper: build an interleaved seat matrix that fills room capacity if possible.
-  function buildInterleavedSeatMatrix(blocks, roomCapacity) {
-    // Prepare round-robin copies of each block.
-    let chunkCopies = blocks.map(obj => ({
-      batch: obj.batch,
-      rolls: [...obj.block],
-      index: 0,
-    }));
+  rooms.forEach((r) => {
+    const cap = parseInt(r.R_capacity, 10);
     let seats = [];
-    let totalSeatsAssigned = 0;
+    for (let i = 1; i <= cap; i++) {
+      seats.push({
+        seatIndex: i,   // 1..capacity
+        batch: null,    // which batch prefix sits here
+        rollNo: null,   // that student's roll number
+      });
+    }
+    arrangement[r.R_code] = {
+      capacity: cap,
+      seats: seats,
+    };
+  });
 
-    // Continuously cycle through chunkCopies until room is full.
-    while (totalSeatsAssigned < roomCapacity) {
-      let seatAssignedInCycle = false;
-      for (let i = 0; i < chunkCopies.length && totalSeatsAssigned < roomCapacity; i++) {
-        let c = chunkCopies[i];
-        if (c.index < c.rolls.length) {
-          seats.push({ batch: c.batch, rollNo: c.rolls[c.index] });
-          c.index++;
-          totalSeatsAssigned++;
-          seatAssignedInCycle = true;
+
+  // ----------------------------------------------------------
+  // 3) ASSIGN SEATS BATCH BY BATCH, USING A RANDOM ROOM ORDER
+  //    - For the k-th batch, we find all seat indices i in each room
+  //      where (i - 1) % M == (k - 1). Those seats "belong" to that batch's pattern.
+  //    - We fill them in ascending seatIndex order, giving out rollNos 1..N as needed.
+  //    - Then move on to the next batch.
+  // ----------------------------------------------------------
+  mergedBatches.forEach((batchObj, batchIndex) => {
+    // batchIndex goes 0..(M-1). We'll call the "batch number" k = batchIndex+1
+    const k = batchIndex + 1;
+    const bName = batchObj.B_name; // e.g. "S1"
+    let studentsLeft = batchObj.B_strenth; // how many in this batch
+    let nextRollNo = 1; // next roll number to assign for this batch
+
+    // We'll pick a random permutation of the rooms for this batch
+    const randomRoomOrder = shuffleArray([...rooms]);
+
+    // Fill seats in that random order
+    for (let roomObj of randomRoomOrder) {
+      if (studentsLeft <= 0) break; // done with this batch
+      const roomCode = roomObj.R_code;
+      let seatArray = arrangement[roomCode].seats;
+
+      // Among seat indices 1..capacity, seat i belongs to batch k if:
+      // ((i - 1) mod M) + 1 == k
+      // We'll fill them in ascending order, until we run out of seats or students.
+      for (let seatObj of seatArray) {
+        if (studentsLeft <= 0) break;
+        if (seatObj.batch === null) { 
+          // This seat is still empty
+          const seatNum = seatObj.seatIndex;
+          // Check if seatNum belongs to batch k in the pattern
+          const seatBatchNum = ((seatNum - 1) % M) + 1;
+          if (seatBatchNum === k) {
+            // Assign this seat to the current batch
+            seatObj.batch = bName;
+            seatObj.rollNo = nextRollNo;
+            nextRollNo++;
+            studentsLeft--;
+          }
         }
       }
-      // Break if no seat was assigned in a full cycle (to avoid infinite loop)
-      if (!seatAssignedInCycle) break;
     }
+  });
 
-    seats.forEach((seat, idx) => { seat.seatNo = idx + 1; });
 
-    // Build rows to avoid having the same first-two-character group in the same row.
-    let seatMatrix = [];
-    let currentRow = [];
-    let usedGroups = new Set();
-    seats.forEach(seat => {
-      const group = seat.batch.substring(0, 2);
-      if (usedGroups.has(group)) {
-        seatMatrix.push(currentRow);
-        currentRow = [];
-        usedGroups = new Set();
-      }
-      currentRow.push(seat);
-      usedGroups.add(group);
-    });
-    if (currentRow.length > 0) seatMatrix.push(currentRow);
+// ----------------------------------------------------------
+// 4) BUILD THE FINAL seatMatrix PER ROOM & THE SUMMARY
+// ----------------------------------------------------------
+let finalArrangement = {};
+let summary = {};
 
-    return seatMatrix;
+rooms.forEach((roomObj) => {
+  const roomCode = roomObj.R_code;
+  const seats = arrangement[roomCode].seats;
+  const cap = arrangement[roomCode].capacity;
+
+  // ---------- ADD THIS LOOP ----------
+  // So that PDF code can read seat.seatNo
+  for (let seatObj of seats) {
+    seatObj.seatNo = seatObj.seatIndex; // Copy seatIndex → seatNo
   }
+  // -----------------------------------
 
-  // Process each room.
-  for (const room of rooms) {
-    const roomCode = room.R_code;
-    const blocks = arrangementBlocks[roomCode]; // blocks assigned to this room.
-    const capacity = parseInt(room.R_capacity, 10);
-    let seatMatrix = buildInterleavedSeatMatrix(blocks, capacity);
-
-    arrangement[roomCode] = { capacity: room.R_capacity, seatMatrix };
-
-    // Build summary from the blocks (using the original contiguous chunks)
-    let roomSummaryMap = {};
-    batches.forEach(b => { roomSummaryMap[b.B_name] = []; });
-    blocks.forEach(({ batch, block }) => {
-      roomSummaryMap[batch].push(...block);
-    });
-    let processedSummary = {};
-    batches.forEach(b => {
-      processedSummary[b.B_name] = formatRollRange(roomSummaryMap[b.B_name]);
-    });
-    summary[roomCode] = processedSummary;
+  // A seatMatrix for easier PDF layout, e.g. 4 columns
+  const columns = 4;
+  let seatMatrix = [];
+  for (let i = 0; i < seats.length; i += columns) {
+    seatMatrix.push(seats.slice(i, i + columns));
   }
+  finalArrangement[roomCode] = {
+    capacity: cap,
+    seatMatrix: seatMatrix,
+  };
 
-  return { arrangement, summary };
+  // Build summary of roll numbers for each batch in this room
+  let summaryMap = {};
+  mergedBatches.forEach((b) => {
+    summaryMap[b.B_name] = [];
+  });
+  seats.forEach((seatObj) => {
+    if (seatObj.batch) {
+      summaryMap[seatObj.batch].push(seatObj.rollNo);
+    }
+  });
+
+  let processedSummary = {};
+  Object.keys(summaryMap).forEach((bName) => {
+    processedSummary[bName] = formatRollRange(summaryMap[bName]);
+  });
+  summary[roomCode] = processedSummary;
+});
+return { arrangement: finalArrangement, summary };
 }
 
-// ------------------- PDF GENERATION -------------------
+/// ------------------- PDF GENERATION -------------------
 // Generate PDF with pdf-lib using the updated structure and naming
 async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   // Create a new PDF document
@@ -780,65 +796,63 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   }
 
   // Draw header for a page and return the updated y position
-// ----- Helper function: Draw header for a page -----
-// Now accepts a third parameter `includeInstitutionHeader` (default true)
-function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
-  const { width, height } = page.getSize();
-  let yPos = height - 50;
-  const leftMargin = 50;
+  // Now accepts a third parameter `includeInstitutionHeader` (default true)
+  function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
+    const { width, height } = page.getSize();
+    let yPos = height - 50;
+    const leftMargin = 50;
 
-  // Draw institution header only if required.
-  if (includeInstitutionHeader) {
-    const lines = [
-      "Rajiv Gandhi Institute of Technology, Kottayam",
-      "Department of Computer Science and Engineering",
-      "B. Tech Computer Science and Engineering",
-    ];
-    lines.forEach((line) => {
-      page.drawText(line, {
+    // Draw institution header only if required.
+    if (includeInstitutionHeader) {
+      const lines = [
+        "Rajiv Gandhi Institute of Technology, Kottayam",
+        "Department of Computer Science and Engineering",
+        "B. Tech Computer Science and Engineering",
+      ];
+      lines.forEach((line) => {
+        page.drawText(line, {
+          x: leftMargin,
+          y: yPos,
+          size: 12,
+          font: helveticaBold,
+        });
+        yPos -= 20;
+      });
+    }
+
+    // Draw title.
+    yPos -= 10;
+    page.drawText(title || "Seating Arrangement", {
+      x: leftMargin,
+      y: yPos,
+      size: 14,
+      font: helveticaBold,
+    });
+    yPos -= 20;
+
+    // Draw exam name if provided.
+    if (examName) {
+      page.drawText(examName, {
         x: leftMargin,
         y: yPos,
         size: 12,
-        font: helveticaBold,
+        font: helvetica,
       });
       yPos -= 20;
-    });
-  }
+    }
 
-  // Draw title.
-  yPos -= 10;
-  page.drawText(title || "Seating Arrangement", {
-    x: leftMargin,
-    y: yPos,
-    size: 14,
-    font: helveticaBold,
-  });
-  yPos -= 20;
-
-  // Draw exam name if provided.
-  if (examName) {
-    page.drawText(examName, {
+    // Draw date.
+    const dateString = examDate || new Date().toLocaleDateString();
+    page.drawText(`Date: ${dateString}`, {
       x: leftMargin,
       y: yPos,
       size: 12,
       font: helvetica,
     });
-    yPos -= 20;
+    yPos -= 30;
+
+    return yPos;
   }
-
-  // Draw date.
-  const dateString = examDate || new Date().toLocaleDateString();
-  page.drawText(`Date: ${dateString}`, {
-    x: leftMargin,
-    y: yPos,
-    size: 12,
-    font: helvetica,
-  });
-  yPos -= 30;
-
-  return yPos;
-}
-
 
   // Draw a table row with cell borders and return the new y position
   function drawTableRow(page, y, values, columnWidths, rowHeight, font, isHeader = false) {
@@ -883,7 +897,15 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
   const rowHeight = 20;
 
   // Draw summary table header row
-  currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
+  currentY = drawTableRow(
+    currentPage,
+    currentY,
+    summaryHeaders,
+    summaryColumnWidths,
+    rowHeight,
+    helveticaBold,
+    true
+  );
 
   // Build table data from the summary object using buildFrontPageRows
   const tableData = buildFrontPageRows(seatingArrangement.summary);
@@ -901,10 +923,25 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
     if (currentY < 50) {
       currentPage = addNewPage();
       currentY = drawPageHeader(currentPage, "Seating Arrangement (continued)");
-      currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
+      currentY = drawTableRow(
+        currentPage,
+        currentY,
+        summaryHeaders,
+        summaryColumnWidths,
+        rowHeight,
+        helveticaBold,
+        true
+      );
     }
 
-    currentY = drawTableRow(currentPage, currentY, rowArray, summaryColumnWidths, rowHeight, helvetica);
+    currentY = drawTableRow(
+      currentPage,
+      currentY,
+      rowArray,
+      summaryColumnWidths,
+      rowHeight,
+      helvetica
+    );
   });
 
   // ----- 2. DETAILED SEATING PAGES -----
@@ -913,24 +950,35 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
     currentPage = addNewPage();
     currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating`, false);
 
-    // Group seats by batch from seatMatrix
+    // Group seats by batch from seatMatrix, but exclude any with null rollNo
     const batchGroups = {};
     if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
       roomData.seatMatrix.forEach(row => {
         row.forEach(seat => {
-          if (!batchGroups[seat.batch]) {
-            batchGroups[seat.batch] = [];
+          // Only include seats that have a valid rollNo
+          if (seat.rollNo !== null) {
+            if (!batchGroups[seat.batch]) {
+              batchGroups[seat.batch] = [];
+            }
+            batchGroups[seat.batch].push(seat);
           }
-          batchGroups[seat.batch].push(seat);
         });
       });
     }
 
     // For each batch in this room, render the detailed seating table
     Object.entries(batchGroups).forEach(([batchName, seats]) => {
+      // If no valid seats, skip
+      if (!seats || seats.length === 0) return;
+
+      // Check page space
       if (currentY < 100) {
         currentPage = addNewPage();
-        currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating (continued)`, false);
+        currentY = drawPageHeader(
+          currentPage,
+          `Room No. ${roomCode} - Detailed Seating (continued)`,
+          false
+        );
       }
 
       // Batch header
@@ -950,7 +998,15 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
         : ["Seat No.", "Roll No."];
 
       // Draw seating table header row for the batch
-      currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+      currentY = drawTableRow(
+        currentPage,
+        currentY,
+        seatHeaders,
+        seatColumnWidths,
+        rowHeight,
+        helveticaBold,
+        true
+      );
 
       // Sort seats by roll number
       seats.sort((a, b) => a.rollNo - b.rollNo);
@@ -965,8 +1021,19 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
         for (let i = 0; i < maxRows; i++) {
           if (currentY < 50) {
             currentPage = addNewPage();
-            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
-            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+            currentY = drawPageHeader(
+              currentPage,
+              `Room No. ${roomCode} - ${batchName} (continued)`
+            );
+            currentY = drawTableRow(
+              currentPage,
+              currentY,
+              seatHeaders,
+              seatColumnWidths,
+              rowHeight,
+              helveticaBold,
+              true
+            );
           }
 
           const rowValues = [];
@@ -987,17 +1054,42 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
             rowValues.push("");
           }
 
-          currentY = drawTableRow(currentPage, currentY, rowValues, seatColumnWidths, rowHeight, helvetica);
+          currentY = drawTableRow(
+            currentPage,
+            currentY,
+            rowValues,
+            seatColumnWidths,
+            rowHeight,
+            helvetica
+          );
         }
       } else {
         // Single column layout
         for (const seat of seats) {
           if (currentY < 50) {
             currentPage = addNewPage();
-            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
-            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
+            currentY = drawPageHeader(
+              currentPage,
+              `Room No. ${roomCode} - ${batchName} (continued)`
+            );
+            currentY = drawTableRow(
+              currentPage,
+              currentY,
+              seatHeaders,
+              seatColumnWidths,
+              rowHeight,
+              helveticaBold,
+              true
+            );
           }
-          currentY = drawTableRow(currentPage, currentY, [String(seat.seatNo), String(seat.rollNo)], seatColumnWidths, rowHeight, helvetica);
+          currentY = drawTableRow(
+            currentPage,
+            currentY,
+            [String(seat.seatNo), String(seat.rollNo)],
+            seatColumnWidths,
+            rowHeight,
+            helvetica
+          );
         }
       }
 
@@ -1051,6 +1143,8 @@ app.post("/api/generate-seating", async (req, res) => {
     res.status(500).json({ error: "Error generating seating arrangement" });
   }
 });
+
+
 
 // ______________________ PDF UPLOAD & NOTIFICATION ______________________
 const pdfSchema = new mongoose.Schema({
