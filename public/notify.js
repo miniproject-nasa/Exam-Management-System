@@ -110,7 +110,10 @@ document.addEventListener("DOMContentLoaded",  async function () {
         while (select.options.length > 1) {
             select.remove(1);
         }
-        
+        const option = document.createElement('option');
+            option.text = "all";
+            option.value = "all";
+            select.add(option);
         items.forEach(item => {
             const option = document.createElement('option');
             option.text = item;
