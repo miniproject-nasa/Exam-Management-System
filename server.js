@@ -1113,7 +1113,11 @@ app.get("/get-pdfs-to/:to",async(req,res)=>{
   try{
       const {to}=req.params;
 
-      const pdfdoc=await pdfmodel.find({to});
+      const pdfdoc = await pdfmodel.find({ 
+        $or: [{ to: "all" }, { to: to }]
+      });
+      console.log(pdfdoc);
+      
 
       if(!pdfdoc.length)
         return res.status(400).json({message:"no inbox found"});
