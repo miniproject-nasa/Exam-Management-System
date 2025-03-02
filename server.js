@@ -1268,6 +1268,8 @@ const trialSchema=new mongoose.Schema({
     batch:String,
     fileName:String,
     data:String,
+    from:String,
+    DT:String,
 })
 
 const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
@@ -1280,12 +1282,17 @@ app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
       const mode=req.body.mode;
       const subject=req.body.subject;
       const batch=req.body.batch;
+      const from=req.body.from;
+      const DT=req.body.dt;
+
       const newtrial= new trialModel({
         mode:mode,
         subject:subject,
         batch:batch,
         fileName:req.file.originalname,
         data:data,
+        from:from,
+        DT:DT,
       })
       await newtrial.save();  
       res.status(200).json({success:true})
