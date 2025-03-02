@@ -714,7 +714,9 @@ function generateSeatingArrangement(batchDetails, rooms) {
   return { arrangement: finalArrangement, summary };
 }
 
-/// ------------------- PDF GENERATION -------------------
+
+
+// ------------------- PDF GENERATION -------------------
 // Generate PDF with pdf-lib using the updated structure and naming
 async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   // Create a new PDF document
@@ -729,63 +731,65 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   }
 
   // Draw header for a page and return the updated y position
-  // Now accepts a third parameter `includeInstitutionHeader` (default true)
-  function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
-    const { width, height } = page.getSize();
-    let yPos = height - 50;
-    const leftMargin = 50;
+// ----- Helper function: Draw header for a page -----
+// Now accepts a third parameter `includeInstitutionHeader` (default true)
+function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
+  const { width, height } = page.getSize();
+  let yPos = height - 50;
+  const leftMargin = 50;
 
-    // Draw institution header only if required.
-    if (includeInstitutionHeader) {
-      const lines = [
-        "Rajiv Gandhi Institute of Technology, Kottayam",
-        "Department of Computer Science and Engineering",
-        "B. Tech Computer Science and Engineering",
-      ];
-      lines.forEach((line) => {
-        page.drawText(line, {
-          x: leftMargin,
-          y: yPos,
-          size: 12,
-          font: helveticaBold,
-        });
-        yPos -= 20;
-      });
-    }
-
-    // Draw title.
-    yPos -= 10;
-    page.drawText(title || "Seating Arrangement", {
-      x: leftMargin,
-      y: yPos,
-      size: 14,
-      font: helveticaBold,
-    });
-    yPos -= 20;
-
-    // Draw exam name if provided.
-    if (examName) {
-      page.drawText(examName, {
+  // Draw institution header only if required.
+  if (includeInstitutionHeader) {
+    const lines = [
+      "Rajiv Gandhi Institute of Technology, Kottayam",
+      "Department of Computer Science and Engineering",
+      "B. Tech Computer Science and Engineering",
+    ];
+    lines.forEach((line) => {
+      page.drawText(line, {
         x: leftMargin,
         y: yPos,
         size: 12,
-        font: helvetica,
+        font: helveticaBold,
       });
       yPos -= 20;
-    }
+    });
+  }
 
-    // Draw date.
-    const dateString = examDate || new Date().toLocaleDateString();
-    page.drawText(`Date: ${dateString}`, {
+  // Draw title.
+  yPos -= 10;
+  page.drawText(title || "Seating Arrangement", {
+    x: leftMargin,
+    y: yPos,
+    size: 14,
+    font: helveticaBold,
+  });
+  yPos -= 20;
+
+  // Draw exam name if provided.
+  if (examName) {
+    page.drawText(examName, {
       x: leftMargin,
       y: yPos,
       size: 12,
       font: helvetica,
     });
-    yPos -= 30;
-
-    return yPos;
+    yPos -= 20;
   }
+
+  // Draw date.
+  const dateString = examDate || new Date().toLocaleDateString();
+  page.drawText(`Date: ${dateString}`, {
+    x: leftMargin,
+    y: yPos,
+    size: 12,
+    font: helvetica,
+  });
+  yPos -= 30;
+
+  return yPos;
+}
+
 
   // Draw a table row with cell borders and return the new y position
   function drawTableRow(page, y, values, columnWidths, rowHeight, font, isHeader = false) {
@@ -830,15 +834,7 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   const rowHeight = 20;
 
   // Draw summary table header row
-  currentY = drawTableRow(
-    currentPage,
-    currentY,
-    summaryHeaders,
-    summaryColumnWidths,
-    rowHeight,
-    helveticaBold,
-    true
-  );
+  currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
 
   // Build table data from the summary object using buildFrontPageRows
   const tableData = buildFrontPageRows(seatingArrangement.summary);
@@ -856,25 +852,10 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
     if (currentY < 50) {
       currentPage = addNewPage();
       currentY = drawPageHeader(currentPage, "Seating Arrangement (continued)");
-      currentY = drawTableRow(
-        currentPage,
-        currentY,
-        summaryHeaders,
-        summaryColumnWidths,
-        rowHeight,
-        helveticaBold,
-        true
-      );
+      currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
     }
 
-    currentY = drawTableRow(
-      currentPage,
-      currentY,
-      rowArray,
-      summaryColumnWidths,
-      rowHeight,
-      helvetica
-    );
+    currentY = drawTableRow(currentPage, currentY, rowArray, summaryColumnWidths, rowHeight, helvetica);
   });
 
   // ----- 2. DETAILED SEATING PAGES -----
@@ -883,35 +864,24 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
     currentPage = addNewPage();
     currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating`, false);
 
-    // Group seats by batch from seatMatrix, but exclude any with null rollNo
+    // Group seats by batch from seatMatrix
     const batchGroups = {};
     if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
       roomData.seatMatrix.forEach(row => {
         row.forEach(seat => {
-          // Only include seats that have a valid rollNo
-          if (seat.rollNo !== null) {
-            if (!batchGroups[seat.batch]) {
-              batchGroups[seat.batch] = [];
-            }
-            batchGroups[seat.batch].push(seat);
+          if (!batchGroups[seat.batch]) {
+            batchGroups[seat.batch] = [];
           }
+          batchGroups[seat.batch].push(seat);
         });
       });
     }
 
     // For each batch in this room, render the detailed seating table
     Object.entries(batchGroups).forEach(([batchName, seats]) => {
-      // If no valid seats, skip
-      if (!seats || seats.length === 0) return;
-
-      // Check page space
       if (currentY < 100) {
         currentPage = addNewPage();
-        currentY = drawPageHeader(
-          currentPage,
-          `Room No. ${roomCode} - Detailed Seating (continued)`,
-          false
-        );
+        currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating (continued)`, false);
       }
 
       // Batch header
@@ -931,15 +901,7 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
         : ["Seat No.", "Roll No."];
 
       // Draw seating table header row for the batch
-      currentY = drawTableRow(
-        currentPage,
-        currentY,
-        seatHeaders,
-        seatColumnWidths,
-        rowHeight,
-        helveticaBold,
-        true
-      );
+      currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
 
       // Sort seats by roll number
       seats.sort((a, b) => a.rollNo - b.rollNo);
@@ -954,19 +916,8 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
         for (let i = 0; i < maxRows; i++) {
           if (currentY < 50) {
             currentPage = addNewPage();
-            currentY = drawPageHeader(
-              currentPage,
-              `Room No. ${roomCode} - ${batchName} (continued)`
-            );
-            currentY = drawTableRow(
-              currentPage,
-              currentY,
-              seatHeaders,
-              seatColumnWidths,
-              rowHeight,
-              helveticaBold,
-              true
-            );
+            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
+            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
           }
 
           const rowValues = [];
@@ -987,42 +938,17 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
             rowValues.push("");
           }
 
-          currentY = drawTableRow(
-            currentPage,
-            currentY,
-            rowValues,
-            seatColumnWidths,
-            rowHeight,
-            helvetica
-          );
+          currentY = drawTableRow(currentPage, currentY, rowValues, seatColumnWidths, rowHeight, helvetica);
         }
       } else {
         // Single column layout
         for (const seat of seats) {
           if (currentY < 50) {
             currentPage = addNewPage();
-            currentY = drawPageHeader(
-              currentPage,
-              `Room No. ${roomCode} - ${batchName} (continued)`
-            );
-            currentY = drawTableRow(
-              currentPage,
-              currentY,
-              seatHeaders,
-              seatColumnWidths,
-              rowHeight,
-              helveticaBold,
-              true
-            );
+            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
+            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
           }
-          currentY = drawTableRow(
-            currentPage,
-            currentY,
-            [String(seat.seatNo), String(seat.rollNo)],
-            seatColumnWidths,
-            rowHeight,
-            helvetica
-          );
+          currentY = drawTableRow(currentPage, currentY, [String(seat.seatNo), String(seat.rollNo)], seatColumnWidths, rowHeight, helvetica);
         }
       }
 
@@ -1076,8 +1002,6 @@ app.post("/api/generate-seating", async (req, res) => {
     res.status(500).json({ error: "Error generating seating arrangement" });
   }
 });
-
-
 
 // ______________________ PDF UPLOAD & NOTIFICATION ______________________
 const pdfSchema = new mongoose.Schema({
@@ -1201,8 +1125,8 @@ const trialSchema=new mongoose.Schema({
     batch:String,
     fileName:String,
     data:String,
+    date:String,
     from:String,
-    DT:String,
 })
 
 const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
@@ -1211,21 +1135,20 @@ const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
 
 app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
     try {
-      const data=req.file.buffer.toString("base64")
+      const data64=req.file.buffer.toString("base64")
       const mode=req.body.mode;
       const subject=req.body.subject;
       const batch=req.body.batch;
+      const date=req.body.dt;
       const from=req.body.from;
-      const DT=req.body.dt;
-
       const newtrial= new trialModel({
         mode:mode,
         subject:subject,
         batch:batch,
         fileName:req.file.originalname,
-        data:data,
+        data:data64,
+        date:date,
         from:from,
-        DT:DT,
       })
       await newtrial.save();  
       res.status(200).json({success:true})

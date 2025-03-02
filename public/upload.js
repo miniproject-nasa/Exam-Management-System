@@ -17,9 +17,6 @@ document.addEventListener("DOMContentLoaded",async function (){
         }
     }
     await checkAuthStatus();
-    
-    
-
     async function subjectDropdown(){
 
         try {
@@ -56,6 +53,10 @@ document.addEventListener("DOMContentLoaded",async function (){
         }
     }
     await batchDropdown();
+    const now=new Date();
+    console.log(now.toISOString().replace("T"," ").split(".")[0]);
+    console.log(data.user)
+    
     const inputFile=document.getElementById("inputFile");
     const pdfcotainer=document.querySelector(".pdf-container");
 
@@ -82,11 +83,8 @@ document.addEventListener("DOMContentLoaded",async function (){
         const subject=document.querySelector("#subject").value;
         const batch=document.querySelector("#batch").value;
         const file=document.querySelector("#inputFile").files[0];
-        const from=data.user.username;
-        const now=new Date();
-        const DT=now.toISOString();
-
-
+        const dAndT=now.toISOString().replace("T"," ").split(".")[0];
+        
         if(!file){
             alert("select a file")
             return;
@@ -96,11 +94,11 @@ document.addEventListener("DOMContentLoaded",async function (){
         formdata.append("mode",mode);
         formdata.append("subject",subject);
         formdata.append("batch",batch);
-        formdata.append("from",from)
-        formdata.append("dt",DT);
+        formdata.append("dt",dAndT);
+        formdata.append("from",data.user.username);
 
         try {
-            const response=fetch("/upload-trial",
+            const response=await fetch("/upload-trial",
                 {
                     method:"POST",
                     body:formdata,
@@ -110,7 +108,7 @@ document.addEventListener("DOMContentLoaded",async function (){
             console.log(error)
         }
         alert("send successfully");
-        location.reload(true)
+        // location.reload(true)
         
 
     })
