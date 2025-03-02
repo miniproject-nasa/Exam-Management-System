@@ -634,49 +634,18 @@ function formatRollRange(rolls) {
     .map(seq => (seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`))
     .join(" || ");
 }
-
-
 function generateSeatingArrangement(batchDetails, rooms) {
-  // ----------------------------------------------------------
-  // 1) MERGE BATCHES BY PREFIX
-  //    e.g., S1A and S1B both become { B_name: "S1", B_strenth: sumOfBoth }
-  // ----------------------------------------------------------
-  let mergedBatchesMap = {};
-  batchDetails.forEach((b) => {
-    const prefix = b.B_name.substring(0, 2);
-    const strength = parseInt(b.B_strenth, 10);
-    if (!mergedBatchesMap[prefix]) {
-      mergedBatchesMap[prefix] = { B_name: prefix, B_strenth: 0 };
-    }
-    mergedBatchesMap[prefix].B_strenth += strength;
-  });
-
-  // Convert to an array
-  const mergedBatches = Object.values(mergedBatchesMap); 
-  // e.g. [ { B_name: "S1", B_strenth: 50 }, { B_name: "S3", B_strenth: 40 }, ...]
-
-  // This array's order determines which batch is considered B1, B2, ...
-  // If you want a specific order, sort them. Otherwise, they stay in the insertion order.
-  // Example: mergedBatches.sort((a, b) => a.B_name.localeCompare(b.B_name));
-
-  // M = total distinct merged batches
-  const M = mergedBatches.length;
-
-
-  // ----------------------------------------------------------
-  // 2) PREPARE A DATA STRUCTURE FOR ROOMS & SEATS
-  //    We'll store for each room an array of seat objects, each with:
-  //      { seatIndex, batch: null, rollNo: null }
-  // ----------------------------------------------------------
+  const batches = [...batchDetails];
+  const M = batches.length;
   let arrangement = {};
   rooms.forEach((r) => {
     const cap = parseInt(r.R_capacity, 10);
     let seats = [];
     for (let i = 1; i <= cap; i++) {
       seats.push({
-        seatIndex: i,   // 1..capacity
-        batch: null,    // which batch prefix sits here
-        rollNo: null,   // that student's roll number
+        seatIndex: i,
+        batch: null,
+        rollNo: null,
       });
     }
     arrangement[r.R_code] = {
@@ -684,43 +653,22 @@ function generateSeatingArrangement(batchDetails, rooms) {
       seats: seats,
     };
   });
-
-
-  // ----------------------------------------------------------
-  // 3) ASSIGN SEATS BATCH BY BATCH, USING A RANDOM ROOM ORDER
-  //    - For the k-th batch, we find all seat indices i in each room
-  //      where (i - 1) % M == (k - 1). Those seats "belong" to that batch's pattern.
-  //    - We fill them in ascending seatIndex order, giving out rollNos 1..N as needed.
-  //    - Then move on to the next batch.
-  // ----------------------------------------------------------
-  mergedBatches.forEach((batchObj, batchIndex) => {
-    // batchIndex goes 0..(M-1). We'll call the "batch number" k = batchIndex+1
+  batches.forEach((batchObj, batchIndex) => {
     const k = batchIndex + 1;
-    const bName = batchObj.B_name; // e.g. "S1"
-    let studentsLeft = batchObj.B_strenth; // how many in this batch
-    let nextRollNo = 1; // next roll number to assign for this batch
-
-    // We'll pick a random permutation of the rooms for this batch
+    const bName = batchObj.B_name;
+    let studentsLeft = parseInt(batchObj.B_strenth, 10);
+    let nextRollNo = 1;
     const randomRoomOrder = shuffleArray([...rooms]);
-
-    // Fill seats in that random order
     for (let roomObj of randomRoomOrder) {
-      if (studentsLeft <= 0) break; // done with this batch
+      if (studentsLeft <= 0) break;
       const roomCode = roomObj.R_code;
       let seatArray = arrangement[roomCode].seats;
-
-      // Among seat indices 1..capacity, seat i belongs to batch k if:
-      // ((i - 1) mod M) + 1 == k
-      // We'll fill them in ascending order, until we run out of seats or students.
       for (let seatObj of seatArray) {
         if (studentsLeft <= 0) break;
-        if (seatObj.batch === null) { 
-          // This seat is still empty
+        if (seatObj.batch === null) {
           const seatNum = seatObj.seatIndex;
-          // Check if seatNum belongs to batch k in the pattern
           const seatBatchNum = ((seatNum - 1) % M) + 1;
           if (seatBatchNum === k) {
-            // Assign this seat to the current batch
             seatObj.batch = bName;
             seatObj.rollNo = nextRollNo;
             nextRollNo++;
@@ -730,55 +678,40 @@ function generateSeatingArrangement(batchDetails, rooms) {
       }
     }
   });
-
-
-// ----------------------------------------------------------
-// 4) BUILD THE FINAL seatMatrix PER ROOM & THE SUMMARY
-// ----------------------------------------------------------
-let finalArrangement = {};
-let summary = {};
-
-rooms.forEach((roomObj) => {
-  const roomCode = roomObj.R_code;
-  const seats = arrangement[roomCode].seats;
-  const cap = arrangement[roomCode].capacity;
-
-  // ---------- ADD THIS LOOP ----------
-  // So that PDF code can read seat.seatNo
-  for (let seatObj of seats) {
-    seatObj.seatNo = seatObj.seatIndex; // Copy seatIndex → seatNo
-  }
-  // -----------------------------------
-
-  // A seatMatrix for easier PDF layout, e.g. 4 columns
-  const columns = 4;
-  let seatMatrix = [];
-  for (let i = 0; i < seats.length; i += columns) {
-    seatMatrix.push(seats.slice(i, i + columns));
-  }
-  finalArrangement[roomCode] = {
-    capacity: cap,
-    seatMatrix: seatMatrix,
-  };
-
-  // Build summary of roll numbers for each batch in this room
-  let summaryMap = {};
-  mergedBatches.forEach((b) => {
-    summaryMap[b.B_name] = [];
-  });
-  seats.forEach((seatObj) => {
-    if (seatObj.batch) {
-      summaryMap[seatObj.batch].push(seatObj.rollNo);
+  let finalArrangement = {};
+  let summary = {};
+  rooms.forEach((roomObj) => {
+    const roomCode = roomObj.R_code;
+    const seats = arrangement[roomCode].seats;
+    const cap = arrangement[roomCode].capacity;
+    for (let seatObj of seats) {
+      seatObj.seatNo = seatObj.seatIndex;
     }
+    const columns = 4;
+    let seatMatrix = [];
+    for (let i = 0; i < seats.length; i += columns) {
+      seatMatrix.push(seats.slice(i, i + columns));
+    }
+    finalArrangement[roomCode] = {
+      capacity: cap,
+      seatMatrix: seatMatrix,
+    };
+    let summaryMap = {};
+    batches.forEach((b) => {
+      summaryMap[b.B_name] = [];
+    });
+    seats.forEach((seatObj) => {
+      if (seatObj.batch) {
+        summaryMap[seatObj.batch].push(seatObj.rollNo);
+      }
+    });
+    let processedSummary = {};
+    Object.keys(summaryMap).forEach((bName) => {
+      processedSummary[bName] = formatRollRange(summaryMap[bName]);
+    });
+    summary[roomCode] = processedSummary;
   });
-
-  let processedSummary = {};
-  Object.keys(summaryMap).forEach((bName) => {
-    processedSummary[bName] = formatRollRange(summaryMap[bName]);
-  });
-  summary[roomCode] = processedSummary;
-});
-return { arrangement: finalArrangement, summary };
+  return { arrangement: finalArrangement, summary };
 }
 
 /// ------------------- PDF GENERATION -------------------
