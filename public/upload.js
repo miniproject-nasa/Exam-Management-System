@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded",async function (){
-    let data=[]
+
     async function checkAuthStatus() {
         try {
             const response = await fetch("/check-auth");
@@ -17,9 +17,6 @@ document.addEventListener("DOMContentLoaded",async function (){
         }
     }
     await checkAuthStatus();
-    
-    
-
     async function subjectDropdown(){
 
         try {
@@ -82,11 +79,6 @@ document.addEventListener("DOMContentLoaded",async function (){
         const subject=document.querySelector("#subject").value;
         const batch=document.querySelector("#batch").value;
         const file=document.querySelector("#inputFile").files[0];
-        const from=data.user.username;
-        const now=new Date();
-        const DT=now.toISOString();
-
-
         if(!file){
             alert("select a file")
             return;
@@ -96,8 +88,6 @@ document.addEventListener("DOMContentLoaded",async function (){
         formdata.append("mode",mode);
         formdata.append("subject",subject);
         formdata.append("batch",batch);
-        formdata.append("from",from)
-        formdata.append("dt",DT);
 
         try {
             const response=fetch("/upload-trial",
