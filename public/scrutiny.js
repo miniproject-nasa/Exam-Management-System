@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded",  async function () {
             const mainContainer=document.querySelector(".main-content")
 
             mainContainer.innerHTML=''
-            console.log(inboxs)
+            // console.log(inboxs)
             inboxs.forEach((inbox)=>{
-                console.log(inbox);
+                // console.log(inbox);
                 
                 // base64 to blob url
                 const byteCharacters = atob(inbox.data); 
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 mainContainer.innerHTML+=`
-                <section class="content-section">
+                <section class="content-section"  data-section='${inbox._id}'>
             <div class="allocated-container">
                 <img src="images/allocated.webp" alt="Allocated" class="allocated-image">
             </div>
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                         </select>
                     </div>
                 </div>
-                <button class="send-button">Allocate</button>
+                <button class="send-button" >Allocate</button>
             </div>
         </section> 
                 `
@@ -76,6 +76,23 @@ document.addEventListener("DOMContentLoaded",  async function () {
         }
     }
     console.log(data.user.username)
-    inbox(data.user.username)
-
+    await inbox(data.user.username)
+    
+    
+    document.querySelectorAll(".send-button").forEach((btn) => {
+        
+        btn.addEventListener("click",function(e) {
+                const sec=e.target.closest("section");
+                const id=sec.dataset.section;
+                console.log(id);
+                console.log(e.target.parentElement.parentElement);
+                const rtContainer=e.target.parentElement;
+                const secContainer=rtContainer.parentElement;
+                const faculty=rtContainer.querySelector(".form-group").querySelector(".dropdown").querySelector("#faculties").value
+                if(!faculty)
+                    return alert("please select a faculty");
+                
+        
+        })
+    })
 });
