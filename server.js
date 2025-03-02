@@ -634,133 +634,85 @@ function formatRollRange(rolls) {
     .map(seq => (seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`))
     .join(" || ");
 }
-
-
-// -------------- ADJUSTED SEATING-ASSIGNMENT LOGIC --------------
-function generateSeatingArrangement(batches, rooms) {
-  // 1) Randomize the order of rooms
-  let shuffledRooms = shuffleArray([...rooms]);
-
-  // 2) Build sequential roll arrays for each batch
-  let batchRollArrays = {};
-  batches.forEach(batch => {
-    const strength = parseInt(batch.B_strenth, 10);
-    let arr = [];
-    for (let i = 1; i <= strength; i++) {
-      arr.push(i);
-    }
-    batchRollArrays[batch.B_name] = arr;
-  });
-
-  // 3) Decide which rooms each batch can use (store in batchRoomsMap)
-  let batchRoomsMap = {};
-  batches.forEach(batch => {
-    batchRoomsMap[batch.B_name] = [];
-  });
-  shuffledRooms.forEach(room => {
-    let availableBatches = batches.filter(b =>
-      batchRollArrays[b.B_name].length > 0 &&
-      !batchRoomsMap[b.B_name].includes(room.R_code)
-    );
-    if (availableBatches.length === 0) return;
-    availableBatches = shuffleArray(availableBatches);
-    availableBatches.forEach(batch => {
-      batchRoomsMap[batch.B_name].push(room.R_code);
-    });
-  });
-
-  // 4) Build chunk-based blocks for summary.
-  //    arrangementBlocks[roomCode] = [ { batch, block: [rollNos] }, ... ]
-  let arrangementBlocks = {};
-  rooms.forEach(r => {
-    arrangementBlocks[r.R_code] = [];
-  });
-  batches.forEach(batch => {
-    const bName = batch.B_name;
-    const rolls = batchRollArrays[bName];
-    const assignedRooms = batchRoomsMap[bName];
-    if (!assignedRooms || assignedRooms.length === 0) return;
-    const chunks = chunkify(rolls, assignedRooms.length);
-    const shuffledRoomCodes = shuffleArray([...assignedRooms]);
-    chunks.forEach((chunk, i) => {
-      const roomCode = shuffledRoomCodes[i];
-      arrangementBlocks[roomCode].push({ batch: bName, block: chunk });
-    });
-  });
-
-  // 5) Build the detailed seating arrangement (seat matrix) per room.
+function generateSeatingArrangement(batchDetails, rooms) {
+  const batches = [...batchDetails];
+  const M = batches.length;
   let arrangement = {};
-  let summary = {};
-
-  // Helper: build an interleaved seat matrix that fills room capacity if possible.
-  function buildInterleavedSeatMatrix(blocks, roomCapacity) {
-    // Prepare round-robin copies of each block.
-    let chunkCopies = blocks.map(obj => ({
-      batch: obj.batch,
-      rolls: [...obj.block],
-      index: 0,
-    }));
+  rooms.forEach((r) => {
+    const cap = parseInt(r.R_capacity, 10);
     let seats = [];
-    let totalSeatsAssigned = 0;
-
-    // Continuously cycle through chunkCopies until room is full.
-    while (totalSeatsAssigned < roomCapacity) {
-      let seatAssignedInCycle = false;
-      for (let i = 0; i < chunkCopies.length && totalSeatsAssigned < roomCapacity; i++) {
-        let c = chunkCopies[i];
-        if (c.index < c.rolls.length) {
-          seats.push({ batch: c.batch, rollNo: c.rolls[c.index] });
-          c.index++;
-          totalSeatsAssigned++;
-          seatAssignedInCycle = true;
+    for (let i = 1; i <= cap; i++) {
+      seats.push({
+        seatIndex: i,
+        batch: null,
+        rollNo: null,
+      });
+    }
+    arrangement[r.R_code] = {
+      capacity: cap,
+      seats: seats,
+    };
+  });
+  batches.forEach((batchObj, batchIndex) => {
+    const k = batchIndex + 1;
+    const bName = batchObj.B_name;
+    let studentsLeft = parseInt(batchObj.B_strenth, 10);
+    let nextRollNo = 1;
+    const randomRoomOrder = shuffleArray([...rooms]);
+    for (let roomObj of randomRoomOrder) {
+      if (studentsLeft <= 0) break;
+      const roomCode = roomObj.R_code;
+      let seatArray = arrangement[roomCode].seats;
+      for (let seatObj of seatArray) {
+        if (studentsLeft <= 0) break;
+        if (seatObj.batch === null) {
+          const seatNum = seatObj.seatIndex;
+          const seatBatchNum = ((seatNum - 1) % M) + 1;
+          if (seatBatchNum === k) {
+            seatObj.batch = bName;
+            seatObj.rollNo = nextRollNo;
+            nextRollNo++;
+            studentsLeft--;
+          }
         }
       }
-      // Break if no seat was assigned in a full cycle (to avoid infinite loop)
-      if (!seatAssignedInCycle) break;
     }
-
-    seats.forEach((seat, idx) => { seat.seatNo = idx + 1; });
-
-    // Build rows to avoid having the same first-two-character group in the same row.
+  });
+  let finalArrangement = {};
+  let summary = {};
+  rooms.forEach((roomObj) => {
+    const roomCode = roomObj.R_code;
+    const seats = arrangement[roomCode].seats;
+    const cap = arrangement[roomCode].capacity;
+    for (let seatObj of seats) {
+      seatObj.seatNo = seatObj.seatIndex;
+    }
+    const columns = 4;
     let seatMatrix = [];
-    let currentRow = [];
-    let usedGroups = new Set();
-    seats.forEach(seat => {
-      const group = seat.batch.substring(0, 2);
-      if (usedGroups.has(group)) {
-        seatMatrix.push(currentRow);
-        currentRow = [];
-        usedGroups = new Set();
-      }
-      currentRow.push(seat);
-      usedGroups.add(group);
+    for (let i = 0; i < seats.length; i += columns) {
+      seatMatrix.push(seats.slice(i, i + columns));
+    }
+    finalArrangement[roomCode] = {
+      capacity: cap,
+      seatMatrix: seatMatrix,
+    };
+    let summaryMap = {};
+    batches.forEach((b) => {
+      summaryMap[b.B_name] = [];
     });
-    if (currentRow.length > 0) seatMatrix.push(currentRow);
-
-    return seatMatrix;
-  }
-
-  // Process each room.
-  for (const room of rooms) {
-    const roomCode = room.R_code;
-    const blocks = arrangementBlocks[roomCode]; // blocks assigned to this room.
-    const capacity = parseInt(room.R_capacity, 10);
-    let seatMatrix = buildInterleavedSeatMatrix(blocks, capacity);
-
-    arrangement[roomCode] = { capacity: room.R_capacity, seatMatrix };
-
-    // Build summary from the blocks (using the original contiguous chunks)
-    let roomSummaryMap = {};
-    batches.forEach(b => { roomSummaryMap[b.B_name] = []; });
-    blocks.forEach(({ batch, block }) => {
-      roomSummaryMap[batch].push(...block);
+    seats.forEach((seatObj) => {
+      if (seatObj.batch) {
+        summaryMap[seatObj.batch].push(seatObj.rollNo);
+      }
     });
     let processedSummary = {};
-    batches.forEach(b => {
-      processedSummary[b.B_name] = formatRollRange(roomSummaryMap[b.B_name]);
+    Object.keys(summaryMap).forEach((bName) => {
+      processedSummary[bName] = formatRollRange(summaryMap[bName]);
     });
     summary[roomCode] = processedSummary;
-  }
+  });
+  return { arrangement: finalArrangement, summary };
+}
 
   return { arrangement, summary };
 }
