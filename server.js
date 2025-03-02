@@ -714,8 +714,7 @@ function generateSeatingArrangement(batchDetails, rooms) {
   return { arrangement: finalArrangement, summary };
 }
 
-  return { arrangement, summary };
-}
+
 
 // ------------------- PDF GENERATION -------------------
 // Generate PDF with pdf-lib using the updated structure and naming
@@ -1126,6 +1125,8 @@ const trialSchema=new mongoose.Schema({
     batch:String,
     fileName:String,
     data:String,
+    date:String,
+    from:String,
 })
 
 const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
@@ -1134,16 +1135,20 @@ const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
 
 app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
     try {
-      const data=req.file.buffer.toString("base64")
+      const data64=req.file.buffer.toString("base64")
       const mode=req.body.mode;
       const subject=req.body.subject;
       const batch=req.body.batch;
+      const date=req.body.dt;
+      const from=req.body.from;
       const newtrial= new trialModel({
         mode:mode,
         subject:subject,
         batch:batch,
         fileName:req.file.originalname,
-        data:data,
+        data:data64,
+        date:date,
+        from:from,
       })
       await newtrial.save();  
       res.status(200).json({success:true})
