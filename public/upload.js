@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded",async function (){
             console.log(error)
         }
         alert("send successfully");
-        // location.reload(true)
+        location.reload(true)
         
 
     })
