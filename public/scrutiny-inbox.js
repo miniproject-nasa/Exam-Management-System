@@ -1,3 +1,5 @@
+// const { FieldAlreadyExistsError } = require("pdf-lib");
+
 document.addEventListener("DOMContentLoaded", async function () {
   async function checkAuthStatus() {
     try {
@@ -25,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const mainContainer = document.querySelector(".main-content");
 
       mainContainer.innerHTML = "";
-      console.log(scrutinys);
+    //   console.log(scrutinys);
       scrutinys.forEach((send) => {
         // Convert base64 to blob URL for PDF file
         const byteCharacters = atob(send.data);
@@ -36,26 +38,70 @@ document.addEventListener("DOMContentLoaded", async function () {
         const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
-        mainContainer.innerHTML += `
-                <section class="content-section" data-section='${send._id}'>
-                    <div class="allocated-container"></div>
-                
-                    <ul class="information-type">
-                        <li><span class="highlight-text">subject: ${send.subject}</span></li>
-                        <li>mode: ${send.mode}</li>
-                    </ul>
-                
-                    <div class="pdf-container">
-                        <div class="pdf-box">
-                            <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${send.fileName}</a>
+        if(send.mode=="allocated")
+        {
+
+            mainContainer.innerHTML += `
+                    <section class="content-section" data-section='${send._id}'>
+                        <div class="allocated-container"></div>
+                    
+                        <ul class="information-type">
+                            <li><span class="highlight-text">subject: ${send.subject}</span></li>
+                            <li>mode: ${send.mode}</li>
+                        </ul>
+                    
+                        <div class="pdf-container">
+                            <div class="pdf-box">
+                                <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${send.fileName}</a>
+                            </div>
+                            <div class="pdf-box">
+                                <label for="inputFile" class="information-type">Choose File</label>
+                                <input type="file" name="scrutFile" id="scrutFile" class="information-type" hidden >   
+                            </div>
                         </div>
-                    </div>
-                
-                    <div class="bottom-right-container">
-                        <button class="send-button">Scrutiny</button>
-                    </div>
-                </section> 
-                `;
+                    
+                        <div class="bottom-right-container">
+                            <button class="send-button">Scrutiny</button>
+                            <button class="submit-button">submit</button>
+                        </div>
+                        
+                    </section> 
+                    `;
+        }
+        else{
+            const SbyteCharacters = atob(send.sdata);
+        const SbyteNumbers = new Array(SbyteCharacters.length)
+          .fill()
+          .map((_, i) => SbyteCharacters.charCodeAt(i));
+        const SbyteArray = new Uint8Array(SbyteNumbers);
+        const SpdfBlob = new Blob([SbyteArray], { type: "application/pdf" });
+        const SpdfUrl = URL.createObjectURL(SpdfBlob);
+            mainContainer.innerHTML += `
+                    <section class="content-section" data-section='${send._id}'>
+                        <div class="allocated-container"></div>
+                    
+                        <ul class="information-type">
+                            <li><span class="highlight-text">subject: ${send.subject}</span></li>
+                            <li>mode: ${send.mode}</li>
+                        </ul>
+                    
+                        <div class="pdf-container">
+                            <div class="pdf-box">
+                                <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${send.fileName}</a>
+                            </div>
+                            <div class="pdf-box">
+                                <a href="${SpdfUrl}" target="_blank" class="pdf-box-content">${send.sfileName}</a>   
+                            </div>
+                        </div>
+                    
+                        <div class="bottom-right-container">
+                            
+                        </div>
+                        
+                    </section> 
+                    `;
+        }
+
       });
     } catch (error) {
       console.log(error);
@@ -65,6 +111,60 @@ document.addEventListener("DOMContentLoaded", async function () {
   console.log(data.user.username);
   await send(data.user.username);
 
+  const inputFiles=document.querySelectorAll("#inputFile")
+  inputFiles.forEach((inputFile)=>{
+
+      inputFile.addEventListener("change",function(){
+            const file=this.files[0];
+    
+            if(file){
+                const fileURL = URL.createObjectURL(file);
+                pdfcotainer.innerHTML=`<div class="pdf-box">
+                            
+                            <p class="pdf-box-content"><a href="${fileURL}"  target="_blank">${file.name} (${(file.size / 1024).toFixed(2)})KB</a></p>`;
+                        
+            }
+            else{
+                inputFile.innerHTML=`<p class="pdf-box-content">No file chosen</p>`;
+            }
+        });
+  })
+
+  document.querySelectorAll(".submit-button").forEach((btn)=>{
+        btn.addEventListener("click",async function(e){
+            
+            const par=e.target.parentElement.parentElement
+            const file=par.querySelector("#scrutFile").files[0]
+            if(!file)
+                return alert("select a file")
+            else{
+
+                const id=par.dataset.section
+                const formdata=new FormData();
+                formdata.append("scrutFile",file);
+                try{
+                    const response=await fetch(`/trial-scrutinized/${id}`,
+                        {
+                            method:"PUT",
+                            body:formdata,
+                            
+                            
+                        }
+                    );
+                    if(!response.ok)
+                        return console.log("failed");
+                    
+                }
+                catch (error) {
+                    console.log(error);
+                    
+                }
+            }
+            
+            alert("sended successfully");
+            location.reload(true)
+        })
+  })
   document.querySelectorAll(".send-button").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault(); // Prevent default action if necessary
