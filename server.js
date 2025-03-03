@@ -311,7 +311,7 @@ app.post("/login", async (req, res) => {
           id: userfinal.U_id,
           username: userfinal.U_name,
           role: userfinal.U_role,
-          pass:userfinal.U_password,
+          pass: userfinal.U_password,
         };
         console.log("Login Successful");
         res.status(200).json({
@@ -340,23 +340,22 @@ app.get("/logout", (req, res) => {
 });
 
 // -------------------CHANGE PASSWOD--------------
-app.put("/update-password",async (req,res)=>{
-  const {id,password}=req.body
-  console.log(req.body)
+app.put("/update-password", async (req, res) => {
+  const { id, password } = req.body;
+  console.log(req.body);
   try {
-    const olduser=await user.findOneAndUpdate(
-      {U_id:id},
-      {U_password:password},
-      {new:true}
+    const olduser = await user.findOneAndUpdate(
+      { U_id: id },
+      { U_password: password },
+      { new: true }
     );
   } catch (error) {
     console.log(error);
-    
   }
-  if(!user)
-    return res.status(400).json({success:false,message:"user not found"});
-  return res.status(200).json({success:true,message:"updated"});
-})
+  if (!user)
+    return res.status(400).json({ success: false, message: "user not found" });
+  return res.status(200).json({ success: true, message: "updated" });
+});
 
 // ------------------- MODULE MANAGEMENT -------------------
 const moduleSchema = new mongoose.Schema({
@@ -520,8 +519,7 @@ app.put("/update-batch/:batch_name", async (req, res) => {
       .json({ error: "Failed to update batch", details: error.message });
   }
 });
- // ------------------- SEATING ARRANGEMENT -------------------
-// Use pdf-lib instead of pdfkit
+// ------------------- SEATING ARRANGEMENT -------------------
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 // GET batches for seating dropdown
@@ -552,8 +550,8 @@ function shuffleArray(array) {
   }
   return array;
 }
+
 // -------------- FUNCTION: Build Front Page Rows --------------
-// (Your earlier provided function, integrated here.)
 function buildFrontPageRows(summaryObject) {
   const tableData = [];
   let serialNo = 1;
@@ -561,16 +559,16 @@ function buildFrontPageRows(summaryObject) {
 
   // Collect all batch names from summary data
   const batches = new Set();
-  roomCodes.forEach(room => {
-    Object.keys(summaryObject[room]).forEach(batch => {
+  roomCodes.forEach((room) => {
+    Object.keys(summaryObject[room]).forEach((batch) => {
       batches.add(batch);
     });
   });
 
-  // Process each batch in the order they appear (or you can sort them as needed)
-  batches.forEach(batchName => {
+  // Process each batch in the order they appear
+  batches.forEach((batchName) => {
     let firstRow = true;
-    roomCodes.forEach(roomCode => {
+    roomCodes.forEach((roomCode) => {
       if (summaryObject[roomCode][batchName]) {
         if (firstRow) {
           tableData.push({
@@ -598,23 +596,6 @@ function buildFrontPageRows(summaryObject) {
   return tableData;
 }
 
-// -------------- HELPER: Split an Array into N Contiguous Chunks --------------
-function chunkify(rollArr, nChunks) {
-  const total = rollArr.length;
-  const baseSize = Math.floor(total / nChunks);
-  let remainder = total % nChunks;
-  let chunks = [];
-  let startIndex = 0;
-  for (let i = 0; i < nChunks; i++) {
-    let size = baseSize + (remainder > 0 ? 1 : 0);
-    remainder = Math.max(0, remainder - 1);
-    const chunk = rollArr.slice(startIndex, startIndex + size);
-    chunks.push(chunk);
-    startIndex += size;
-  }
-  return chunks;
-}
-
 // -------------- HELPER: Format Roll Ranges --------------
 function formatRollRange(rolls) {
   if (rolls.length === 0) return "-";
@@ -631,9 +612,13 @@ function formatRollRange(rolls) {
   }
   sequences.push(currentSeq);
   return sequences
-    .map(seq => (seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`))
+    .map((seq) =>
+      seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`
+    )
     .join(" || ");
 }
+
+// -------------- FUNCTION: Generate Seating Arrangement --------------
 function generateSeatingArrangement(batchDetails, rooms) {
   const batches = [...batchDetails];
   const M = batches.length;
@@ -701,7 +686,7 @@ function generateSeatingArrangement(batchDetails, rooms) {
       summaryMap[b.B_name] = [];
     });
     seats.forEach((seatObj) => {
-      if (seatObj.batch) {
+      if (seatObj.batch && seatObj.rollNo !== null) {
         summaryMap[seatObj.batch].push(seatObj.rollNo);
       }
     });
@@ -714,10 +699,7 @@ function generateSeatingArrangement(batchDetails, rooms) {
   return { arrangement: finalArrangement, summary };
 }
 
-
-
 // ------------------- PDF GENERATION -------------------
-// Generate PDF with pdf-lib using the updated structure and naming
 async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   // Create a new PDF document
   const pdfDoc = await PDFDocument.create();
@@ -731,68 +713,73 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   }
 
   // Draw header for a page and return the updated y position
-// ----- Helper function: Draw header for a page -----
-// Now accepts a third parameter `includeInstitutionHeader` (default true)
-function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
-  const { width, height } = page.getSize();
-  let yPos = height - 50;
-  const leftMargin = 50;
+  function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
+    const { width, height } = page.getSize();
+    let yPos = height - 50;
+    const leftMargin = 50;
 
-  // Draw institution header only if required.
-  if (includeInstitutionHeader) {
-    const lines = [
-      "Rajiv Gandhi Institute of Technology, Kottayam",
-      "Department of Computer Science and Engineering",
-      "B. Tech Computer Science and Engineering",
-    ];
-    lines.forEach((line) => {
-      page.drawText(line, {
+    // Draw institution header only if required.
+    if (includeInstitutionHeader) {
+      const lines = [
+        "Rajiv Gandhi Institute of Technology, Kottayam",
+        "Department of Computer Science and Engineering",
+        "B. Tech Computer Science and Engineering",
+      ];
+      lines.forEach((line) => {
+        page.drawText(line, {
+          x: leftMargin,
+          y: yPos,
+          size: 12,
+          font: helveticaBold,
+        });
+        yPos -= 20;
+      });
+    }
+
+    // Draw title.
+    yPos -= 10;
+    page.drawText(title || "Seating Arrangement", {
+      x: leftMargin,
+      y: yPos,
+      size: 14,
+      font: helveticaBold,
+    });
+    yPos -= 20;
+
+    // Draw exam name if provided.
+    if (examName) {
+      page.drawText(examName, {
         x: leftMargin,
         y: yPos,
         size: 12,
-        font: helveticaBold,
+        font: helvetica,
       });
       yPos -= 20;
-    });
-  }
+    }
 
-  // Draw title.
-  yPos -= 10;
-  page.drawText(title || "Seating Arrangement", {
-    x: leftMargin,
-    y: yPos,
-    size: 14,
-    font: helveticaBold,
-  });
-  yPos -= 20;
-
-  // Draw exam name if provided.
-  if (examName) {
-    page.drawText(examName, {
+    // Draw date.
+    const dateString = examDate || new Date().toLocaleDateString();
+    page.drawText(`Date: ${dateString}`, {
       x: leftMargin,
       y: yPos,
       size: 12,
       font: helvetica,
     });
-    yPos -= 20;
+    yPos -= 30;
+
+    return yPos;
   }
 
-  // Draw date.
-  const dateString = examDate || new Date().toLocaleDateString();
-  page.drawText(`Date: ${dateString}`, {
-    x: leftMargin,
-    y: yPos,
-    size: 12,
-    font: helvetica,
-  });
-  yPos -= 30;
-
-  return yPos;
-}
-
-
   // Draw a table row with cell borders and return the new y position
-  function drawTableRow(page, y, values, columnWidths, rowHeight, font, isHeader = false) {
+  function drawTableRow(
+    page,
+    y,
+    values,
+    columnWidths,
+    rowHeight,
+    font,
+    isHeader = false
+  ) {
     let x = 50; // Left margin
     const borderWidth = 0.5;
     const padding = 5;
@@ -834,7 +821,15 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
   const rowHeight = 20;
 
   // Draw summary table header row
-  currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
+  currentY = drawTableRow(
+    currentPage,
+    currentY,
+    summaryHeaders,
+    summaryColumnWidths,
+    rowHeight,
+    helveticaBold,
+    true
+  );
 
   // Build table data from the summary object using buildFrontPageRows
   const tableData = buildFrontPageRows(seatingArrangement.summary);
@@ -852,109 +847,186 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
     if (currentY < 50) {
       currentPage = addNewPage();
       currentY = drawPageHeader(currentPage, "Seating Arrangement (continued)");
-      currentY = drawTableRow(currentPage, currentY, summaryHeaders, summaryColumnWidths, rowHeight, helveticaBold, true);
+      currentY = drawTableRow(
+        currentPage,
+        currentY,
+        summaryHeaders,
+        summaryColumnWidths,
+        rowHeight,
+        helveticaBold,
+        true
+      );
     }
 
-    currentY = drawTableRow(currentPage, currentY, rowArray, summaryColumnWidths, rowHeight, helvetica);
+    currentY = drawTableRow(
+      currentPage,
+      currentY,
+      rowArray,
+      summaryColumnWidths,
+      rowHeight,
+      helvetica
+    );
   });
 
   // ----- 2. DETAILED SEATING PAGES -----
   // For each room, create a detailed seating page
-  Object.entries(seatingArrangement.arrangement).forEach(([roomCode, roomData]) => {
-    currentPage = addNewPage();
-    currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating`, false);
+  Object.entries(seatingArrangement.arrangement).forEach(
+    ([roomCode, roomData]) => {
+      currentPage = addNewPage();
+      currentY = drawPageHeader(
+        currentPage,
+        `Room No. ${roomCode} - Detailed Seating`,
+        false
+      );
 
-    // Group seats by batch from seatMatrix
-    const batchGroups = {};
-    if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
-      roomData.seatMatrix.forEach(row => {
-        row.forEach(seat => {
-          if (!batchGroups[seat.batch]) {
-            batchGroups[seat.batch] = [];
-          }
-          batchGroups[seat.batch].push(seat);
+      // Group seats by batch from seatMatrix
+      const batchGroups = {};
+      if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
+        roomData.seatMatrix.forEach((row) => {
+          row.forEach((seat) => {
+            // Skip seats with null batch or roll number
+            if (seat.batch && seat.rollNo !== null) {
+              if (!batchGroups[seat.batch]) {
+                batchGroups[seat.batch] = [];
+              }
+              batchGroups[seat.batch].push(seat);
+            }
+          });
         });
+      }
+
+      // For each batch in this room, render the detailed seating table
+      Object.entries(batchGroups).forEach(([batchName, seats]) => {
+        // Skip if no valid seats (all null)
+        if (seats.length === 0) return;
+
+        if (currentY < 100) {
+          currentPage = addNewPage();
+          currentY = drawPageHeader(
+            currentPage,
+            `Room No. ${roomCode} - Detailed Seating (continued)`,
+            false
+          );
+        }
+
+        // Batch header
+        currentPage.drawText(batchName, {
+          x: 50,
+          y: currentY,
+          size: 12,
+          font: helveticaBold,
+        });
+        currentY -= 20;
+
+        // Decide on single or double column layout based on the number of seats
+        const useDoubleColumn = seats.length > 15;
+        const seatColumnWidths = useDoubleColumn
+          ? [60, 60, 60, 60]
+          : [120, 120];
+        const seatHeaders = useDoubleColumn
+          ? ["Seat No.", "Roll No.", "Seat No.", "Roll No."]
+          : ["Seat No.", "Roll No."];
+
+        // Draw seating table header row for the batch
+        currentY = drawTableRow(
+          currentPage,
+          currentY,
+          seatHeaders,
+          seatColumnWidths,
+          rowHeight,
+          helveticaBold,
+          true
+        );
+
+        // Sort seats by roll number
+        seats.sort((a, b) => a.rollNo - b.rollNo);
+
+        if (useDoubleColumn) {
+          // Split seats into two columns
+          const halfLength = Math.ceil(seats.length / 2);
+          const firstColumn = seats.slice(0, halfLength);
+          const secondColumn = seats.slice(halfLength);
+          const maxRows = Math.max(firstColumn.length, secondColumn.length);
+
+          for (let i = 0; i < maxRows; i++) {
+            if (currentY < 50) {
+              currentPage = addNewPage();
+              currentY = drawPageHeader(
+                currentPage,
+                `Room No. ${roomCode} - ${batchName} (continued)`
+              );
+              currentY = drawTableRow(
+                currentPage,
+                currentY,
+                seatHeaders,
+                seatColumnWidths,
+                rowHeight,
+                helveticaBold,
+                true
+              );
+            }
+
+            const rowValues = [];
+            // First column data
+            if (i < firstColumn.length) {
+              rowValues.push(String(firstColumn[i].seatNo));
+              rowValues.push(String(firstColumn[i].rollNo));
+            } else {
+              rowValues.push("");
+              rowValues.push("");
+            }
+            // Second column data
+            if (i < secondColumn.length) {
+              rowValues.push(String(secondColumn[i].seatNo));
+              rowValues.push(String(secondColumn[i].rollNo));
+            } else {
+              rowValues.push("");
+              rowValues.push("");
+            }
+
+            currentY = drawTableRow(
+              currentPage,
+              currentY,
+              rowValues,
+              seatColumnWidths,
+              rowHeight,
+              helvetica
+            );
+          }
+        } else {
+          // Single column layout
+          for (const seat of seats) {
+            if (currentY < 50) {
+              currentPage = addNewPage();
+              currentY = drawPageHeader(
+                currentPage,
+                `Room No. ${roomCode} - ${batchName} (continued)`
+              );
+              currentY = drawTableRow(
+                currentPage,
+                currentY,
+                seatHeaders,
+                seatColumnWidths,
+                rowHeight,
+                helveticaBold,
+                true
+              );
+            }
+            currentY = drawTableRow(
+              currentPage,
+              currentY,
+              [String(seat.seatNo), String(seat.rollNo)],
+              seatColumnWidths,
+              rowHeight,
+              helvetica
+            );
+          }
+        }
+
+        currentY -= 20; // Space after each batch table
       });
     }
-
-    // For each batch in this room, render the detailed seating table
-    Object.entries(batchGroups).forEach(([batchName, seats]) => {
-      if (currentY < 100) {
-        currentPage = addNewPage();
-        currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating (continued)`, false);
-      }
-
-      // Batch header
-      currentPage.drawText(batchName, {
-        x: 50,
-        y: currentY,
-        size: 12,
-        font: helveticaBold,
-      });
-      currentY -= 20;
-
-      // Decide on single or double column layout based on the number of seats
-      const useDoubleColumn = seats.length > 15;
-      const seatColumnWidths = useDoubleColumn ? [60, 60, 60, 60] : [120, 120];
-      const seatHeaders = useDoubleColumn
-        ? ["Seat No.", "Roll No.", "Seat No.", "Roll No."]
-        : ["Seat No.", "Roll No."];
-
-      // Draw seating table header row for the batch
-      currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
-
-      // Sort seats by roll number
-      seats.sort((a, b) => a.rollNo - b.rollNo);
-
-      if (useDoubleColumn) {
-        // Split seats into two columns
-        const halfLength = Math.ceil(seats.length / 2);
-        const firstColumn = seats.slice(0, halfLength);
-        const secondColumn = seats.slice(halfLength);
-        const maxRows = Math.max(firstColumn.length, secondColumn.length);
-
-        for (let i = 0; i < maxRows; i++) {
-          if (currentY < 50) {
-            currentPage = addNewPage();
-            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
-            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
-          }
-
-          const rowValues = [];
-          // First column data
-          if (i < firstColumn.length) {
-            rowValues.push(String(firstColumn[i].seatNo));
-            rowValues.push(String(firstColumn[i].rollNo));
-          } else {
-            rowValues.push("");
-            rowValues.push("");
-          }
-          // Second column data
-          if (i < secondColumn.length) {
-            rowValues.push(String(secondColumn[i].seatNo));
-            rowValues.push(String(secondColumn[i].rollNo));
-          } else {
-            rowValues.push("");
-            rowValues.push("");
-          }
-
-          currentY = drawTableRow(currentPage, currentY, rowValues, seatColumnWidths, rowHeight, helvetica);
-        }
-      } else {
-        // Single column layout
-        for (const seat of seats) {
-          if (currentY < 50) {
-            currentPage = addNewPage();
-            currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - ${batchName} (continued)`);
-            currentY = drawTableRow(currentPage, currentY, seatHeaders, seatColumnWidths, rowHeight, helveticaBold, true);
-          }
-          currentY = drawTableRow(currentPage, currentY, [String(seat.seatNo), String(seat.rollNo)], seatColumnWidths, rowHeight, helvetica);
-        }
-      }
-
-      currentY -= 20; // Space after each batch table
-    });
-  });
+  );
 
   // Return the PDF document as a buffer
   return await pdfDoc.save();
@@ -985,10 +1057,17 @@ app.post("/api/generate-seating", async (req, res) => {
     }
 
     // 3) Generate seating arrangement
-    const seatingArrangement = generateSeatingArrangement(batchDetails, roomDetails);
+    const seatingArrangement = generateSeatingArrangement(
+      batchDetails,
+      roomDetails
+    );
 
     // 4) Generate PDF with correct parameter order: seatingArrangement, examName, examDate
-    const pdfBytes = await generateSeatingPDF(seatingArrangement, examName, examDate);
+    const pdfBytes = await generateSeatingPDF(
+      seatingArrangement,
+      examName,
+      examDate
+    );
 
     // 5) Send PDF
     res.setHeader("Content-Type", "application/pdf");
@@ -1009,7 +1088,7 @@ const pdfSchema = new mongoose.Schema({
   data: String,
   from: String,
   to: String,
-  textmessage:String,
+  textmessage: String,
 });
 const pdfmodel = mongoose.model("PDF", pdfSchema, "notify");
 
@@ -1022,7 +1101,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "no file uploaded" });
     const base64dta = req.file.buffer.toString("base64");
     const from = req.body.from;
-    const textmessage=req.body.textmessage;
+    const textmessage = req.body.textmessage;
 
     const to = req.body.to;
     const newpdf = new pdfmodel({
@@ -1030,7 +1109,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
       data: base64dta,
       from: from,
       to: to,
-      textmessage:textmessage,
+      textmessage: textmessage,
     });
     await newpdf.save();
     res.status(200).json({ success: true, to });
@@ -1038,7 +1117,6 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
     res.status(400).json({ success: false });
   }
 });
-
 
 // ______________________FETCHING FACULTY______________________
 
@@ -1056,173 +1134,156 @@ app.get("/api/notify/faculty", async (req, res) => {
   }
 });
 
-
-
 // ______________________DISPLAY INBOX______________________
 
-app.get("/get-pdfs-to/:to",async(req,res)=>{
-  try{
-      const {to}=req.params;
-
-      const pdfdoc = await pdfmodel.find({ 
-        $or: [{ to: "all" }, { to: to }]
-      });
-      console.log(pdfdoc);
-      
-
-      if(!pdfdoc.length)
-        return res.status(400).json({message:"no inbox found"});
-
-      const responcepdf=pdfdoc.map((doc)=>({
-
-        filename:doc.filename,
-        from:doc.from,
-        to:doc.to,
-        textmessage:doc.textmessage,
-        data:`data:application/pdf;base64,${doc.data}`,
-      }));
-      res.json(responcepdf)
-  }
-  catch(error){
-    console.log(error);
-    res.status(400).json({message:"error in retriving pdfs"})
-  }
-})
-
-//______________________DISPLAY SEND______________________
-
-app.get("/get-pdfs-from/:from",async(req,res)=>{
-  try{
-      const {from}=req.params;
-
-      const pdfdoc=await pdfmodel.find({from:from});
-
-      if(!pdfdoc.length)
-        return res.status(400).json({message:"no inbox found"});
-
-      const responcepdf=pdfdoc.map((doc)=>({
-
-        filename:doc.filename,
-        from:doc.from,
-        to:doc.to,
-        textmessage:doc.textmessage,
-        data:`data:application/pdf;base64,${doc.data}`,
-      }));
-      res.json(responcepdf)
-  }
-  catch(error){
-    console.log(error);
-    res.status(400).json({message:"error in retriving pdfs"})
-  }
-})
-
-
-//______________________TRIAL SCHEMA_______________________
-
-const trialSchema=new mongoose.Schema({
-    mode:String,
-    subject:String,
-    batch:String,
-    fileName:String,
-    data:String,
-    date:String,
-    from:String,
-    allocate:String,
-})
-
-const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
-//_______________________TRIAL UPLOAD_______________________
-
-
-app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
-    try {
-      const data64=req.file.buffer.toString("base64")
-      const mode=req.body.mode;
-      const subject=req.body.subject;
-      const batch=req.body.batch;
-      const date=req.body.dt;
-      const from=req.body.from;
-      const newtrial= new trialModel({
-        mode:mode,
-        subject:subject,
-        batch:batch,
-        fileName:req.file.originalname,
-        data:data64,
-        date:date,
-        from:from,
-        allocate:null,
-      })
-      await newtrial.save();  
-      res.status(200).json({success:true})
-    } catch (error) {
-      console.log(error);
-      
-      res.status(400).json({success:false})
-    }
-
-})
-
-
-
-//______________________TRIAL TO_______________________
-
-
-app.get("/get-trial/:to",async(req,res)=>{
+app.get("/get-pdfs-to/:to", async (req, res) => {
   try {
+    const { to } = req.params;
 
-      const {to}=req.params;
-      const module=await Module.findOne({moduleCoordinator:to})
-      const subjects=await module.subjects
-      const trial=await trialModel.find({subject:{$in:subjects}})
-      res.status(200).json(trial)
-  } catch (error) {
-    res.status(400).json({message:"error"})
-  }
-})
+    const pdfdoc = await pdfmodel.find({
+      $or: [{ to: "all" }, { to: to }],
+    });
+    console.log(pdfdoc);
 
-//____________________UPDATE TRIAL TO ALLOCATE_____________________
+    if (!pdfdoc.length)
+      return res.status(400).json({ message: "no inbox found" });
 
-app.put('/trial-update/:id',async (req,res)=>{
-  try {
-      const {id}=req.params;
-      const {faculty}=req.body;
-
-      const trialUpdt=await trialModel.findOneAndUpdate(
-        {_id:id},
-        {
-          mode:"allocated",
-          allocate:faculty,
-
-        }
-      )
-    
+    const responcepdf = pdfdoc.map((doc) => ({
+      filename: doc.filename,
+      from: doc.from,
+      to: doc.to,
+      textmessage: doc.textmessage,
+      data: `data:application/pdf;base64,${doc.data}`,
+    }));
+    res.json(responcepdf);
   } catch (error) {
     console.log(error);
-    
-    }
-})
-
-
-//______________________ALLOCATED FACULTY SCRUTINY INBOX______________
-
-app.get('/scrutiny-inbox/:allocate',async (req,res)=>{
-  try {
-    const {allocate}=req.params;
-    const allocateInbox= await trialModel.find({allocate:allocate});
-    res.status(200).json(allocateInbox)
-  } catch (error) {
-    res.status(400).json({message:"error occured"})
-    console.log(error);
-    
+    res.status(400).json({ message: "error in retriving pdfs" });
   }
 });
 
+//______________________DISPLAY SEND______________________
+
+app.get("/get-pdfs-from/:from", async (req, res) => {
+  try {
+    const { from } = req.params;
+
+    const pdfdoc = await pdfmodel.find({ from: from });
+
+    if (!pdfdoc.length)
+      return res.status(400).json({ message: "no inbox found" });
+
+    const responcepdf = pdfdoc.map((doc) => ({
+      filename: doc.filename,
+      from: doc.from,
+      to: doc.to,
+      textmessage: doc.textmessage,
+      data: `data:application/pdf;base64,${doc.data}`,
+    }));
+    res.json(responcepdf);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "error in retriving pdfs" });
+  }
+});
+
+//______________________TRIAL SCHEMA_______________________
+
+const trialSchema = new mongoose.Schema({
+  mode: String,
+  subject: String,
+  batch: String,
+  fileName: String,
+  data: String,
+  date: String,
+  from: String,
+  allocate: String,
+});
+
+const trialModel = mongoose.model("trials", trialSchema, "TRIAL");
+//_______________________TRIAL UPLOAD_______________________
+
+app.post("/upload-trial", upload.single("pdfFile"), async (req, res) => {
+  try {
+    const data64 = req.file.buffer.toString("base64");
+    const mode = req.body.mode;
+    const subject = req.body.subject;
+    const batch = req.body.batch;
+    const date = req.body.dt;
+    const from = req.body.from;
+    const newtrial = new trialModel({
+      mode: mode,
+      subject: subject,
+      batch: batch,
+      fileName: req.file.originalname,
+      data: data64,
+      date: date,
+      from: from,
+      allocate: null,
+    });
+    await newtrial.save();
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({ success: false });
+  }
+});
+
+//______________________TRIAL TO_______________________
+
+app.get("/get-trial/:to", async (req, res) => {
+  try {
+    const { to } = req.params;
+    const module = await Module.findOne({ moduleCoordinator: to });
+    const subjects = await module.subjects;
+    const trial = await trialModel.find({ subject: { $in: subjects } });
+    res.status(200).json(trial);
+  } catch (error) {
+    res.status(400).json({ message: "error" });
+  }
+});
+
+//____________________UPDATE TRIAL TO ALLOCATE_____________________
+
+app.put("/trial-update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { faculty } = req.body;
+
+    const trialUpdt = await trialModel.findOneAndUpdate(
+      { _id: id },
+      {
+        mode: "allocated",
+        allocate: faculty,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//______________________ALLOCATED FACULTY SCRUTINY INBOX______________
+
+app.get("/scrutiny-inbox/:allocate", async (req, res) => {
+  try {
+    const { allocate } = req.params;
+    const allocateInbox = await trialModel.find({ allocate: allocate });
+    res.status(200).json(allocateInbox);
+  } catch (error) {
+    res.status(400).json({ message: "error occured" });
+    console.log(error);
+  }
+});
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
-const path = require('path');
+const path = require("path");
 const { log } = require("console");
-const { generateInvigilationPDF } = require(path.join(__dirname, 'pdfGenerator.js'));
+const { generateInvigilationPDF } = require(path.join(
+  __dirname,
+  "pdfGenerator.js"
+));
 
 app.get("/api/duty/faculty", async (req, res) => {
   try {
@@ -1251,26 +1312,37 @@ app.post("/api/generate-invigilation", async (req, res) => {
   try {
     const { selectedFaculties, selectedRooms, dutyDate } = req.body;
 
-    if (!selectedFaculties || !selectedRooms || selectedFaculties.length === 0 || selectedRooms.length === 0) {
-      return res.status(400).json({ error: "Please select at least one faculty and one room" });
+    if (
+      !selectedFaculties ||
+      !selectedRooms ||
+      selectedFaculties.length === 0 ||
+      selectedRooms.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please select at least one faculty and one room" });
     }
 
     // Generate PDF
-    const pdfBytes = await generateInvigilationPDF(selectedFaculties, selectedRooms, dutyDate);
+    const pdfBytes = await generateInvigilationPDF(
+      selectedFaculties,
+      selectedRooms,
+      dutyDate
+    );
 
     // Send the PDF as a response
-    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
-      'Content-Disposition',
+      "Content-Disposition",
       `attachment; filename=invigilation-duty-${dutyDate}.pdf`
     );
     res.send(Buffer.from(pdfBytes));
   } catch (error) {
     console.error("Error generating invigilation duty allocation:", error);
-    res.status(500).json({ error: "Error generating invigilation duty allocation" });
+    res
+      .status(500)
+      .json({ error: "Error generating invigilation duty allocation" });
   }
 });
-
-
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
