@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded",async function() {
                 const byteArray = new Uint8Array(byteNumbers);
                 const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                console.log("hai");
+                // console.log("hai");
                 
                 mainContainer.innerHTML+=`
                 <section class="content-section"  data-section='${send._id}'>
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded",async function() {
                 
                     <div class="bottom-right-container">
                         
-                        <button class="send-button" >Allocate</button>
+                        <button class="send-button" >Scrutiny</button>
                     </div>
                 </section> 
                 `
@@ -70,5 +70,20 @@ document.addEventListener("DOMContentLoaded",async function() {
         }
     }
     console.log(data.user.username)
-    send(data.user.username)
+    await send(data.user.username)
+    document.querySelectorAll(".send-button").forEach((btn) => {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault(); // Prevent default action if necessary
+            document.getElementById("scrutiny-popup").classList.add("show"); // Show the popup
+        });
+    });
+    
+    // Close popup when clicking the close button
+    document.querySelector(".close").addEventListener("click", function (e) {
+        e.preventDefault();
+        document.getElementById("scrutiny-popup").classList.remove("show"); // Hide the popup
+    });    
+    
+        
+    
 });

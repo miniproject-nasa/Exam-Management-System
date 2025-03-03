@@ -285,6 +285,170 @@ form button:focus {
     border: 1px solid rgba(15, 98, 254, 1);
 }
 
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow-y: auto;
+    /* Flex properties will apply when shown */
+    align-items: center;
+    justify-content: center;
+}
+
+/* When we want to show the popup, add the "show" class */
+.popup.show {
+    display: flex;
+}
+
+.popup-content {
+    background: white;
+    margin-top: 2200px;
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 600px;
+    border-radius: 10px;
+    position: relative;
+}
+/* Show popup when targeted */
+:target {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Close button */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    text-decoration: none;
+    font-size: 24px;
+    color: black;
+}
+
+#credentials-text {
+    white-space: pre-line; /* Ensures line breaks are respected */
+    font-weight: bold;
+    font-size: 18px;
+    color: black;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.popup-content label {
+    font-size: 14px;
+    color: rgba(112, 112, 112, 1);
+    font-weight: 500;
+    margin-bottom: 7px;
+    margin-top: 7px;
+    display: block;
+}
+
+.popup-content input {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: rgba(112, 112, 112, 1);
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+.popup-content form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.popup-content button {
+    width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    margin-top: 10px;
+    border: none;
+    padding: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+/* Ensure the title is centered */
+.scrutniy-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    margin-top: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Checkbox and declaration text on the same line */
+.certification-container {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Adds space between checkbox and text */
+    flex-wrap: wrap; /* Allows text wrapping when necessary */
+}
+
+.certification-container input[type="checkbox"] {
+    margin: 0; /* Ensures no unnecessary spacing */
+    flex-shrink: 0; /* Prevents checkbox from shrinking */
+}
+
+.information-type {
+    font-size: 12px;
+    color: rgba(112, 112, 112, 1);
+    letter-spacing: .6px;
+    line-height: 1.3;
+    list-style: none;
+    padding: 0;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap; /* Ensures no extra space due to wrapping */
+}
+
+.dropdown {
+    display: flex;
+    width: 100%;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd; /* Default border */
+    background-color: white;
+    color: rgba(112, 112, 112, 1);
+    cursor: pointer;
+    appearance: none;
+    outline: none;
+    margin-bottom: 15px;
+    margin-top: 0px;
+}
+
+select:focus {
+    border: 1px solid rgba(15, 98, 254, 1);
+}
+
 @media only screen and (max-width: 650px) {
     header {
         height: 55px;
