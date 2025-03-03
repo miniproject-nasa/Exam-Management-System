@@ -5,9 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
-    "dev": "nodemon server.js",
-    "postinstall": "npm install"
-  },
+    "dev": "nodemon server.js"
+    },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/miniproject-nasa/Exam-Management-System.git"
