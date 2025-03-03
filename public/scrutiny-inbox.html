@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body class="main">
     <header>
         <img src="images/logo.webp" alt="logo">
             <div class="title-head">
@@ -65,7 +65,155 @@
                 </div>
             </div>
         </section> -->
-    </div>    
+    </div>   
+
+    <div id="scrutiny-popup" class="popup">
+        <div class="popup-content">
+          <a href="#" class="close">&times;</a>
+          <br>
+          <h2 class="scrutiny-title">Scrutiny Form</h2>
+          <br><br>
+          <form>
+
+            <label for="course-code-name" class="information-type">Course Code & Course Name</label>
+            <select id="course-code-name" name="course-code-name" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Correct">Correct</option>
+              <option value="Not Correct">Not Correct</option>
+            </select>
+
+            <label for="max-marks-duration" class="information-type">Max Marks & Duration</label>
+            <select id="max-marks-duration" name="max-marks-duration" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Correct">Correct</option>
+              <option value="Not Correct">Not Correct</option>
+            </select>
+
+            <label for="question-pattern" class="information-type">Pattern of Question Paper</label>
+            <select id="question-pattern" name="question-pattern" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Correct">Correct</option>
+              <option value="Not Correct">Not Correct</option>
+            </select>
+
+            <label for="choices-instruction" class="information-type">Marking of Compulsory Questions, Choices & Instructions (like use of Tables, Graph etc.)</label>
+            <select id="choices-instruction" name="choices-instruction" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Correct">Correct</option>
+              <option value="Not Correct">Not Correct</option>
+            </select>
+
+            <label for="question-clear" class="information-type">Wheather the Questions are clear?</label>
+            <select id="question-clear" name="question-clear" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="question-duplicate" class="information-type">Wheather Questions are duplicated?</label>
+            <select id="question-duplicate" name="question-duplicate" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="question-distribution" class="information-type">Wheather distribution of questions are as per particular syllabus covering modules</label>
+            <select id="question-distribution" name="question-distribution" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="figure-number" class="information-type">Wheather numbers of tables and figures match with that in questions</label>
+            <select id="figure-number" name="figure-number" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="duration-sufficient" class="information-type">Wheather the duration of time is sufficient?</label>
+            <select id="duration-sufficient" name="duration-sufficient" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="question-mapping" class="information-type">Wheather mapping of questions with course outcome given?</label>
+            <select id="question-mapping" name="question-mapping" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <label for="recommendation" class="information-type">Recommendation</label>
+            <select id="recommendation" name="recommendation" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Question Paper Can be Accepted">Question Paper Can be Accepted</option>
+              <option value="Accepted with Minor Corrections">Accepted with Minor Corrections</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+
+            <label for="q1" class="information-type">Suggested Corrections</label>
+
+            <label for="q1" class="information-type">Question 1</label>
+            <input type="text" id="q1" name="q1" required />
+
+            <label for="q2" class="information-type">Question 2</label>
+            <input type="text" id="q2" name="q2" required />
+            
+            <label for="q3" class="information-type">Question 3</label>
+            <input type="text" id="q3" name="q3" required />
+
+            <label for="q4" class="information-type">Question 4</label>
+            <input type="text" id="q4" name="q4" required />
+
+            <label for="q5" class="information-type">Question 5</label>
+            <input type="text" id="q5" name="q5" required />
+
+            <label for="q6" class="information-type">Question 6</label>
+            <input type="text" id="q6" name="q6" required />
+
+            <label for="q7" class="information-type">Question 7</label>
+            <input type="text" id="q7" name="q7" required />
+
+            <label for="q8" class="information-type">Question 8</label>
+            <input type="text" id="q8" name="q8" required />
+
+            <label for="q9" class="information-type">Question 9</label>
+            <input type="text" id="q9" name="q9" required />
+
+            <label for="q10" class="information-type">Question 10</label>
+            <input type="text" id="q10" name="q10" required />
+
+            <label for="q11" class="information-type">Question 11</label>
+            <input type="text" id="q11" name="q11" required />
+
+            <label for="q12" class="information-type">Question 12</label>
+            <input type="text" id="q12" name="q12" required />
+
+            <label for="rejection-reason" class="information-type">Reasons for Rejection</label>
+            <input type="text" id="rejection-reason" name="rejection-reason" required />
+
+            <label for="evaluation-scheme-sufficient" class="information-type">Wheather the scheme of evaluation is sufficient for valuation, if not, give suggestions</label>
+            <input type="text" id="evaluation-scheme-sufficient" name="evaluation-scheme-sufficient" required />
+
+            <label for="evaluation-scheme" class="information-type">Wheather the scheme of evaluation can be Accepted/Rejected</label>
+            <select id="evaluation-scheme" name="evaluation-scheme" required>
+              <option value="" disabled selected>Select</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+
+            <label class="certification-container">
+                <input type="checkbox" id="certification-checkbox" name="certification-checkbox" required>
+                <span>I hereby certify that, I have scrutinized the Question Paper and the scheme of evaluation and suggested the required corrections as mentioned in the attached sheet.</span>
+            </label>
+
+            <button type="submit">Submit</button>
+          </form>
+        </div>
+      </div>
+
     
     <br><br><br>
     <footer>
