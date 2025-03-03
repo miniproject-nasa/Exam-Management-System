@@ -1127,6 +1127,7 @@ const trialSchema=new mongoose.Schema({
     data:String,
     date:String,
     from:String,
+    allocate:String,
 })
 
 const  trialModel=mongoose.model("trials",trialSchema,"TRIAL");
@@ -1149,6 +1150,7 @@ app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
         data:data64,
         date:date,
         from:from,
+        allocate:null,
       })
       await newtrial.save();  
       res.status(200).json({success:true})
@@ -1159,6 +1161,8 @@ app.post("/upload-trial",upload.single("pdfFile"),async(req,res)=>{
     }
 
 })
+
+
 
 //______________________TRIAL TO_______________________
 
@@ -1176,10 +1180,32 @@ app.get("/get-trial/:to",async(req,res)=>{
   }
 })
 
+//____________________UPDATE TRIAL TO ALLOCATE_____________________
+
+app.put('/trial-update/:id',async (req,res)=>{
+  try {
+      const {id}=req.params;
+      const {faculty}=req.body;
+
+      const trialUpdt=await trialModel.findOneAndUpdate(
+        {_id:id},
+        {
+          mode:"allocated",
+          allocate:faculty,
+
+        }
+      )
+    
+  } catch (error) {
+    console.log(error);
+    
+    }
+})
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
 const path = require('path');
+const { log } = require("console");
 const { generateInvigilationPDF } = require(path.join(__dirname, 'pdfGenerator.js'));
 
 app.get("/api/duty/faculty", async (req, res) => {
