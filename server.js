@@ -1143,7 +1143,7 @@ app.get("/get-pdfs-to/:to", async (req, res) => {
     const pdfdoc = await pdfmodel.find({
       $or: [{ to: "all" }, { to: to }],
     });
-    console.log(pdfdoc);
+    // console.log(pdfdoc);
 
     if (!pdfdoc.length)
       return res.status(400).json({ message: "no inbox found" });
@@ -1198,6 +1198,8 @@ const trialSchema = new mongoose.Schema({
   date: String,
   from: String,
   allocate: String,
+  sfileName:String,
+  sdata:String,
 });
 
 const trialModel = mongoose.model("trials", trialSchema, "TRIAL");
@@ -1220,6 +1222,8 @@ app.post("/upload-trial", upload.single("pdfFile"), async (req, res) => {
       date: date,
       from: from,
       allocate: null,
+      sfileName:null,
+      sdata:null,
     });
     await newtrial.save();
     res.status(200).json({ success: true });
@@ -1262,6 +1266,30 @@ app.put("/trial-update/:id", async (req, res) => {
     console.log(error);
   }
 });
+
+//_______________________SCRUTINIZED_____________________________
+app.put("/trial-scrutinized/:id",upload.single("scrutFile"),async(req,res)=>{
+    try {
+      const {id}=req.params;
+      const data64 = req.file.buffer.toString("base64");
+      const trialupdate =await trialModel.findByIdAndUpdate(
+        {_id:id},
+        {
+          mode:"scrutinized",
+          sfileName:req.file.originalname,
+          sdata:data64,
+        }
+
+      )
+
+
+    } catch (error) {
+      console.log(error);
+      
+    }
+
+})
+
 
 //______________________ALLOCATED FACULTY SCRUTINY INBOX______________
 
