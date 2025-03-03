@@ -521,7 +521,6 @@ app.put("/update-batch/:batch_name", async (req, res) => {
   }
 });
  // ------------------- SEATING ARRANGEMENT -------------------
-// Use pdf-lib instead of pdfkit
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 // GET batches for seating dropdown
@@ -552,8 +551,8 @@ function shuffleArray(array) {
   }
   return array;
 }
+
 // -------------- FUNCTION: Build Front Page Rows --------------
-// (Your earlier provided function, integrated here.)
 function buildFrontPageRows(summaryObject) {
   const tableData = [];
   let serialNo = 1;
@@ -567,7 +566,7 @@ function buildFrontPageRows(summaryObject) {
     });
   });
 
-  // Process each batch in the order they appear (or you can sort them as needed)
+  // Process each batch in the order they appear
   batches.forEach(batchName => {
     let firstRow = true;
     roomCodes.forEach(roomCode => {
@@ -598,23 +597,6 @@ function buildFrontPageRows(summaryObject) {
   return tableData;
 }
 
-// -------------- HELPER: Split an Array into N Contiguous Chunks --------------
-function chunkify(rollArr, nChunks) {
-  const total = rollArr.length;
-  const baseSize = Math.floor(total / nChunks);
-  let remainder = total % nChunks;
-  let chunks = [];
-  let startIndex = 0;
-  for (let i = 0; i < nChunks; i++) {
-    let size = baseSize + (remainder > 0 ? 1 : 0);
-    remainder = Math.max(0, remainder - 1);
-    const chunk = rollArr.slice(startIndex, startIndex + size);
-    chunks.push(chunk);
-    startIndex += size;
-  }
-  return chunks;
-}
-
 // -------------- HELPER: Format Roll Ranges --------------
 function formatRollRange(rolls) {
   if (rolls.length === 0) return "-";
@@ -634,6 +616,8 @@ function formatRollRange(rolls) {
     .map(seq => (seq.length === 1 ? seq[0] : `${seq[0]}-${seq[seq.length - 1]}`))
     .join(" || ");
 }
+
+// -------------- FUNCTION: Generate Seating Arrangement --------------
 function generateSeatingArrangement(batchDetails, rooms) {
   const batches = [...batchDetails];
   const M = batches.length;
@@ -701,7 +685,7 @@ function generateSeatingArrangement(batchDetails, rooms) {
       summaryMap[b.B_name] = [];
     });
     seats.forEach((seatObj) => {
-      if (seatObj.batch) {
+      if (seatObj.batch && seatObj.rollNo !== null) {
         summaryMap[seatObj.batch].push(seatObj.rollNo);
       }
     });
@@ -714,10 +698,7 @@ function generateSeatingArrangement(batchDetails, rooms) {
   return { arrangement: finalArrangement, summary };
 }
 
-
-
 // ------------------- PDF GENERATION -------------------
-// Generate PDF with pdf-lib using the updated structure and naming
 async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   // Create a new PDF document
   const pdfDoc = await PDFDocument.create();
@@ -731,65 +712,62 @@ async function generateSeatingPDF(seatingArrangement, examName, examDate) {
   }
 
   // Draw header for a page and return the updated y position
-// ----- Helper function: Draw header for a page -----
-// Now accepts a third parameter `includeInstitutionHeader` (default true)
-function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
-  const { width, height } = page.getSize();
-  let yPos = height - 50;
-  const leftMargin = 50;
+  function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
+    const { width, height } = page.getSize();
+    let yPos = height - 50;
+    const leftMargin = 50;
 
-  // Draw institution header only if required.
-  if (includeInstitutionHeader) {
-    const lines = [
-      "Rajiv Gandhi Institute of Technology, Kottayam",
-      "Department of Computer Science and Engineering",
-      "B. Tech Computer Science and Engineering",
-    ];
-    lines.forEach((line) => {
-      page.drawText(line, {
+    // Draw institution header only if required.
+    if (includeInstitutionHeader) {
+      const lines = [
+        "Rajiv Gandhi Institute of Technology, Kottayam",
+        "Department of Computer Science and Engineering",
+        "B. Tech Computer Science and Engineering",
+      ];
+      lines.forEach((line) => {
+        page.drawText(line, {
+          x: leftMargin,
+          y: yPos,
+          size: 12,
+          font: helveticaBold,
+        });
+        yPos -= 20;
+      });
+    }
+
+    // Draw title.
+    yPos -= 10;
+    page.drawText(title || "Seating Arrangement", {
+      x: leftMargin,
+      y: yPos,
+      size: 14,
+      font: helveticaBold,
+    });
+    yPos -= 20;
+
+    // Draw exam name if provided.
+    if (examName) {
+      page.drawText(examName, {
         x: leftMargin,
         y: yPos,
         size: 12,
-        font: helveticaBold,
+        font: helvetica,
       });
       yPos -= 20;
-    });
-  }
+    }
 
-  // Draw title.
-  yPos -= 10;
-  page.drawText(title || "Seating Arrangement", {
-    x: leftMargin,
-    y: yPos,
-    size: 14,
-    font: helveticaBold,
-  });
-  yPos -= 20;
-
-  // Draw exam name if provided.
-  if (examName) {
-    page.drawText(examName, {
+    // Draw date.
+    const dateString = examDate || new Date().toLocaleDateString();
+    page.drawText(`Date: ${dateString}`, {
       x: leftMargin,
       y: yPos,
       size: 12,
       font: helvetica,
     });
-    yPos -= 20;
+    yPos -= 30;
+
+    return yPos;
   }
-
-  // Draw date.
-  const dateString = examDate || new Date().toLocaleDateString();
-  page.drawText(`Date: ${dateString}`, {
-    x: leftMargin,
-    y: yPos,
-    size: 12,
-    font: helvetica,
-  });
-  yPos -= 30;
-
-  return yPos;
-}
-
 
   // Draw a table row with cell borders and return the new y position
   function drawTableRow(page, y, values, columnWidths, rowHeight, font, isHeader = false) {
@@ -865,20 +843,26 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
     currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating`, false);
 
     // Group seats by batch from seatMatrix
-    const batchGroups = {};
+    const batchGroups = {}; 
     if (roomData.seatMatrix && roomData.seatMatrix.length > 0) {
       roomData.seatMatrix.forEach(row => {
         row.forEach(seat => {
-          if (!batchGroups[seat.batch]) {
-            batchGroups[seat.batch] = [];
+          // Skip seats with null batch or roll number
+          if (seat.batch && seat.rollNo !== null) {
+            if (!batchGroups[seat.batch]) {
+              batchGroups[seat.batch] = [];
+            }
+            batchGroups[seat.batch].push(seat);
           }
-          batchGroups[seat.batch].push(seat);
         });
       });
     }
 
     // For each batch in this room, render the detailed seating table
     Object.entries(batchGroups).forEach(([batchName, seats]) => {
+      // Skip if no valid seats (all null)
+      if (seats.length === 0) return;
+      
       if (currentY < 100) {
         currentPage = addNewPage();
         currentY = drawPageHeader(currentPage, `Room No. ${roomCode} - Detailed Seating (continued)`, false);
@@ -959,7 +943,6 @@ function drawPageHeader(page, title = "", includeInstitutionHeader = true) {
   // Return the PDF document as a buffer
   return await pdfDoc.save();
 }
-
 // -------------- EXPRESS ROUTE --------------
 app.post("/api/generate-seating", async (req, res) => {
   try {
