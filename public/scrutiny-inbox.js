@@ -18,21 +18,21 @@ document.addEventListener("DOMContentLoaded",async function() {
     }
     await checkAuthStatus();
 
-    async function send(from) {
+    async function send(allocate) {
         try {
-            const responce=await fetch(`/get-pdfs-from/${from}`);
+            const responce=await fetch(`/scrutiny-inbox/${allocate}`);
             if(!responce.ok)
                 return console.log("failed to load inbox");
 
-            const sends=await responce.json();
+            const scrutinys=await responce.json();
 
             const mainContainer=document.querySelector(".main-content")
 
             mainContainer.innerHTML=''
-            console.log(sends)
-            sends.forEach((send)=>{
+            console.log(scrutinys)
+            scrutinys.forEach((send)=>{
                 // base64 to blob url
-                const byteCharacters = atob(send.data.split(',')[1]); 
+                const byteCharacters = atob(send.data); 
                 const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
                 const byteArray = new Uint8Array(byteNumbers);
                 const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
@@ -40,31 +40,32 @@ document.addEventListener("DOMContentLoaded",async function() {
                 console.log("hai");
                 
                 mainContainer.innerHTML+=`
-                <section class="content-section">
-                <ul class="information-type">
-                    <li>
-                        <span class="highlight-text">To:${send.to}</span>
-                        <p>${send.textmessage}</p>
-
-                        <ul class="pdf-container">
-                            <li class="pdf-box">
-                                <div class="pdf-box-small">
-                                    <p class="info-new-type">PDF</p>
-                                </div>  
-                            
-                                <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${send.filename}</a>
-                            
-                            </li>
-                        
-                        </ul>
-                    </li>
-                </ul>            
-                </section>
-                `
-                console.log("hai");
+                <section class="content-section"  data-section='${send._id}'>
+                    <div class="allocated-container">
+                       
+                    </div>
                 
+                    <ul class="information-type">
+                        <li><span class="highlight-text">subject:${send.subject}</span></li>
+                        <li>mode:${send.mode}</li>
+                    </ul>
+                
+                    <div class="pdf-container">
+                        <div class="pdf-box">
+                            <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${send.fileName}</a>
+                        </div>
+                        
+                    </div>
+                
+                    <div class="bottom-right-container">
+                        
+                        <button class="send-button" >Allocate</button>
+                    </div>
+                </section> 
+                `
             })
         } catch (error) {
+            console.log(error);
             
         }
     }

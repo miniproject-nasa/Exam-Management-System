@@ -1202,6 +1202,22 @@ app.put('/trial-update/:id',async (req,res)=>{
     }
 })
 
+
+//______________________ALLOCATED FACULTY SCRUTINY INBOX______________
+
+app.get('/scrutiny-inbox/:allocate',async (req,res)=>{
+  try {
+    const {allocate}=req.params;
+    const allocateInbox= await trialModel.find({allocate:allocate});
+    res.status(200).json(allocateInbox)
+  } catch (error) {
+    res.status(400).json({message:"error occured"})
+    console.log(error);
+    
+  }
+});
+
+
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
 const path = require('path');
