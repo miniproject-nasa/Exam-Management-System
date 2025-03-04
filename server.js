@@ -4,7 +4,7 @@ const app = express();
 const session = require("express-session");
 const multer = require("multer");
 
-// Connect to MongoDB
+// ______________________Connect to MongoDB_________________
 mongoose
   .connect(
     "mongodb+srv://Examiner:Exam%40123@exammanagedb.2z5zb.mongodb.net/Exammanage"
@@ -12,7 +12,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
-// Middleware
+// _________________Middleware______________________________
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 app.use(express.json());
@@ -45,7 +45,7 @@ app.get("/modulemanagement", (req, res) => {
   res.redirect("/module.html");
 });
 
-// ------------------- SUBJECT MANAGEMENT -------------------
+// _________________________ SUBJECT MANAGEMENT _________________________
 const subjectSchema = new mongoose.Schema({
   S_name: String,
   S_code: String,
@@ -123,7 +123,7 @@ app.put("/update-subject/:S_code", async (req, res) => {
   }
 });
 
-// ------------------- ROOM MANAGEMENT -------------------
+// ______________________ROOM MANAGEMENT ______________________
 const roomSchema = new mongoose.Schema({
   R_code: String,
   R_capacity: String,
@@ -193,7 +193,7 @@ app.put("/update-room/:room_code", async (req, res) => {
   }
 });
 
-// ------------------- USER MANAGEMENT -------------------
+// _________________________ USER MANAGEMENT ________________________
 const userSchema = new mongoose.Schema({
   U_name: String,
   U_id: String,
@@ -278,7 +278,7 @@ app.delete("/delete-user/:user_id", async (req, res) => {
   }
 });
 
-// ------------------- LOGIN API -------------------
+//________________________ LOGIN API________________________
 app.use(
   session({
     secret: "your_secret_key",
@@ -339,7 +339,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// -------------------CHANGE PASSWOD--------------
+// _____________________CHANGE PASSWOD________________________
 app.put("/update-password", async (req, res) => {
   const { id, password } = req.body;
   console.log(req.body);
@@ -357,7 +357,7 @@ app.put("/update-password", async (req, res) => {
   return res.status(200).json({ success: true, message: "updated" });
 });
 
-// ------------------- MODULE MANAGEMENT -------------------
+//____________________ MODULE MANAGEMENT _____________________
 const moduleSchema = new mongoose.Schema({
   moduleName: { type: String, required: true },
   moduleCoordinator: { type: String, required: true },
@@ -450,7 +450,7 @@ app.get("/api/modules/:id", async (req, res) => {
   }
 });
 
-// ------------------- BATCH MANAGEMENT -------------------
+//________________________ BATCH MANAGEMENT ________________________
 const batchSchema = new mongoose.Schema({
   B_id: String,
   B_name: String,
@@ -1292,6 +1292,22 @@ app.put("/trial-scrutinized/:id",upload.single("scrutFile"),async(req,res)=>{
 
 })
 
+// ____________________VERIFIED TO FACULTY(FROM)__________________
+
+app.get("/get-verified/:from",async(req,res)=>{
+  try {
+      const {from}=req.params;
+      const verified=await trialModel.find({from:from, mode:"verified"})
+      res.status(200).json(verified);
+  } catch (error) {
+    console.log(error);
+      res.status(400).json({message:"error occured in api"})
+    
+  }  
+
+})
+
+
 
 //______________________ALLOCATED FACULTY SCRUTINY INBOX______________
 
@@ -1320,15 +1336,30 @@ app.put("/verify-update/:id",async(req,res)=>{
         mode:"verified",
         textmesg:textmesg,
       }
-
+      
     )
-
-
+    
+    
   } catch (error) {
     console.log(error);
     
   }
+  
+  
+})
 
+//______________________FINAL TO EC__________________________
+
+app.get("/final-qustion",async(req,res)=>{
+  try {
+    const final=await trialModel.find({mode:"final"})
+    res.status(200).json(final);
+    
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({message:"failed to load final qustions"})
+     
+  }
 
 })
 
