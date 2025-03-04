@@ -95,6 +95,8 @@ p {
     position: relative;
     width: 90%;
     margin: 0 auto;
+    margin-top: -40px;
+    margin-bottom: 45px;
     background: white;
     padding: 15px;
     border-radius: 5px;
@@ -227,7 +229,7 @@ select option[disabled] {
     flex-direction: row;
     gap: 15px;
     position: relative;
-    margin-top: 7px;
+    margin-top: 30px;
     margin-left: 5vw;
     justify-content: center;
 }
