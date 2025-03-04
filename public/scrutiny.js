@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
             inboxs.forEach((inbox)=>{
                 if(inbox.mode=="trial")
                 {
-                    console.log(inbox);
+                    // console.log(inbox);
                 
                 // base64 to blob url
                 const byteCharacters = atob(inbox.data); 
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 `
                 }
                 else{
-                    console.log(inbox);
+                    // console.log(inbox);
                 
                 // base64 to blob url
                 const byteCharacters = atob(inbox.data); 
