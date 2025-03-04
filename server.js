@@ -1200,6 +1200,7 @@ const trialSchema = new mongoose.Schema({
   allocate: String,
   sfileName:String,
   sdata:String,
+  textmesg:String,
 });
 
 const trialModel = mongoose.model("trials", trialSchema, "TRIAL");
@@ -1224,6 +1225,7 @@ app.post("/upload-trial", upload.single("pdfFile"), async (req, res) => {
       allocate: null,
       sfileName:null,
       sdata:null,
+      textmesg:null,
     });
     await newtrial.save();
     res.status(200).json({ success: true });
@@ -1303,6 +1305,32 @@ app.get("/scrutiny-inbox/:allocate", async (req, res) => {
     console.log(error);
   }
 });
+
+
+// ________________________VERIFY UPDATE__________________________
+
+app.put("/verify-update/:id",async(req,res)=>{
+  try {
+    const {id}=req.params;
+    const {textmesg}=req.body;
+    
+    const trialupdate =await trialModel.findByIdAndUpdate(
+      {_id:id},
+      {
+        mode:"verified",
+        textmesg:textmesg,
+      }
+
+    )
+
+
+  } catch (error) {
+    console.log(error);
+    
+  }
+
+
+})
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
