@@ -236,7 +236,7 @@ form button:focus {
     flex-direction: row;
     gap: 15px;
     position: relative;
-    margin-top: 30px;
+    margin-top: 7px;
     margin-left: 5vw;
     justify-content: center;
 }

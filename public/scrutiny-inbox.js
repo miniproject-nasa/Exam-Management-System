@@ -82,8 +82,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         <div class="allocated-container"></div>
                     
                         <ul class="information-type">
-                            <li><span class="highlight-text">subject: ${send.subject}</span></li>
-                            <li>mode: ${send.mode}</li>
+                            <li><span class="highlight-text">${send.subject}</span></li>
                         </ul>
                     
                         <div class="pdf-container">

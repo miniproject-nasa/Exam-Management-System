@@ -9,6 +9,12 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
+.message-text {
+    color: rgb(141, 141, 141);
+    font-size: 14px;
+    font-weight: 500;
+}
+
 header {
     position: relative;
     top: 0;
@@ -89,7 +95,6 @@ p {
     flex-direction: column;
     gap: 10px;
     align-items: center;
-    margin-top: -40px;
 }
 
 .content-section {
@@ -107,6 +112,7 @@ p {
     gap: 10px;
     margin-top: 10px;
     flex-wrap: wrap;
+    padding-left: 0;
 }
 
 .pdf-box {
@@ -121,7 +127,7 @@ p {
     gap: 7px;
     position: relative;
     align-items: center;
-    padding-left: 35px;
+    padding-left: auto;
 }
 
 .pdf-box-small {
@@ -137,11 +143,11 @@ p {
     position: absolute;
     left: 0;
     top: 0;
+    margin-right: 20px;
 }
 
 .pdf-box-content {
-    margin-left: 25px;
-    white-space: nowrap;
+    margin-left: 0;
     font-size: 11px;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
@@ -157,6 +163,8 @@ p {
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
     line-height: 1.6;
+    padding: 0;
+    margin: 0;
 }
 
 .info-new-type {
@@ -164,7 +172,6 @@ p {
     color: rgb(255, 255, 255);
     letter-spacing: .6px;
     line-height: 1.6;
-    white-space: nowrap;
 }
 
 .highlight-text {
@@ -177,11 +184,18 @@ ul {
  
 }
 
+.message-text {
+    color: rgb(141, 141, 141);
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .button-container {
     display: flex;
     flex-direction: row;
     gap: 15px;
     position: relative;
+    margin-bottom: -40px;
     margin-top: 7px;
     margin-left: 5vw;
     justify-content: center;
@@ -212,24 +226,24 @@ ul {
     justify-content: center;
 }
 
-.button-type-2 {
+.button-type-1 {
     background: rgba(15, 98, 254, 1);
     color: white;
     border: none;
 }
 
-.button-type-2:hover {
+.button-type-1:hover {
     background: rgb(1, 83, 235);
     transform: scale(1.01);
 }
 
-.button-type-1 {
+.button-type-2 {
     background: white;
     color: rgba(15, 98, 254, 1);
     border: 1px solid rgba(15, 98, 254, 1);
 }
 
-.button-type-1:hover {
+.button-type-2:hover {
     background: rgb(250, 250, 250);
     transform: scale(1.01);
 }
@@ -278,7 +292,7 @@ form button:focus {
 
     .menu {
         font-size: 9px;
-        right: 5px;
+        right: 5;
     }
 
     .menu-container {
@@ -286,10 +300,13 @@ form button:focus {
         right: 15px;
         gap: 15px;
     }
+
+    .highlight-text {
+        font-size: 6.5px;
+    }
     
     .main-content {
-        margin-top: 0px;
-        gap: 5px;
+        gap: 7px;
     }
     
     .content-section {
@@ -307,10 +324,6 @@ form button:focus {
     .pdf-box {
         padding: 5px;
         border-radius: 2px;
-    }
-
-    .highlight-text {
-        font-size: 6.5;
     }
     
     .information-type {

@@ -157,6 +157,8 @@ p {
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
     line-height: 1.6;
+    padding: 0;
+    margin: 0;
 }
 
 .info-new-type {
@@ -178,8 +180,8 @@ ul {
 
 .message-text {
     color: rgb(141, 141, 141);
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .button-container {

@@ -44,17 +44,12 @@ document.addEventListener("DOMContentLoaded",async function() {
                 <section class="content-section">
                 <ul class="information-type">
                     <li>
-                        <span class="highlight-text">To:${send.to}</span>
-                        <p>${send.textmessage}</p>
+                        <span class="highlight-text">Send To: ${send.to}</span>
+                        <p class="message-text">${send.textmessage}</p>
 
                         <ul class="pdf-container">
                             <li class="pdf-box">
-                                <div class="pdf-box-small">
-                                    <p class="info-new-type">PDF</p>
-                                </div>  
-                            
                                 <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${send.filename}</a>
-                            
                             </li>
                         
                         </ul>

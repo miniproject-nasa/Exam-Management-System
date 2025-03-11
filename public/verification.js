@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 mainContainer.innerHTML+=`
                 <section class="content-section" data-session="${inbox._id}">
                     <ul class="information-type">
-                        <li><span class="highlight-text">Exam Coordinator, ${inbox.date}</span></li>
+                        <li><span class="highlight-text">${inbox.date}</span></li>
                     </ul>
                 
                     <div class="pdf-container">
