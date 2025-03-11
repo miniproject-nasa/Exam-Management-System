@@ -135,7 +135,7 @@ p {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid rgb(208, 207, 207);
-    width: 150px;
+    max-width: 500px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -145,7 +145,7 @@ p {
 }
 
 .pdf-box-content {
-    white-space: nowrap;
+    width: 800px;
     font-size: 11px;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
@@ -161,6 +161,7 @@ p {
 
 .information-type {
     font-size: 12px;
+    font-weight: 600;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
     line-height: 1.6;
@@ -178,8 +179,13 @@ p {
 }
 
 .highlight-text {
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(141, 141, 141);
+}
+
+ul {
+    list-style-type: none;
+ 
 }
 
 .form-group {
@@ -206,6 +212,11 @@ p {
     appearance: none;
 }
 
+.dropdown p {
+    font-weight: 600;
+    font-size: 13px;
+}
+
 select option[disabled] {
     display: none;
 }
@@ -229,7 +240,7 @@ select option[disabled] {
     flex-direction: row;
     gap: 15px;
     position: relative;
-    margin-top: 30px;
+    margin-top: 10px;
     margin-left: 5vw;
     justify-content: center;
 }

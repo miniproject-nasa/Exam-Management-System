@@ -52,7 +52,6 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 <section class="content-section" data-session="${inbox._id}">
                     <ul class="information-type">
                         <li><span class="highlight-text">Exam Coordinator, ${inbox.date}</span></li>
-                        <li>mode:${inbox.mode}</li>
                     </ul>
                 
                     <div class="pdf-container">
@@ -114,9 +113,12 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 let Fpara=document.createElement("p");
                 Fpara.innerText=textmesg;
                 Fpara.id="message"
-                textArea.replaceWith(Fpara);
-                
-        
+                let span = document.createElement("span");
+                span.textContent = "Verified";
+                span.style.color = "blue";
+                span.style.fontSize = "15px";
+                span.style.fontWeight = "600";
+                textArea.replaceWith(span);
         })
     })
     // async function fetchFaculties() {
