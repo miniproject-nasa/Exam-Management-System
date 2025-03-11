@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
 
             const mainContainer=document.querySelector(".main-content")
 
-            mainContainer.innerHTML=''
+            
             console.log(inboxs)
             inboxs.forEach((inbox)=>{
                 if(inbox.mode=="scrutinized")
