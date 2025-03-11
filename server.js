@@ -1106,34 +1106,54 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
       const file = req.file;
       const textMessage = req.body.textmessage || "";
-      const from = req.body.from;
+      // 'from' is sent as the U_id of the sender.
+      const senderId = req.body.from; 
       const to = req.body.to;
 
       if (!file && !textMessage.trim()) {
           return res.status(400).json({ message: "Please provide a file or a text message." });
       }
 
+      // Look up the sender by U_id to get the U_name.
+      const sender = await user.findOne({ U_id: senderId });
+      const senderName = sender ? sender.U_name : senderId;
+
       const base64data = file ? file.buffer.toString("base64") : "";
-      // Use pdfmodel as defined from the pdfSchema
+      // Save the notification using the correct model (pdfmodel)
       const newNotification = new pdfmodel({
           filename: file ? file.originalname : "",
           data: base64data,
-          from: from,
+          from: senderName,  // Save sender's name instead of U_id.
           to: to,
           textmessage: textMessage,
       });
       await newNotification.save();
 
-      // Fetch recipient's email from the user schema
-      const faculty = await user.findOne({ U_name: to });
-      
-      // Send email notification if the recipient's email exists
-      if (faculty && faculty.U_email) {
+      // Determine recipient email addresses.
+      let recipientsEmails = [];
+      if (to === "all") {
+          // Query all faculties (assuming "FC" is the faculty role)
+          const faculties = await user.find({ U_role: { $in: ["FC"] } });
+          recipientsEmails = faculties
+            .filter(faculty => faculty.U_email)
+            .map(faculty => faculty.U_email);
+      } else {
+          const faculty = await user.findOne({ U_name: to });
+          if (faculty && faculty.U_email) {
+              recipientsEmails.push(faculty.U_email);
+          }
+      }
+
+      // Construct the email text with the sender's name.
+      const emailText = `Notification from ${senderName}: ${textMessage || "You have received a new notification."}`;
+
+      // Send email notification if there are any recipient emails.
+      if (recipientsEmails.length > 0) {
           let mailOptions = {
               from: '"Internal Exam Management" <your-email@example.com>',
-              to: faculty.U_email,
+              to: recipientsEmails.join(","),
               subject: "New Notification",
-              text: textMessage || "You have received a new notification.",
+              text: emailText,
               attachments: file ? [{
                   filename: file.originalname,
                   content: file.buffer,
@@ -1154,6 +1174,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
       res.status(400).json({ success: false, details: error.message });
   }
 });
+
 
 // ______________________FETCHING FACULTY______________________
 
