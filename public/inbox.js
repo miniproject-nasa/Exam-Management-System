@@ -40,20 +40,14 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 mainContainer.innerHTML+=`
                 <section class="content-section">
-                <p>NOTIFY</p>
                 <ul class="information-type">
                     <li>
-                        <span class="highlight-text">From:${inbox.from}</span>
-                        <p>${inbox.textmessage}</p>
+                        <span class="highlight-text">${inbox.from}</span>
+                        <p class="message-text">${inbox.textmessage}</p>
 
                         <ul class="pdf-container">
                             <li class="pdf-box">
-                                <div class="pdf-box-small">
-                                    <p class="info-new-type">PDF</p>
-                                </div>  
-                            
                                 <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${inbox.filename}</a>
-                            
                             </li>
                         
                         </ul>
@@ -87,7 +81,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 <p>SCRUTINY</p>
                 <ul class="information-type">
                     <li>
-                        <span class="highlight-text">mode:${verified.mode}</span>
+                        <span class="highlight-text">${verified.mode}</span>
                         <p>MC:${verified.textmesg}</p>
 
                         <ul class="pdf-container">
@@ -139,7 +133,6 @@ document.addEventListener("DOMContentLoaded",  async function () {
                     // console.log(final);
                     mainContainer.innerHTML+=`
                     <section class="content-section">
-                    <p>FINAL</p>
                     <ul class="information-type">
                         <li>
                             

@@ -214,8 +214,10 @@ form button:hover {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    height: 40px;
+    height: 50px;
     margin: 0 auto;
+    margin-bottom: -70px;
+    margin-top: -35px;
     border-radius: 5px;
     border: 1px solid #ddd;
     background-color: white;
@@ -250,10 +252,9 @@ form button:hover {
 
 .pdf-container {
     display: flex;
-    flex-direction: row;
     gap: 10px;
+    max-width: 100%;
     margin-top: 70px;
-    flex-wrap: wrap;
 }
 
 .pdf-box {
@@ -287,8 +288,7 @@ form button:hover {
 }
 
 .pdf-box-content {
-    margin-left: 25px;
-    white-space: nowrap;
+    margin-left: 0;
     font-size: 11px;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;

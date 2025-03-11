@@ -49,8 +49,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                     </div>
                 
                     <ul class="information-type">
-                        <li><span class="highlight-text">subject:${inbox.subject}</span></li>
-                        <li>mode:${inbox.mode}</li>
+                        <li><span class="highlight-text">${inbox.subject}</span></li>
                     </ul>
                 
                     <div class="pdf-container">
@@ -89,8 +88,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
             </div>
         
             <ul class="information-type">
-                <li><span class="highlight-text">subject:${inbox.subject}</span></li>
-                <li>mode:${inbox.mode}</li>
+                <li><span class="highlight-text">${inbox.subject}</span></li>
             </ul>
         
             <div class="pdf-container">

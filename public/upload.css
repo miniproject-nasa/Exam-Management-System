@@ -144,7 +144,7 @@ form button:hover {
     max-width: 100%;
     box-sizing: border-box;
     height: 40px;
-    margin: 0 auto;
+    margin-bottom: -30px;
     border-radius: 5px;
     border: 1px solid #ddd;
     background-color: white;
@@ -199,6 +199,7 @@ form button:hover {
     position: relative;
     align-items: center;
     padding-left: 35px;
+    margin-top: 20px;
 }
 
 .pdf-box-small {
@@ -218,7 +219,6 @@ form button:hover {
 
 .pdf-box-content {
     margin-left: 25px;
-    white-space: nowrap;
     font-size: 11px;
     color: rgba(112, 112, 112, 1);
     letter-spacing: .6px;
