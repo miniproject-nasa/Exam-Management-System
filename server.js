@@ -1102,6 +1102,7 @@ const transporter = nodemailer.createTransport({
       user: "miniproject22426@gmail.com",
       pass: "vann cbpk revt frum", 
 }});
+
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
       const file = req.file;

@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded",async function() {
 
             mainContainer.innerHTML=''
             console.log(sends)
+            sends.reverse();
             sends.forEach((send)=>{
                 // base64 to blob url
                 const byteCharacters = atob(send.data.split(',')[1]); 
