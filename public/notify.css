@@ -407,11 +407,34 @@ form button:hover {
     .flex-container {
         gap: 10px;
         width: 100%;
-        height: auto;
         margin-top: 15px;
-        margin-bottom: 20px;
     }
-        
+    
+    .pdf-container {
+        gap: 10px;
+        margin-top: 60px;
+        margin-bottom: 5px;
+    }
+    
+    .pdf-box {
+        padding: 10px;
+        border-radius: 5px;
+        gap: 7px;
+        padding-left: 35px;
+    }
+    
+    .pdf-box-small {
+        height: 100%;
+        border-radius: 4.2px;
+        min-width: 30px;
+        padding: 0 10px;
+    }
+    
+    .pdf-box-content {
+        margin-left: 25px;
+        font-size: 7.5px;
+    }
+    
     .info-new-type {
         font-size: 7px;
     }
