@@ -1107,7 +1107,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
       const file = req.file;
       const textMessage = req.body.textmessage || "";
-      // 'from' is currently sent as the U_id of the sender.
+      // 'from' is sent as the U_id of the sender.
       const senderId = req.body.from; 
       const to = req.body.to;
 
@@ -1115,31 +1115,44 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
           return res.status(400).json({ message: "Please provide a file or a text message." });
       }
 
-      // Look up the sender in the database using U_id and retrieve the U_name.
+      // Look up the sender by U_id to get the U_name.
       const sender = await user.findOne({ U_id: senderId });
       const senderName = sender ? sender.U_name : senderId;
 
       const base64data = file ? file.buffer.toString("base64") : "";
+      // Save the notification using the correct model (pdfmodel)
       const newNotification = new pdfmodel({
           filename: file ? file.originalname : "",
           data: base64data,
-          from: senderName,  // Store the sender's name instead of U_id.
+          from: senderName,  // Save sender's name instead of U_id.
           to: to,
           textmessage: textMessage,
       });
       await newNotification.save();
 
-      // Fetch recipient's email from the user schema using U_name.
-      const faculty = await user.findOne({ U_name: to });
-      
-        // Construct email text including the sender's name.
-        const emailText = `Notification from ${senderName}: ${textMessage || "You have received a new notification."}`;
+      // Determine recipient email addresses.
+      let recipientsEmails = [];
+      if (to === "all") {
+          // Query all faculties (assuming "FC" is the faculty role)
+          const faculties = await user.find({ U_role: { $in: ["FC"] } });
+          recipientsEmails = faculties
+            .filter(faculty => faculty.U_email)
+            .map(faculty => faculty.U_email);
+      } else {
+          const faculty = await user.findOne({ U_name: to });
+          if (faculty && faculty.U_email) {
+              recipientsEmails.push(faculty.U_email);
+          }
+      }
 
-      // Send email notification if the recipient's email exists.
-      if (faculty && faculty.U_email) {
+      // Construct the email text with the sender's name.
+      const emailText = `Notification from ${senderName}: ${textMessage || "You have received a new notification."}`;
+
+      // Send email notification if there are any recipient emails.
+      if (recipientsEmails.length > 0) {
           let mailOptions = {
-              from: '"Internal Exam Management" <miniproject22426@gmail.com>',
-              to: faculty.U_email,
+              from: '"Internal Exam Management" <your-email@example.com>',
+              to: recipientsEmails.join(","),
               subject: "New Notification",
               text: emailText,
               attachments: file ? [{
@@ -1162,6 +1175,7 @@ app.post("/upload", upload.single("pdfFile"), async (req, res) => {
       res.status(400).json({ success: false, details: error.message });
   }
 });
+
 
 // ______________________FETCHING FACULTY______________________
 
