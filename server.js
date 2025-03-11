@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const session = require("express-session");
 const multer = require("multer");
+const nodemailer = require("nodemailer");
 
 // ______________________Connect to MongoDB_________________
 mongoose
@@ -1095,26 +1096,62 @@ const pdfmodel = mongoose.model("PDF", pdfSchema, "notify");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+      user: "miniproject22426@gmail.com",
+      pass: "vann cbpk revt frum", 
+}});
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
-    // console.log(req.file);
-    if (!req.file) return res.status(400).json({ message: "no file uploaded" });
-    const base64dta = req.file.buffer.toString("base64");
-    const from = req.body.from;
-    const textmessage = req.body.textmessage;
+      const file = req.file;
+      const textMessage = req.body.textmessage || "";
+      const from = req.body.from;
+      const to = req.body.to;
 
-    const to = req.body.to;
-    const newpdf = new pdfmodel({
-      filename: req.file.originalname,
-      data: base64dta,
-      from: from,
-      to: to,
-      textmessage: textmessage,
-    });
-    await newpdf.save();
-    res.status(200).json({ success: true, to });
+      if (!file && !textMessage.trim()) {
+          return res.status(400).json({ message: "Please provide a file or a text message." });
+      }
+
+      const base64data = file ? file.buffer.toString("base64") : "";
+      // Use pdfmodel as defined from the pdfSchema
+      const newNotification = new pdfmodel({
+          filename: file ? file.originalname : "",
+          data: base64data,
+          from: from,
+          to: to,
+          textmessage: textMessage,
+      });
+      await newNotification.save();
+
+      // Fetch recipient's email from the user schema
+      const faculty = await user.findOne({ U_name: to });
+      
+      // Send email notification if the recipient's email exists
+      if (faculty && faculty.U_email) {
+          let mailOptions = {
+              from: '"Internal Exam Management" <your-email@example.com>',
+              to: faculty.U_email,
+              subject: "New Notification",
+              text: textMessage || "You have received a new notification.",
+              attachments: file ? [{
+                  filename: file.originalname,
+                  content: file.buffer,
+              }] : [],
+          };
+
+          transporter.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                  console.error("Error sending email:", error);
+              } else {
+                  console.log("Email sent: " + info.response);
+              }
+          });
+      }
+
+      res.status(200).json({ success: true, to });
   } catch (error) {
-    res.status(400).json({ success: false });
+      res.status(400).json({ success: false, details: error.message });
   }
 });
 
