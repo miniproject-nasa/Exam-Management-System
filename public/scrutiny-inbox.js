@@ -28,9 +28,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       mainContainer.innerHTML = "";
       scrutinys.reverse();
-    //   console.log(scrutinys);
+    
       scrutinys.forEach((send) => {
-        // Convert base64 to blob URL for PDF file
         const byteCharacters = atob(send.data);
         const byteNumbers = new Array(byteCharacters.length)
           .fill()
@@ -39,25 +38,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
-        if(send.mode=="allocated")
-        {
-
+        if(send.mode=="allocated") {
             mainContainer.innerHTML += `
                     <section class="content-section" data-section='${send._id}'>
                         <div class="allocated-container"></div>
                     
                         <ul class="information-type">
-                            <li><span class="highlight-text">subject: ${send.subject}</span></li>
-                            <li>mode: ${send.mode}</li>
+                            <li><span class="highlight-text">${send.subject}</span></li>
                         </ul>
                     
                         <div class="pdf-container">
                             <div class="pdf-box">
                                 <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${send.fileName}</a>
                             </div>
-                            <div class="pdf-box">
-                                <label for="inputFile" class="information-type">Choose File</label>
-                                <input type="file" name="scrutFile" id="scrutFile" class="information-type" hidden >   
+                            <div class="file-box">
+                                <label for="inputFile" class="file-label">Choose File</label>
+                                <input type="file" name="inputFile" id="inputFile" class="information-type" hidden required>   
                             </div>
                         </div>
                     
@@ -65,18 +61,16 @@ document.addEventListener("DOMContentLoaded", async function () {
                             <button class="send-button">Scrutiny</button>
                             <button class="submit-button">submit</button>
                         </div>
-                        
                     </section> 
                     `;
-        }
-        else{
+        } else {
             const SbyteCharacters = atob(send.sdata);
-        const SbyteNumbers = new Array(SbyteCharacters.length)
-          .fill()
-          .map((_, i) => SbyteCharacters.charCodeAt(i));
-        const SbyteArray = new Uint8Array(SbyteNumbers);
-        const SpdfBlob = new Blob([SbyteArray], { type: "application/pdf" });
-        const SpdfUrl = URL.createObjectURL(SpdfBlob);
+            const SbyteNumbers = new Array(SbyteCharacters.length)
+              .fill()
+              .map((_, i) => SbyteCharacters.charCodeAt(i));
+            const SbyteArray = new Uint8Array(SbyteNumbers);
+            const SpdfBlob = new Blob([SbyteArray], { type: "application/pdf" });
+            const SpdfUrl = URL.createObjectURL(SpdfBlob);
             mainContainer.innerHTML += `
                     <section class="content-section" data-section='${send._id}'>
                         <div class="allocated-container"></div>
@@ -94,14 +88,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                             </div>
                         </div>
                     
-                        <div class="bottom-right-container">
-                            
-                        </div>
-                        
+                        <div class="bottom-right-container"></div>
                     </section> 
                     `;
         }
-
       });
     } catch (error) {
       console.log(error);
@@ -111,82 +101,60 @@ document.addEventListener("DOMContentLoaded", async function () {
   console.log(data.user.username);
   await send(data.user.username);
 
-  const inputFiles=document.querySelectorAll("#inputFile")
-  inputFiles.forEach((inputFile)=>{
-
-      inputFile.addEventListener("change",function(){
-            const file=this.files[0];
-    
-            if(file){
-                const fileURL = URL.createObjectURL(file);
-                pdfcotainer.innerHTML=`<div class="pdf-box">
-                            
+  const inputFiles = document.querySelectorAll("#inputFile");
+  inputFiles.forEach((inputFile) => {
+    inputFile.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        pdfcotainer.innerHTML = `<div class="pdf-box">
                             <p class="pdf-box-content"><a href="${fileURL}"  target="_blank">${file.name} (${(file.size / 1024).toFixed(2)})KB</a></p>`;
-                        
-            }
-            else{
-                inputFile.innerHTML=`<p class="pdf-box-content">No file chosen</p>`;
-            }
-        });
-  })
-
-  document.querySelectorAll(".submit-button").forEach((btn)=>{
-        btn.addEventListener("click",async function(e){
-            
-            const par=e.target.parentElement.parentElement
-            const file=par.querySelector("#scrutFile").files[0]
-            if(!file)
-                return alert("select a file")
-            else{
-
-                const id=par.dataset.section
-                const formdata=new FormData();
-                formdata.append("scrutFile",file);
-                try{
-                    const response=await fetch(`/trial-scrutinized/${id}`,
-                        {
-                            method:"PUT",
-                            body:formdata,
-                            
-                            
-                        }
-                    );
-                    if(!response.ok)
-                        return console.log("failed");
-                    
-                }
-                catch (error) {
-                    console.log(error);
-                    
-                }
-            }
-            
-            alert("sended successfully");
-            location.reload(true)
-        })
-  })
-  document.querySelectorAll(".send-button").forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault(); // Prevent default action if necessary
-      document.getElementById("scrutiny-popup").classList.add("show"); // Show the popup
+      }
     });
   });
 
-  // Close popup when clicking the close button
+  document.querySelectorAll(".submit-button").forEach((btn) => {
+    btn.addEventListener("click", async function (e) {
+      const par = e.target.parentElement.parentElement;
+      const file = par.querySelector("#inputFile").files[0];
+      if (!file) return alert("select a file");
+      else {
+        const id = par.dataset.section;
+        const formdata = new FormData();
+        formdata.append("inputFile", file);
+        try {
+          const response = await fetch(`/trial-scrutinized/${id}`, {
+            method: "PUT",
+            body: formdata,
+          });
+          if (!response.ok) return console.log("failed");
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      alert("sended successfully");
+      location.reload(true);
+    });
+  });
+
+  document.querySelectorAll(".send-button").forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      document.getElementById("scrutiny-popup").classList.add("show");
+    });
+  });
+
   document.querySelector(".close").addEventListener("click", function (e) {
     e.preventDefault();
-    document.getElementById("scrutiny-popup").classList.remove("show"); // Hide the popup
+    document.getElementById("scrutiny-popup").classList.remove("show");
   });
 
   const form = document.querySelector("#scrutiny-popup form");
-
   if (form) {
-    form.addEventListener("submit", function(event) {
-      event.preventDefault(); // Prevent default form submission
-      
-      // Collect form data as question/answer pairs
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
       const qaPairs = [];
-      form.querySelectorAll("label").forEach(label => {
+      form.querySelectorAll("label").forEach((label) => {
         const fieldId = label.getAttribute("for");
         const input = form.querySelector(`#${fieldId}`);
         if (input) {
@@ -195,64 +163,37 @@ document.addEventListener("DOMContentLoaded", async function () {
           qaPairs.push({ question, answer });
         }
       });
-      
-      // Initialize jsPDF
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      
-      // Set a line height factor close to 1 (or < 1 to reduce further)
-      doc.setLineHeightFactor(1); 
-      
-      // Font settings for body text
+      doc.setLineHeightFactor(1);
       doc.setFontSize(12);
-      
-      // Positioning variables
       let x = 10;
       let y = 20;
-      
-      // This controls the vertical jump after each line
-      // Lower this value for tighter spacing
-      const lineHeight = 5; 
-      
-      // Title - Increase heading size
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(18);  // Increased heading size
+      const lineHeight = 5;
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(18);
       doc.text("Scrutiny Form Responses", x, y);
-      y += lineHeight * 2; // extra space after title
-      
-      // Reset font size for the rest of the content
+      y += lineHeight * 2;
       doc.setFontSize(12);
-      
-      // Loop over each question/answer pair
-      qaPairs.forEach(pair => {
-        // Question in bold
-        doc.setFont(undefined, 'bold');
+      qaPairs.forEach((pair) => {
+        doc.setFont(undefined, "bold");
         doc.text(pair.question + ":", x, y);
-        y += lineHeight * 1.2; // move down for the answer
-        
-        // Answer in normal font
-        doc.setFont(undefined, 'normal');
-        // Split text to wrap within 180 width
+        y += lineHeight * 1.2;
+        doc.setFont(undefined, "normal");
         const lines = doc.splitTextToSize(pair.answer || "N/A", 180);
-        
-        // Print each wrapped line manually
-        lines.forEach(line => {
+        lines.forEach((line) => {
           doc.text(line, x, y);
-          y += lineHeight; 
+          y += lineHeight;
         });
-        
-        // Small extra gap before the next Q/A pair
         y += lineHeight;
-        
-        // Add a new page if needed
         if (y > 270) {
           doc.addPage();
           y = 20;
         }
       });
-      
-      // Save the PDF
       doc.save("scrutiny_form.pdf");
+      document.getElementById("scrutiny-popup").classList.remove("show");
     });
   }
 });

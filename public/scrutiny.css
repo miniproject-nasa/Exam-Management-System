@@ -97,10 +97,12 @@ p {
     margin: 0 auto;
     margin-top: -40px;
     margin-bottom: 45px;
-    background: white;
+    border: 1px solid #ddd;
+    background-color: white;
     padding: 15px;
     border-radius: 5px;
     box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 .allocated-container {
@@ -120,6 +122,7 @@ p {
     right: 15px;
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
 .pdf-container {
@@ -172,6 +175,20 @@ p {
     margin: 0;
 }
 
+.form-titles {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(112, 112, 112, 1);
+    letter-spacing: .6px;
+    line-height: 1.6;
+    list-style: none;
+    padding: 0;
+    margin-bottom: 5px; /* Add spacing between label and input */
+    display: block;
+    text-align: left;
+    width: 100%; /* Ensure it takes the full width */
+}
+
 .info-new-type {
     font-size: 10px;
     color: rgb(255, 255, 255);
@@ -200,7 +217,7 @@ ul {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-start; /* Ensures label aligns with input */
 }
 
 .dropdown select {
@@ -224,6 +241,17 @@ select option[disabled] {
 }
 
 .send-button {
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.form-button {
+    margin-bottom: 20px;
     background: rgba(15, 98, 254, 1);
     color: white;
     border: none;
@@ -332,9 +360,14 @@ form button:focus {
     margin-top: 2200px;
     margin-bottom: 30px;
     padding: 20px;
-    width: 600px;
+    max-width: 1000px; /* Increase this value to make the popup wider */
+    width: 100%; /* Ensures responsiveness */
     border-radius: 10px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the contents horizontally */
+    justify-content: center; /* Centers content inside the container */
 }
 /* Show popup when targeted */
 :target {
@@ -388,7 +421,7 @@ form button:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
+    width: 90%;
 }
 
 .popup-content button {
@@ -469,6 +502,70 @@ select {
 
 select:focus {
     border: 1px solid rgba(15, 98, 254, 1);
+}
+
+#inputFile {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+input {
+    outline: none;
+}
+
+.file-label {
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 5px;
+    color: rgb(101, 0, 179);
+    cursor: pointer;
+    text-align: center;
+    outline: none;
+}
+
+.file-label:hover {
+    transform: scale(1.05);
+}
+
+input:focus, .file-label:focus-within {
+    border: 1px solid rgba(15, 98, 254, 1);
+}
+
+.submit-button {
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.submit-button:hover {
+    transform: scale(1.01);
+}
+
+.file-box {
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgb(208, 207, 207);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;  /* Centers text horizontally */
+    align-items: center;  /* Centers text vertically */
+    text-align: center;  /* Ensures text alignment */
+    gap: 7px;
+    position: relative;
+    margin-bottom: -8px;
+    width: 200px;
+    padding-left: 0;
 }
 
 @media only screen and (max-width: 650px) {
