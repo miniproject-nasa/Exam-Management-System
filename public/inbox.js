@@ -68,6 +68,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 return console.log("failed to load inbox");
 
             const verifieded=await respon.json();
+            verifieded.reverse();
 
             // const mainContainer=document.querySelector(".main-content")
 
