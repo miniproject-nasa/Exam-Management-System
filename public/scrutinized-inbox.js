@@ -18,104 +18,46 @@ document.addEventListener("DOMContentLoaded",  async function () {
     }
     await checkAuthStatus();
 
-    async function loadVerifiedMessages(to) {
+    async function loadScrutiny(to) {
         try {
             const response = await fetch(`/get-verified/${to}`);
-            if (!response.ok) return console.log("Failed to load verified messages");
+            if (!response.ok) return console.log("Failed to load scrutiny");
     
-            const verifiedMessages = await response.json();
-            verifiedMessages.reverse();
+            const verifieded = await response.json();
+            verifieded.reverse();
+    
             const mainContainer = document.querySelector(".main-content");
-            
-            verifiedMessages.forEach((verified) => {
+    
+            verifieded.forEach((verified) => {
+                // Convert base64 to Blob URL
                 const byteCharacters = atob(verified.sdata);
-                const byteNumbers = new Uint8Array([...byteCharacters].map(c => c.charCodeAt(0)));
-                const pdfBlob = new Blob([byteNumbers], { type: "application/pdf" });
+                const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+                const byteArray = new Uint8Array(byteNumbers);
+                const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                
+    
                 mainContainer.innerHTML += `
                 <section class="content-section">
                     <ul class="information-type">
                         <li>
-                            <span class="highlight-text">${verified.mode}</span>
-                            <p>MC: ${verified.textmesg}</p>
+                            <p class="message-text">${verified.textmesg}</p>
                             <ul class="pdf-container">
                                 <li class="pdf-box">
-                                    <div class="pdf-box-small">
-                                        <p class="info-new-type">PDF</p>
-                                    </div>  
-                                    <a href="${pdfUrl}" target="_blank" class="pdf-box-content"> ${verified.sfileName}</a>
+                                    <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${verified.sfileName}</a>
                                 </li>
                             </ul>
                         </li>
                     </ul>            
-                </section>`;
+                </section>
+                `;
             });
+    
         } catch (error) {
             console.log(error);
         }
     }
     
     console.log(data.user.username);
-    await loadInboxMessages(data.user.username);
-    await loadVerifiedMessages(data.user.username);
-    console.log(data.user.role);
-    
-    async function examcord(roles) {
-        if(roles.includes("EC"))
-        {
-            console.log("hai");
-            
-            try {
-                const responce= await fetch(`/final-qustion`);
-                if(!responce.ok)
-                    return console.log("error occured");
-
-                const finals=await responce.json();
-                
-                const mainContainer=document.querySelector(".main-content")
-                
-                finals.forEach((final)=>{
-                    const byteCharacters = atob(final.data); 
-                    const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
-                    const pdfUrl = URL.createObjectURL(pdfBlob);
-                    // console.log(final);
-                    mainContainer.innerHTML+=`
-                    <section class="content-section">
-                    <ul class="information-type">
-                        <li>
-                            
-                            <span class="highlight-text">${final.subject}</span>
-                            <br>
-                            <span class="highlight-text">${final.batch}</span>
-                            <br>
-                            <ul class="pdf-container">
-                                <li class="pdf-box">
-                                    <div class="pdf-box-small">
-                                        <p class="info-new-type">PDF</p>
-                                    </div>  
-                                
-                                    <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${final.fileName}</a>
-                                
-                                </li>
-                            
-                            </ul>
-                        </li>
-                    </ul>            
-                    </section>
-                    `
-                
-                })
-                    
-            } catch (error) {
-                console.log(error);
-                
-            }
-        }
-            
-    }
-    await examcord(data.user.role)
+    await loadScrutiny(data.user.username);    
 
 });
