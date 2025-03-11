@@ -1,66 +1,78 @@
 <!DOCTYPE html>
 <html lang="eng">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Internal Exam Management">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Internal Exam Management" />
     <title>Notify</title>
-    <link rel="icon" href="images/icon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="notify.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-</head>
+    <link rel="icon" href="images/icon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="notify.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
+  <body>
     <header>
-        <img src="images/logo.webp" alt="logo">
-            <div class="title-head">
-                <h2>Internal Exam</h2>
-                <p>Management</p>
-            </div>
+      <img src="images/logo.webp" alt="logo" />
+      <div class="title-head">
+        <h2>Internal Exam</h2>
+        <p>Management</p>
+      </div>
 
-        <div class="menu-container">
-            <a href="home.html"><p class="menu">Home</p></a>
-        </div>
+      <div class="menu-container">
+        <a href="home.html"><p class="menu">Home</p></a>
+      </div>
     </header>
-    <br>
+    <br />
     <section class="main">
-        <form id="notifyForm">
-            <h2 class="upload-title">Notify</h2>
+      <form id="notifyForm">
+        <h2 class="upload-title">Notify</h2>
 
-            <div class="form-group">
-                <label for="reciever">Reciever</label>
-                <div class="dropdown">
-                    <select id="faculties" name="reciever">
-                        <option value="" disabled selected>Select the recipient</option>
-                    </select>
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="reciever">Reciever</label>
+          <div class="dropdown">
+            <select id="faculties" name="reciever">
+              <option value="" disabled selected>Select the recipient</option>
+            </select>
+          </div>
+        </div>
 
-            <div class="form-group">
-                <label for="textmessage">Text Message</label>
-                <input type="text" id="textmessage" name="textmessage" required><br><br>
-            </div>
+        <div class="form-group">
+          <label for="textmessage">Text Message</label>
+          <input
+            type="text"
+            id="textmessage"
+            name="textmessage"
+              /><br /><br />
+        </div>
 
-            <div class="flex-container">
-                <div class="content-section">
-                    <label for="inputFile" class="information-type">Choose File</label>
-                    <input type="file" name="inputFile" id="inputFile" class="information-type" hidden>
-                    
-                    <!-- <p class="information-type">
+        <div class="flex-container">
+          <div class="content-section">
+            <label for="inputFile" class="information-type">Choose File</label>
+            <input
+              type="file"
+              name="inputFile"
+              id="inputFile"
+              class="information-type"
+              hidden
+            />
+
+            <!-- <p class="information-type">
                         Select your files
                     </p> -->
-                </div>
-                <div class="pdf-container">
-                    
-                </div>
-                <button type="submit">Send</button>
-            </div>
-            <br><br><br>         
-        </form>
+          </div>
+          <div class="pdf-container"></div>
+          <button type="submit">Send</button>
+        </div>
+        <br /><br /><br />
+      </form>
     </section>
-    <br>
+    <br />
     <footer>
-        <p class="footer-style">&copy; 2025, DPCSE</p>
+      <p class="footer-style">&copy; 2025, DPCSE</p>
     </footer>
     <script src="notify.js"></script>
-</body>
+  </body>
+</html>
