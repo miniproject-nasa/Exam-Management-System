@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const mainContainer = document.querySelector(".main-content");
 
       mainContainer.innerHTML = "";
+      scrutinys.reverse();
     //   console.log(scrutinys);
       scrutinys.forEach((send) => {
         // Convert base64 to blob URL for PDF file

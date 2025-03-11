@@ -1102,38 +1102,46 @@ const transporter = nodemailer.createTransport({
       user: "miniproject22426@gmail.com",
       pass: "vann cbpk revt frum", 
 }});
+
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
       const file = req.file;
       const textMessage = req.body.textmessage || "";
-      const from = req.body.from;
+      // 'from' is currently sent as the U_id of the sender.
+      const senderId = req.body.from; 
       const to = req.body.to;
 
       if (!file && !textMessage.trim()) {
           return res.status(400).json({ message: "Please provide a file or a text message." });
       }
 
+      // Look up the sender in the database using U_id and retrieve the U_name.
+      const sender = await user.findOne({ U_id: senderId });
+      const senderName = sender ? sender.U_name : senderId;
+
       const base64data = file ? file.buffer.toString("base64") : "";
-      // Use pdfmodel as defined from the pdfSchema
       const newNotification = new pdfmodel({
           filename: file ? file.originalname : "",
           data: base64data,
-          from: from,
+          from: senderName,  // Store the sender's name instead of U_id.
           to: to,
           textmessage: textMessage,
       });
       await newNotification.save();
 
-      // Fetch recipient's email from the user schema
+      // Fetch recipient's email from the user schema using U_name.
       const faculty = await user.findOne({ U_name: to });
       
-      // Send email notification if the recipient's email exists
+        // Construct email text including the sender's name.
+        const emailText = `Notification from ${senderName}: ${textMessage || "You have received a new notification."}`;
+
+      // Send email notification if the recipient's email exists.
       if (faculty && faculty.U_email) {
           let mailOptions = {
-              from: '"Internal Exam Management" <your-email@example.com>',
+              from: '"Internal Exam Management" <miniproject22426@gmail.com>',
               to: faculty.U_email,
               subject: "New Notification",
-              text: textMessage || "You have received a new notification.",
+              text: emailText,
               attachments: file ? [{
                   filename: file.originalname,
                   content: file.buffer,
