@@ -1,5 +1,5 @@
 body {
-    background-image: url('bgb.webp');
+    background-image: url('images/bgf.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -154,6 +154,15 @@ form {
 }
 
 form input[type="text"] {
+    padding: 12px;
+    width: 100%;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form input[type="email"] {
     padding: 12px;
     width: 100%;
     border: 1px solid #ddd;

@@ -1491,4 +1491,94 @@ app.post("/api/generate-invigilation", async (req, res) => {
   }
 });
 
+// In-memory OTP store – for production, consider using a persistent store like Redis
+const otpStore = {};
+
+app.post("/api/auth/send-reset-link", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+  try {
+    // Find the user by their email (U_email)
+    const existingUser = await user.findOne({ U_email: email });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Generate a 6-digit OTP as a string
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Store the OTP with an expiration time (15 minutes)
+    otpStore[email] = {
+      otp,
+      expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes in milliseconds
+    };
+
+    // Prepare the email options
+    const mailOptions = {
+      from: '"Internal Exam Management" <miniproject22426@gmail.com>',
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP for password reset is: ${otp}. It is valid for 15 minutes.`,
+    };
+
+    // Send the OTP email using nodemailer transporter
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending OTP email:", error);
+        return res.status(500).json({ message: "Error sending OTP email." });
+      } else {
+        console.log("OTP email sent: " + info.response);
+        return res.status(200).json({
+          message: "Password reset OTP sent successfully.",
+          // For development only: return the OTP for testing purposes
+          testOtp: process.env.NODE_ENV === "development" ? otp : undefined,
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Send reset link error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+  try {
+    // Retrieve OTP data for the provided email
+    const otpData = otpStore[email];
+    if (!otpData) {
+      return res.status(400).json({ message: "OTP not found or expired. Please request a new one." });
+    }
+    // Check if the OTP has expired
+    if (Date.now() > otpData.expiresAt) {
+      delete otpStore[email];
+      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    }
+    // Verify the OTP value
+    if (otpData.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    // OTP is valid; remove it from the store
+    delete otpStore[email];
+
+    // Find the user by email
+    const existingUser = await user.findOne({ U_email: email });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's password (storing as plain text, per your project)
+    existingUser.U_password = newPassword;
+    await existingUser.save();
+
+    return res.status(200).json({ message: "Password reset successfully. Please log in." });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 app.listen(4000, () => console.log("Listening on port 4000..."));
