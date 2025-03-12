@@ -1659,10 +1659,24 @@ app.post("/api/generate-invigilation", async (req, res) => {
         .json({ error: "Please select at least one faculty and one room" });
     }
 
-    // Generate PDF
+    // Shuffle the faculties array
+    const shuffledFaculties = [...selectedFaculties];
+    for (let i = shuffledFaculties.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledFaculties[i], shuffledFaculties[j]] = [shuffledFaculties[j], shuffledFaculties[i]];
+    }
+
+    // Shuffle the rooms array
+    const shuffledRooms = [...selectedRooms];
+    for (let i = shuffledRooms.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledRooms[i], shuffledRooms[j]] = [shuffledRooms[j], shuffledRooms[i]];
+    }
+
+    // Generate PDF with shuffled faculties and rooms
     const pdfBytes = await generateInvigilationPDF(
-      selectedFaculties,
-      selectedRooms,
+      shuffledFaculties,
+      shuffledRooms,
       dutyDate
     );
 
