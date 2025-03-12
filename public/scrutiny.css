@@ -122,7 +122,8 @@ p {
     right: 15px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .pdf-container {
@@ -357,7 +358,7 @@ form button:focus {
 
 .popup-content {
     background: white;
-    margin-top: 2200px;
+    margin-top: 2000px;
     margin-bottom: 30px;
     padding: 20px;
     max-width: 1000px; /* Increase this value to make the popup wider */
@@ -544,7 +545,9 @@ input:focus, .file-label:focus-within {
     padding: 8px 22px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
+    width: 120px;
+    height: 35px;
 }
 
 .submit-button:hover {
