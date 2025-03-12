@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
 
             const mainContainer=document.querySelector(".main-content")
 
-            
+            inboxs.reverse();
             console.log(inboxs)
             inboxs.forEach((inbox)=>{
                 if(inbox.mode=="scrutinized")
@@ -73,6 +73,48 @@ document.addEventListener("DOMContentLoaded",  async function () {
                 </section>   
                 `
                 }
+                if(inbox.mode=="verified")
+                    {
+                        // console.log(inbox);
+                    
+                    // base64 to blob url
+                    const byteCharacters = atob(inbox.data); 
+                    const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+                    const SbyteCharacters = atob(inbox.sdata); 
+                    const SbyteNumbers = new Array(SbyteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+                    const SbyteArray = new Uint8Array(SbyteNumbers);
+                    const SpdfBlob = new Blob([SbyteArray], { type: "application/pdf" });
+                    const SpdfUrl = URL.createObjectURL(SpdfBlob);
+                    mainContainer.innerHTML+=`
+                    <section class="content-section" data-session="${inbox._id}">
+                        <ul class="information-type">
+                            <li><span class="highlight-text">${inbox.date}</span></li>
+                        </ul>
+                    
+                        <div class="pdf-container">
+                            <div class="pdf-box">
+                                <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${inbox.fileName}</a>
+                            </div>
+                            <div class="pdf-box">
+                                <a href="${SpdfUrl}" target="_blank"  class="pdf-box-content"> ${inbox.sfileName}</a>
+                            </div>
+                            
+                        </div>
+                    
+                        <div class="bottom-right-container">
+                            <div class="form-group">
+                                <p id="message">${inbox.textmesg}</p>
+                            </div>
+                            <span style="color:blue;font-size:15px;font-weight:600;">Verified</span>
+                        </div>
+                    </section>   
+                    `
+                    }
+
                 
             })
         } catch (error) {
