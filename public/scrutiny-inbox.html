@@ -1,181 +1,183 @@
 <!DOCTYPE html>
 <html lang="eng">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Internal Exam Management">
-    <title>Scrutiny</title>
-    <link rel="icon" href="images/icon.ico" type="images/x-icon">
-    <link rel="stylesheet" href="scrutiny.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Internal Exam Management">
+  <title>Scrutiny</title>
+  <link rel="icon" href="images/icon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="scrutiny.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
 <body class="main">
-    <header>
-        <img src="images/logo.webp" alt="logo">
-            <div class="title-head">
-                <h2>Internal Exam</h2>
-                <p>Management</p>
-            </div>
-
-        <div class="menu-container">
-            <a href="home.html"><p class="menu">Home</p></a>
-        </div>
-    </header>
-    <br>
-    <section class="button-container">
-        <button class="button-type-2" type="submit">Scrutiny</button>
-        <a href="scrutinized-inbox.html"><button class="button-type-1" type="submit">scrutinized</button></a>
-        <a href="inbox.html"><button class="button-type-1" type="submit">Inbox</button></a>
-        <a href="send.html"><button class="button-type-1" type="submit">Sent</button></a>
-    </section>
-    <br><br><br>
-
-    <div class="main-content">
-        
-    </div>   
-
-    <div id="scrutiny-popup" class="popup">
-      <div class="popup-content">
-        <a href="#" class="close">&times;</a>
-        <br>
-        <h2 class="scrutiny-title">Scrutiny Form</h2>
-        <br><br>
-        <form>
-
-          <label for="course-code-name" class="form-titles">Course Code & Course Name</label>
-          <select id="course-code-name" name="course-code-name" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Correct">Correct</option>
-            <option value="Not Correct">Not Correct</option>
-          </select>
-
-          <label for="max-marks-duration" class="form-titles">Max Marks & Duration</label>
-          <select id="max-marks-duration" name="max-marks-duration" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Correct">Correct</option>
-            <option value="Not Correct">Not Correct</option>
-          </select>
-
-          <label for="question-pattern" class="form-titles">Pattern of Question Paper</label>
-          <select id="question-pattern" name="question-pattern" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Correct">Correct</option>
-            <option value="Not Correct">Not Correct</option>
-          </select>
-
-          <label for="choices-instruction" class="form-titles">Marking of Compulsory Questions, Choices & Instructions (like use of Tables, Graph etc.)</label>
-          <select id="choices-instruction" name="choices-instruction" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Correct">Correct</option>
-            <option value="Not Correct">Not Correct</option>
-          </select>
-
-          <label for="question-clear" class="form-titles">Wheather the Questions are clear?</label>
-          <select id="question-clear" name="question-clear" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="question-duplicate" class="form-titles">Wheather Questions are duplicated?</label>
-          <select id="question-duplicate" name="question-duplicate" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="question-distribution" class="form-titles">Wheather distribution of questions are as per particular syllabus covering modules</label>
-          <select id="question-distribution" name="question-distribution" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="figure-number" class="form-titles">Wheather numbers of tables and figures match with that in questions</label>
-          <select id="figure-number" name="figure-number" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="duration-sufficient" class="form-titles">Wheather the duration of time is sufficient?</label>
-          <select id="duration-sufficient" name="duration-sufficient" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="question-mapping" class="form-titles">Wheather mapping of questions with course outcome given?</label>
-          <select id="question-mapping" name="question-mapping" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-
-          <label for="recommendation" class="form-titles">Recommendation</label>
-          <select id="recommendation" name="recommendation" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Question Paper Can be Accepted">Question Paper Can be Accepted</option>
-            <option value="Accepted with Minor Corrections">Accepted with Minor Corrections</option>
-            <option value="Rejected">Rejected</option>
-          </select>
-
-          <label for="q1" class="form-titles">Suggested Corrections</label>
-
-          <label for="q1" class="form-titles">Question 1</label>
-          <input type="text" id="q1" name="q1" required />
-
-          <label for="q2" class="form-titles">Question 2</label>
-          <input type="text" id="q2" name="q2" required />
-          
-          <label for="q3" class="form-titles">Question 3</label>
-          <input type="text" id="q3" name="q3" required />
-
-          <label for="q4" class="form-titles">Question 4</label>
-          <input type="text" id="q4" name="q4" required />
-
-          <label for="q5" class="form-titles">Question 5</label>
-          <input type="text" id="q5" name="q5" required />
-
-          <label for="q6" class="form-titles">Question 6</label>
-          <input type="text" id="q6" name="q6" required />
-
-          <label for="q7" class="form-titles">Question 7</label>
-          <input type="text" id="q7" name="q7" required />
-
-          <label for="q8" class="form-titles">Question 8</label>
-          <input type="text" id="q8" name="q8" required />
-
-          <label for="q9" class="form-titles">Question 9</label>
-          <input type="text" id="q9" name="q9" required />
-
-          <label for="q10" class="form-titles">Question 10</label>
-          <input type="text" id="q10" name="q10" required />
-
-          <label for="rejection-reason" class="form-titles">Reasons for Rejection</label>
-          <input type="text" id="rejection-reason" name="rejection-reason" required />
-
-          <label for="evaluation-scheme-sufficient" class="form-titles">Wheather the scheme of evaluation is sufficient for valuation, if not, give suggestions</label>
-          <input type="text" id="evaluation-scheme-sufficient" name="evaluation-scheme-sufficient" required />
-
-          <label for="evaluation-scheme" class="form-titles">Wheather the scheme of evaluation can be Accepted/Rejected</label>
-          <select id="evaluation-scheme" name="evaluation-scheme" required>
-            <option value="" disabled selected>Select</option>
-            <option value="Accepted">Accepted</option>
-            <option value="Rejected">Rejected</option>
-          </select>
-          <br>
-          <button type="submit" class="form-button">Submit</button>
-        </form>
-      </div>
+  <header>
+    <img src="images/logo.webp" alt="logo">
+    <div class="title-head">
+      <h2>Internal Exam</h2>
+      <p>Management</p>
     </div>
+    <div class="menu-container">
+      <a href="home.html"><p class="menu">Home</p></a>
+    </div>
+  </header>
+  <br>
+  <section class="button-container">
+    <button class="button-type-2" type="submit">Scrutiny</button>
+    <a href="scrutinized-inbox.html"><button class="button-type-1" type="submit">scrutinized</button></a>
+    <a href="inbox.html"><button class="button-type-1" type="submit">Inbox</button></a>
+    <a href="send.html"><button class="button-type-1" type="submit">Sent</button></a>
+  </section>
+  <br><br><br>
 
-    
-    <br><br><br>
-    <footer>
-        <p class="footer-style">&copy; 2025, DPCSE</p>
-    </footer>
-    <script src="scrutiny-inbox.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <div class="main-content">
+    <!-- Dynamic content will be inserted here -->
+  </div>   
+
+  <!-- Scrutiny Popup -->
+  <div id="scrutiny-popup" class="popup">
+    <div class="popup-content">
+      <a href="#" class="close">&times;</a>
+      <br>
+      <h2 class="scrutiny-title">Scrutiny Form</h2>
+      <!-- Hidden inputs to store paper (subject) name and allocated faculty name -->
+      <input type="hidden" id="paperName">
+      <input type="hidden" id="facultyName">
+      <br><br>
+      <form>
+        <label for="course-code-name" class="form-titles">Course Code & Course Name</label>
+        <select id="course-code-name" name="course-code-name" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Correct">Correct</option>
+          <option value="Not Correct">Not Correct</option>
+        </select>
+
+        <label for="max-marks-duration" class="form-titles">Max Marks & Duration</label>
+        <select id="max-marks-duration" name="max-marks-duration" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Correct">Correct</option>
+          <option value="Not Correct">Not Correct</option>
+        </select>
+
+        <label for="question-pattern" class="form-titles">Pattern of Question Paper</label>
+        <select id="question-pattern" name="question-pattern" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Correct">Correct</option>
+          <option value="Not Correct">Not Correct</option>
+        </select>
+
+        <label for="choices-instruction" class="form-titles">Marking of Compulsory Questions, Choices & Instructions (like use of Tables, Graph etc.)</label>
+        <select id="choices-instruction" name="choices-instruction" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Correct">Correct</option>
+          <option value="Not Correct">Not Correct</option>
+        </select>
+
+        <label for="question-clear" class="form-titles">Whether the Questions are clear?</label>
+        <select id="question-clear" name="question-clear" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="question-duplicate" class="form-titles">Whether Questions are duplicated?</label>
+        <select id="question-duplicate" name="question-duplicate" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="question-distribution" class="form-titles">Whether distribution of questions are as per particular syllabus covering modules</label>
+        <select id="question-distribution" name="question-distribution" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="figure-number" class="form-titles">Whether numbers of tables and figures match with that in questions</label>
+        <select id="figure-number" name="figure-number" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="duration-sufficient" class="form-titles">Whether the duration of time is sufficient?</label>
+        <select id="duration-sufficient" name="duration-sufficient" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="question-mapping" class="form-titles">Whether mapping of questions with course outcome given?</label>
+        <select id="question-mapping" name="question-mapping" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label for="recommendation" class="form-titles">Recommendation</label>
+        <select id="recommendation" name="recommendation" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Question Paper Can be Accepted">Question Paper Can be Accepted</option>
+          <option value="Accepted with Minor Corrections">Accepted with Minor Corrections</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <label for="q1" class="form-titles">Suggested Corrections</label>
+
+        <label for="q1" class="form-titles">Question 1</label>
+        <input type="text" id="q1" name="q1" required />
+
+        <label for="q2" class="form-titles">Question 2</label>
+        <input type="text" id="q2" name="q2" required />
+          
+        <label for="q3" class="form-titles">Question 3</label>
+        <input type="text" id="q3" name="q3" required />
+
+        <label for="q4" class="form-titles">Question 4</label>
+        <input type="text" id="q4" name="q4" required />
+
+        <label for="q5" class="form-titles">Question 5</label>
+        <input type="text" id="q5" name="q5" required />
+
+        <label for="q6" class="form-titles">Question 6</label>
+        <input type="text" id="q6" name="q6" required />
+
+        <label for="q7" class="form-titles">Question 7</label>
+        <input type="text" id="q7" name="q7" required />
+
+        <label for="q8" class="form-titles">Question 8</label>
+        <input type="text" id="q8" name="q8" required />
+
+        <label for="q9" class="form-titles">Question 9</label>
+        <input type="text" id="q9" name="q9" required />
+
+        <label for="q10" class="form-titles">Question 10</label>
+        <input type="text" id="q10" name="q10" required />
+
+        <label for="rejection-reason" class="form-titles">Reasons for Rejection</label>
+        <input type="text" id="rejection-reason" name="rejection-reason" required />
+
+        <label for="evaluation-scheme-sufficient" class="form-titles">Whether the scheme of evaluation is sufficient for valuation, if not, give suggestions</label>
+        <input type="text" id="evaluation-scheme-sufficient" name="evaluation-scheme-sufficient" required />
+
+        <label for="evaluation-scheme" class="form-titles">Whether the scheme of evaluation can be Accepted/Rejected</label>
+        <select id="evaluation-scheme" name="evaluation-scheme" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <br>
+        <button type="submit" class="form-button">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <br><br><br>
+  <footer>
+    <p class="footer-style">&copy; 2025, DPCSE</p>
+  </footer>
+  <script src="scrutiny-inbox.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
+</html>
