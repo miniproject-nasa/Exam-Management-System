@@ -1099,83 +1099,91 @@ const upload = multer({ storage: storage });
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-      user: "miniproject22426@gmail.com",
-      pass: "vann cbpk revt frum", 
-}});
+    user: "miniproject22426@gmail.com",
+    pass: "vann cbpk revt frum",
+  },
+});
 
 app.post("/upload", upload.single("pdfFile"), async (req, res) => {
   try {
-      const file = req.file;
-      const textMessage = req.body.textmessage || "";
-      // 'from' is sent as the U_id of the sender.
-      const senderId = req.body.from; 
-      const to = req.body.to;
+    const file = req.file;
+    const textMessage = req.body.textmessage || "";
+    // 'from' is sent as the U_id of the sender.
+    const senderId = req.body.from;
+    const to = req.body.to;
 
-      if (!file && !textMessage.trim()) {
-          return res.status(400).json({ message: "Please provide a file or a text message." });
+    if (!file && !textMessage.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Please provide a file or a text message." });
+    }
+
+    // Look up the sender by U_id to get the U_name.
+    const sender = await user.findOne({ U_id: senderId });
+    const senderName = sender ? sender.U_name : senderId;
+
+    const base64data = file ? file.buffer.toString("base64") : "";
+    // Save the notification using the correct model (pdfmodel)
+    const newNotification = new pdfmodel({
+      filename: file ? file.originalname : "",
+      data: base64data,
+      from: senderName, // Save sender's name instead of U_id.
+      to: to,
+      textmessage: textMessage,
+    });
+    await newNotification.save();
+
+    // Determine recipient email addresses.
+    let recipientsEmails = [];
+    if (to === "all") {
+      // Query all faculties (assuming "FC" is the faculty role)
+      const faculties = await user.find({ U_role: { $in: ["FC"] } });
+      recipientsEmails = faculties
+        .filter((faculty) => faculty.U_email)
+        .map((faculty) => faculty.U_email);
+    } else {
+      const faculty = await user.findOne({ U_name: to });
+      if (faculty && faculty.U_email) {
+        recipientsEmails.push(faculty.U_email);
       }
+    }
 
-      // Look up the sender by U_id to get the U_name.
-      const sender = await user.findOne({ U_id: senderId });
-      const senderName = sender ? sender.U_name : senderId;
+    // Construct the email text with the sender's name.
+    const emailText = `Notification from ${senderName}: ${
+      textMessage || "You have received a new notification."
+    }`;
 
-      const base64data = file ? file.buffer.toString("base64") : "";
-      // Save the notification using the correct model (pdfmodel)
-      const newNotification = new pdfmodel({
-          filename: file ? file.originalname : "",
-          data: base64data,
-          from: senderName,  // Save sender's name instead of U_id.
-          to: to,
-          textmessage: textMessage,
+    // Send email notification if there are any recipient emails.
+    if (recipientsEmails.length > 0) {
+      let mailOptions = {
+        from: '"Internal Exam Management" <your-email@example.com>',
+        to: recipientsEmails.join(","),
+        subject: "New Notification",
+        text: emailText,
+        attachments: file
+          ? [
+              {
+                filename: file.originalname,
+                content: file.buffer,
+              },
+            ]
+          : [],
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
       });
-      await newNotification.save();
+    }
 
-      // Determine recipient email addresses.
-      let recipientsEmails = [];
-      if (to === "all") {
-          // Query all faculties (assuming "FC" is the faculty role)
-          const faculties = await user.find({ U_role: { $in: ["FC"] } });
-          recipientsEmails = faculties
-            .filter(faculty => faculty.U_email)
-            .map(faculty => faculty.U_email);
-      } else {
-          const faculty = await user.findOne({ U_name: to });
-          if (faculty && faculty.U_email) {
-              recipientsEmails.push(faculty.U_email);
-          }
-      }
-
-      // Construct the email text with the sender's name.
-      const emailText = `Notification from ${senderName}: ${textMessage || "You have received a new notification."}`;
-
-      // Send email notification if there are any recipient emails.
-      if (recipientsEmails.length > 0) {
-          let mailOptions = {
-              from: '"Internal Exam Management" <your-email@example.com>',
-              to: recipientsEmails.join(","),
-              subject: "New Notification",
-              text: emailText,
-              attachments: file ? [{
-                  filename: file.originalname,
-                  content: file.buffer,
-              }] : [],
-          };
-
-          transporter.sendMail(mailOptions, (error, info) => {
-              if (error) {
-                  console.error("Error sending email:", error);
-              } else {
-                  console.log("Email sent: " + info.response);
-              }
-          });
-      }
-
-      res.status(200).json({ success: true, to });
+    res.status(200).json({ success: true, to });
   } catch (error) {
-      res.status(400).json({ success: false, details: error.message });
+    res.status(400).json({ success: false, details: error.message });
   }
 });
-
 
 // ______________________FETCHING FACULTY______________________
 
@@ -1247,7 +1255,6 @@ app.get("/get-pdfs-from/:from", async (req, res) => {
 });
 
 //______________________TRIAL SCHEMA_______________________
-
 const trialSchema = new mongoose.Schema({
   mode: String,
   subject: String,
@@ -1257,9 +1264,9 @@ const trialSchema = new mongoose.Schema({
   date: String,
   from: String,
   allocate: String,
-  sfileName:String,
-  sdata:String,
-  textmesg:String,
+  sfileName: String,
+  sdata: String,
+  textmesg: String,
 });
 
 const trialModel = mongoose.model("trials", trialSchema, "TRIAL");
@@ -1267,31 +1274,84 @@ const trialModel = mongoose.model("trials", trialSchema, "TRIAL");
 
 app.post("/upload-trial", upload.single("pdfFile"), async (req, res) => {
   try {
+    // Validate request
+    if (!req.file) {
+      return res.status(400).json({ message: "Please select a file." });
+    }
+
+    const { mode, subject, batch, dt: date, from } = req.body;
+
+    if (!mode || !subject || !batch || !date || !from) {
+      return res.status(400).json({ message: "Missing required fields." });
+    }
+
     const data64 = req.file.buffer.toString("base64");
-    const mode = req.body.mode;
-    const subject = req.body.subject;
-    const batch = req.body.batch;
-    const date = req.body.dt;
-    const from = req.body.from;
-    const newtrial = new trialModel({
-      mode: mode,
-      subject: subject,
-      batch: batch,
+
+    // Save the uploaded question paper in the trialModel
+    const newTrial = new trialModel({
+      mode,
+      subject,
+      batch,
       fileName: req.file.originalname,
       data: data64,
-      date: date,
-      from: from,
+      date,
+      from,
       allocate: null,
-      sfileName:null,
-      sdata:null,
-      textmesg:null,
+      sfileName: null,
+      sdata: null,
+      textmesg: null,
     });
-    await newtrial.save();
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.log(error);
 
-    res.status(400).json({ success: false });
+    await newTrial.save();
+
+    let recipientUser = null;
+
+    if (mode === "trial") {
+      // Find the module where the subject exists in the subjects array
+      const moduleData = await Module.findOne({ subjects: { $in: [subject] } });
+
+      if (moduleData) {
+        // Get the module coordinator's name (U_name)
+        const moduleCoordinator = moduleData.moduleCoordinator;
+        recipientUser = await user.findOne({ U_name: moduleCoordinator });
+      }
+    } else if (mode === "final") {
+      // For final mode, notify the Exam Coordinator (EC)
+      recipientUser = await user.findOne({ U_role: "EC" });
+    }
+
+    // If a recipient is found and has an email, send the notification
+    if (recipientUser?.U_email) {
+      const mailText =
+        mode === "trial"
+          ? `User ${from} has uploaded a TRIAL question paper for subject: ${subject}.`
+          : `User ${from} has uploaded a FINAL question paper for subject: ${subject}.`;
+
+      const mailOptions = {
+        from: '"Internal Exam Management" <miniproject22426@gmail.com>',
+        to: recipientUser.U_email,
+        subject: "Question Paper Upload Notification",
+        text: mailText,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email notification:", error);
+        } else {
+          console.log("Email notification sent: " + info.response);
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Question paper uploaded successfully.",
+    });
+  } catch (error) {
+    console.error("Error uploading question paper:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error uploading question paper" });
   }
 });
 
@@ -1316,57 +1376,146 @@ app.put("/trial-update/:id", async (req, res) => {
     const { id } = req.params;
     const { faculty } = req.body;
 
-    const trialUpdt = await trialModel.findOneAndUpdate(
-      { _id: id },
-      {
-        mode: "allocated",
-        allocate: faculty,
-      }
+    // Update the trial paper with the allocated faculty name and change mode to "allocated"
+    const trialPaper = await trialModel.findByIdAndUpdate(
+      id,
+      { mode: "allocated", allocate: faculty },
+      { new: true }
     );
+
+    if (!trialPaper) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Trial paper not found." });
+    }
+
+    // Look up the allocated faculty using U_name
+    const allocatedFaculty = await user.findOne({ U_name: faculty });
+
+    // If the allocated faculty is found and has an email, send the notification email
+    if (allocatedFaculty && allocatedFaculty.U_email) {
+      const mailText = `Dear ${allocatedFaculty.U_name},
+
+You have been allocated a paper for scrutiny.
+Subject: ${trialPaper.subject}
+File Name: ${trialPaper.fileName}
+
+Please review the paper at your earliest convenience.
+
+Regards,
+Module Coordinator`;
+
+      const mailOptions = {
+        from: '"Internal Exam Management" <miniproject22426@gmail.com>',
+        to: allocatedFaculty.U_email,
+        subject: "Paper Allocation Notification for Scrutiny",
+        text: mailText,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email notification:", error);
+        } else {
+          console.log("Email notification sent: " + info.response);
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Paper allocated and notification sent successfully.",
+      data: trialPaper,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error allocating paper:", error);
+    res.status(500).json({ success: false, message: "Error allocating paper" });
   }
 });
 
+
 //_______________________SCRUTINIZED_____________________________
-app.put("/trial-scrutinized/:id",upload.single("scrutFile"),async(req,res)=>{
-    try {
-      const {id}=req.params;
-      const data64 = req.file.buffer.toString("base64");
-      const trialupdate =await trialModel.findByIdAndUpdate(
-        {_id:id},
-        {
-          mode:"scrutinized",
-          sfileName:req.file.originalname,
-          sdata:data64,
-        }
+app.put("/trial-scrutinized/:id", upload.single("inputFile"), async (req, res) => {
+  try {
+    const { id } = req.params;
 
-      )
-
-
-    } catch (error) {
-      console.log(error);
-      
+    // Validate that a file is provided
+    if (!req.file) {
+      return res.status(400).json({ message: "Please select a file." });
     }
 
-})
+    // Convert the uploaded file to a base64 string
+    const sdata = req.file.buffer.toString("base64");
+    const sfileName = req.file.originalname;
+
+    // Update the trial paper: set mode to "scrutinized", save scrutinized file info
+    const trialPaper = await trialModel.findByIdAndUpdate(
+      id,
+      {
+        mode: "scrutinized",
+        sfileName,
+        sdata,
+      },
+      { new: true }
+    );
+
+    if (!trialPaper) {
+      return res.status(404).json({ message: "Trial paper not found." });
+    }
+
+    // Look up the MC (Module Coordinator) for verification
+    const mcUser = await user.findOne({ U_role: { $in: ["MC"] } });
+
+    // If MC is found and has an email, send the notification
+    if (mcUser && mcUser.U_email) {
+      const mailText = `Dear ${mcUser.U_name},
+
+The paper for subject "${trialPaper.subject}" has been scrutinized and is now ready for verification.
+Please log in to the system to review the scrutinized document.
+
+Regards,
+Internal Exam Management System
+`;
+
+      const mailOptions = {
+        from: '"Internal Exam Management" <miniproject22426@gmail.com>',
+        to: mcUser.U_email,
+        subject: "Scrutiny Completed - Verification Needed",
+        text: mailText,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email notification:", error);
+        } else {
+          console.log("Email notification sent: " + info.response);
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Scrutinized paper updated and notification sent successfully.",
+      data: trialPaper,
+    });
+  } catch (error) {
+    console.error("Error updating scrutinized paper:", error);
+    res.status(500).json({ message: "Error updating scrutinized paper" });
+  }
+});
+
 
 // ____________________VERIFIED TO FACULTY(FROM)__________________
 
-app.get("/get-verified/:from",async(req,res)=>{
+app.get("/get-verified/:from", async (req, res) => {
   try {
-      const {from}=req.params;
-      const verified=await trialModel.find({from:from, mode:"verified"})
-      res.status(200).json(verified);
+    const { from } = req.params;
+    const verified = await trialModel.find({ from: from, mode: "verified" });
+    res.status(200).json(verified);
   } catch (error) {
     console.log(error);
-      res.status(400).json({message:"error occured in api"})
-    
-  }  
-
-})
-
-
+    res.status(400).json({ message: "error occured in api" });
+  }
+});
 
 //______________________ALLOCATED FACULTY SCRUTINY INBOX______________
 
@@ -1381,46 +1530,87 @@ app.get("/scrutiny-inbox/:allocate", async (req, res) => {
   }
 });
 
-
 // ________________________VERIFY UPDATE__________________________
 
-app.put("/verify-update/:id",async(req,res)=>{
+app.put("/verify-update/:id", async (req, res) => {
   try {
-    const {id}=req.params;
-    const {textmesg}=req.body;
-    
-    const trialupdate =await trialModel.findByIdAndUpdate(
-      {_id:id},
+    const { id } = req.params;
+    const { textmesg } = req.body;
+
+    if (!textmesg) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide verification suggestions." });
+    }
+
+    // Update the trial paper: mark as "verified" and save the verification message
+    const trialPaper = await trialModel.findByIdAndUpdate(
+      id,
       {
-        mode:"verified",
-        textmesg:textmesg,
-      }
-      
-    )
-    
-    
+        mode: "verified",
+        textmesg: textmesg,
+      },
+      { new: true }
+    );
+
+    if (!trialPaper) {
+      return res.status(404).json({ success: false, message: "Trial paper not found." });
+    }
+
+    // Look up the faculty who originally sent the paper.
+    // Assumption: trialPaper.from stores the faculty's U_id.
+    const facultyUser = await user.findOne({ U_id: trialPaper.from });
+
+    // If the faculty exists and has an email, send the notification
+    if (facultyUser && facultyUser.U_email) {
+      const mailText = `Dear ${facultyUser.U_name},
+
+Your question paper for subject "${trialPaper.subject}" has been scrutinised and verified.
+
+Please log in to the system for further details.
+
+Regards,
+Internal Exam Management System`;
+
+      const mailOptions = {
+        from: '"Internal Exam Management" <miniproject22426@gmail.com>',
+        to: facultyUser.U_email,
+        subject: "Paper Verification Completed",
+        text: mailText,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email notification:", error);
+        } else {
+          console.log("Email notification sent: " + info.response);
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Paper verified and notification sent successfully.",
+      data: trialPaper,
+    });
   } catch (error) {
-    console.log(error);
-    
+    console.error("Error updating verified paper:", error);
+    res.status(500).json({ success: false, message: "Error updating verified paper" });
   }
-  
-  
-})
+});
+
 
 //______________________FINAL TO EC__________________________
 
-app.get("/final-qustion",async(req,res)=>{
+app.get("/final-qustion", async (req, res) => {
   try {
-    const final=await trialModel.find({mode:"final"})
+    const final = await trialModel.find({ mode: "final" });
     res.status(200).json(final);
-    
   } catch (error) {
     console.log(error);
-    res.status(400).json({message:"failed to load final qustions"})
-     
+    res.status(400).json({ message: "failed to load final qustions" });
   }
-
-})
+});
 
 // ------------------- INVIGILATION DUTY ALLOCATION -------------------
 
@@ -1550,12 +1740,18 @@ app.post("/api/auth/reset-password", async (req, res) => {
     // Retrieve OTP data for the provided email
     const otpData = otpStore[email];
     if (!otpData) {
-      return res.status(400).json({ message: "OTP not found or expired. Please request a new one." });
+      return res
+        .status(400)
+        .json({
+          message: "OTP not found or expired. Please request a new one.",
+        });
     }
     // Check if the OTP has expired
     if (Date.now() > otpData.expiresAt) {
       delete otpStore[email];
-      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+      return res
+        .status(400)
+        .json({ message: "OTP has expired. Please request a new one." });
     }
     // Verify the OTP value
     if (otpData.otp !== otp) {
@@ -1574,7 +1770,9 @@ app.post("/api/auth/reset-password", async (req, res) => {
     existingUser.U_password = newPassword;
     await existingUser.save();
 
-    return res.status(200).json({ message: "Password reset successfully. Please log in." });
+    return res
+      .status(200)
+      .json({ message: "Password reset successfully. Please log in." });
   } catch (err) {
     console.error("Reset password error:", err);
     return res.status(500).json({ message: "Server error" });
