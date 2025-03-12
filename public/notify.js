@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         } catch (error) {
             console.error("Error checking auth status:", error);
+            showPopup("Error checking authentication status", "error");
         }
     }
     await checkAuthStatus();
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const file = document.querySelector("#inputFile").files[0];
 
         if (!file && !textMessage) {
-            alert("Please provide at least a text message or a file.");
+            showPopup("Please provide at least a text message or a file.", "warning");
             return;
         }
 
@@ -62,13 +63,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
 
             if (response.ok) {
-                alert("Notification sent successfully!");
-                location.reload(true);
+                showPopup("Notification sent successfully!", "success", () => location.reload(true));
             } else {
-                alert("Failed to send notification.");
+                showPopup("Failed to send notification.", "error");
             }
         } catch (error) {
             console.error("Error sending notification:", error);
+            showPopup("Error sending notification.", "error");
         }
     });
 
@@ -79,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             populateDropdown('faculties', faculties.map(f => f.U_name));
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert('Error loading data from server');
+            showPopup('Error loading data from server', "error");
         }
     }
 
@@ -100,3 +101,37 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 });
+
+// Function to Show Styled Popups
+function showPopup(message, type = "info", callback = null) {
+    const popup = document.createElement("div");
+    popup.classList.add("popup", "active");
+    
+    let bgColor = "#0f62fe"; // Default blue
+    if (type === "success") bgColor = "green";
+    if (type === "warning") bgColor = "orange";
+    if (type === "error") bgColor = "red";
+
+    popup.innerHTML = `
+        <div class="popup-content" style="border-left: 5px solid ${bgColor};">
+            <span class="close">&times;</span>
+            <p>${message}</p>
+            <button class="close-popup">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    document.querySelector(".close-popup").addEventListener("click", () => {
+        popup.classList.remove("active");
+        setTimeout(() => {
+            popup.remove();
+            if (callback) callback();
+        }, 300);
+    });
+
+    document.querySelector(".close").addEventListener("click", () => {
+        popup.classList.remove("active");
+        setTimeout(() => popup.remove(), 300);
+    });
+}

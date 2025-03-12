@@ -647,3 +647,70 @@ input:focus, .file-label:focus-within {
         font-size: 9.5px;
     }
 }
+
+.alert-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.alert-popup.active {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+}
+
+.alert-popup-content {
+    background: white;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    position: relative;
+    text-align: center;
+}
+
+.alert-popup-content p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.alert-popup-content button {
+    width: 100%;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s ease-in-out;
+}
+
+.alert-popup-content button:hover {
+    background: rgb(1, 83, 235);
+}
+
+.alert-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(112, 112, 112, 1);
+    cursor: pointer;
+}
+
+.alert-close:hover {
+    color: black;
+}

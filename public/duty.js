@@ -16,7 +16,7 @@ async function fetchFacultiesAndRooms() {
         populateDropdown('rooms', rooms.map(r => r.R_code));
     } catch (error) {
         console.error('Error fetching data:', error);
-        alert('Error loading data from server');
+        showPopup('Error loading data from server', 'error');
     }
 }
 
@@ -74,7 +74,7 @@ async function handleFormSubmit(event) {
         .filter(Boolean);
     
     if (selectedFaculties.length === 0 || selectedRooms.length === 0) {
-        alert('Please select at least one faculty and one room');
+        showPopup('Please select at least one faculty and one room', 'error');
         return;
     }
     
@@ -99,12 +99,13 @@ async function handleFormSubmit(event) {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+            showPopup('Invigilation duty allocation downloaded successfully!', 'success');
         } else {
             throw new Error('Failed to generate invigilation duty allocation');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error generating invigilation duty allocation');
+        showPopup('Error generating invigilation duty allocation', 'error');
     }
 }
 
@@ -113,3 +114,30 @@ document.addEventListener("DOMContentLoaded", function () {
     let today = new Date().toISOString().split("T")[0];
     //dateInput.value = today; // Set default value to today's date
 });
+
+function showPopup(message, type = "info") {
+    const popup = document.createElement("div");
+    popup.classList.add("popup", "active");
+
+    let bgColor = "#0f62fe"; // Default blue
+    if (type === "success") bgColor = "green";
+    if (type === "error") bgColor = "red";
+
+    popup.innerHTML = `
+        <div class="popup-content" style="border-left: 5px solid ${bgColor};">
+            <span class="close">&times;</span>
+            <p>${message}</p>
+            <button class="close-popup">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+    document.querySelector(".close-popup").addEventListener("click", () => {
+        popup.classList.remove("active");
+        setTimeout(() => popup.remove(), 300);
+    });
+    document.querySelector(".close").addEventListener("click", () => {
+        popup.classList.remove("active");
+        setTimeout(() => popup.remove(), 300);
+    });
+}
