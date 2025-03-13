@@ -57,7 +57,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             });
         } catch (error) {
             console.error("Error loading sent messages:", error);
-            showPopup("Error loading sent messages", "error");
         }
     }
 
