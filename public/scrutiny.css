@@ -122,6 +122,15 @@ p {
     right: 15px;
     display: flex;
     align-items: center;
+    gap: 5px;
+}
+
+.right-container {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    display: flex;
+    align-items: center;
     flex-direction: column;
     gap: 5px;
 }

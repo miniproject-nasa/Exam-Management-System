@@ -94,9 +94,7 @@ document.addEventListener("DOMContentLoaded",  async function () {
                             <br>
                             <ul class="pdf-container">
                                 <li class="pdf-box">
-                                    <div class="pdf-box-small">
-                                        <p class="info-new-type">PDF</p>
-                                    </div>  
+                                    
                                 
                                     <a href="${pdfUrl}" target="_blank"  class="pdf-box-content"> ${final.fileName}</a>
                                 

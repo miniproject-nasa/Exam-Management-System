@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         <input type="file" name="inputFile" id="inputFile" class="information-type" hidden required>   
                     </div>
                 </div>
-                <div class="bottom-right-container">
+                <div class="right-container">
                     <button class="send-button">Scrutiny</button>
                     <button class="submit-button">Submit</button>
                 </div>

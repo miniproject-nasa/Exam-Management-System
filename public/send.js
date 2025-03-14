@@ -20,8 +20,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         try {
             const response = await fetch(`/get-pdfs-from/${from}`);
             if (!response.ok) {
-                showPopup("Failed to load sent messages", "error");
-                return;
+                return; 
             }
 
             const sends = await response.json();
