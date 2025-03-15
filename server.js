@@ -1369,6 +1369,25 @@ app.get("/get-trial/:to", async (req, res) => {
   }
 });
 
+
+//____________________TRIAL FROM_____________________
+
+app.get("/trial-from/:from",async(req,res)=>{
+  try {
+    const {from}=req.params;    
+    const trialsfrom=await trialModel.find({from:from,mode:"trial"})
+    // console.log(trialsfrom);
+    
+    res.status(200).json(trialsfrom);
+    
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({message:`${error}`});
+    
+  }
+  
+})
+
 //____________________UPDATE TRIAL TO ALLOCATE_____________________
 
 app.put("/trial-update/:id", async (req, res) => {

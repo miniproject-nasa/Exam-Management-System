@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", async function() {
+    var newflag=false;
     async function checkAuthStatus() {
         try {
             const response = await fetch("/check-auth");
@@ -15,9 +16,54 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     }
     await checkAuthStatus();
+    async function trials(from){
+        try {
+            const responce=await fetch(`/trial-from/${from}`);
+            if(!responce.ok) return console.log("error occured");
+            
+            const trials=await responce.json();
+            console.log(trials);
+            trials.reverse();
+            const mainContainer = document.querySelector(".main-content");
+            console.log(newflag);
+            
+            
+            
+            trials.forEach((trial)=>{
+                const byteCharacters = atob(trial.data);
+                const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+                const byteArray = new Uint8Array(byteNumbers);
+                const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                console.log("test");
+
+                mainContainer.innerHTML += `
+                <section class="content-section">
+                    <ul class="information-type">
+                        <li>
+                            <span class="highlight-text">trial:${trial.mode}</span>
+                            <p class="message-text">${trial.subject}</p>
+                            <ul class="pdf-container">
+                                <li class="pdf-box">
+                                    <a href="${pdfUrl}" target="_blank" class="pdf-box-content">${trial.fileName}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>            
+                </section>
+                `;
+
+
+            })
+            
+        } catch (error) {
+            
+        }
+    }
 
     async function send(from) {
         try {
+            console.log(newflag);
             const response = await fetch(`/get-pdfs-from/${from}`);
             if (!response.ok) {
                 return; 
@@ -26,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             const sends = await response.json();
             const mainContainer = document.querySelector(".main-content");
             mainContainer.innerHTML = "";
-
+            newflag=true;
             sends.reverse();
             sends.forEach((send) => {
                 // Convert base64 to Blob URL
@@ -60,7 +106,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 
     console.log(data.user.username);
-    send(data.user.username);
+    await send(data.user.username);
+    await trials(data.user.username);
 });
 
 function showPopup(message, type = "info") {

@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded",  async function () {
     }
     await checkAuthStatus();
 
+    
+
     async function inbox(to) {
         try {
             const response = await fetch(`/get-pdfs-to/${to}`);
