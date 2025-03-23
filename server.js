@@ -4,6 +4,9 @@ const app = express();
 const session = require("express-session");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
+const fs=require("fs");
+const csv = require("csvtojson");
+
 
 // ______________________Connect to MongoDB_________________
 mongoose
@@ -1810,6 +1813,126 @@ app.post("/api/auth/reset-password", async (req, res) => {
     console.error("Reset password error:", err);
     return res.status(500).json({ message: "Server error" });
   }
+});
+
+
+//___________________upload xlsx_________________________
+
+
+const xlupload = new mongoose.Schema({
+  fileName: String,
+  data: String,
+  
+});
+
+const xlmodel = mongoose.model("xlupload", xlupload, "XLUP");
+app.post("/uploading-xl",upload.single("nwfile"), async(req,res)=>{
+  try {
+    const Base64=req.file.buffer.toString("base64");
+    const fileName=req.file.originalname;
+    const newxl= new xlmodel({
+      fileName:"room.xlsx",
+      data:Base64,
+    }
+  );
+  await newxl.save()
+  res.json({done:"hodeoe"})
+
+    
+  } catch (error) { 
+    console.log(error);
+    
+  }
+  
+});
+
+//__________reading XL file as csv_______________
+
+app.post("/csv-converter/:from",upload.single("inputfile"),async(req,res)=>{
+  
+  try {
+    console.log(req.file);
+        const {from}=req.params
+        await csv()
+        .fromString(req.file.buffer.toString("utf-8"))
+        .then ((responce)=>{
+          console.log(responce);
+          if(from=="room"){
+
+            responce.forEach((item)=>{
+              newroom=new room({
+                R_code: item.Room_Code,
+                R_capacity:item.Room_Capacity,
+              })
+               newroom.save();
+    
+            })
+          }
+          else if(from=="subject")
+          {
+            responce.forEach((item)=>{
+              const StrArr_batch=item.S_batch.split(",")
+              const StrArr_faculty=item.S_faculty.split(",")
+
+              const newSubject = new Subject({
+                S_name:item.S_name,
+                S_code:item.S_code,
+                S_batch:StrArr_batch,
+                S_faculty:StrArr_faculty
+               });
+              newSubject.save();
+    
+            })
+          }
+          else if(from=="user")
+            {
+              responce.forEach((item)=>{
+                const rollArray=item.U_role.split(",")
+                const defaultPassword = "abcd1234";
+                const newUser = new user({
+                  U_name:item.U_name,
+                  U_id:item.U_id,
+                  U_phone:item.U_phone,
+                  U_email:item.U_email,
+                  U_role:rollArray,
+                  U_password: defaultPassword,
+                });
+                newUser.save();
+      
+              })
+            }
+            else if(from=="module")
+              {
+                responce.forEach((item)=>{
+                  const subArray=item.subjects.split(",")
+                  const facArray=item.faculties.split(",")
+                  const newModule = new Module({
+                    moduleName:item.moduleName,
+                    moduleCoordinator:item.moduleCoordinator,
+                    subjects:subArray,
+                    faculties:facArray,
+                  });
+                  newModule.save();
+        
+                })
+              }
+            else if(from=="batch")
+                {
+                  responce.forEach((item)=>{
+                    const newBatch = new batch({ 
+                      B_name:item.B_name, 
+                      B_strenth:item.B_strenth
+                    });
+                  newBatch.save();
+          
+                  })
+               }
+        })
+    res.status(200).json({done:"hoendef"})  
+    } catch (error) {
+      console.log(error);
+      
+    }
 });
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
