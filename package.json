@@ -21,6 +21,8 @@
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
+    "csv": "^6.3.11",
+    "csvtojson": "^2.0.10",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
