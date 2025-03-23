@@ -68,6 +68,21 @@ document.addEventListener("DOMContentLoaded", async function () {
             </section>`;
         }
       });
+      
+      // Fix for duplicate IDs by making each file input ID unique
+      document.querySelectorAll('.content-section').forEach((section, index) => {
+        const fileInput = section.querySelector('#inputFile');
+        if (fileInput) {
+          const newId = `inputFile-${index}`;
+          fileInput.id = newId;
+          
+          const fileLabel = section.querySelector('.file-label');
+          if (fileLabel) {
+            fileLabel.setAttribute('for', newId);
+          }
+        }
+      });
+      
     } catch (error) {
       console.log(error);
       showPopup("Error loading inbox", "error");
@@ -80,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.querySelectorAll(".submit-button").forEach((btn) => {
     btn.addEventListener("click", async function (e) {
       const section = e.target.closest("section");
-      const file = section.querySelector("#inputFile").files[0];
+      const file = section.querySelector("input[type='file']").files[0];
       if (!file) {
         showPopup("Please select a file", "error");
         return;
@@ -116,10 +131,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       const section = e.target.closest("section");
       const paperName = section.dataset.paperName || "Unknown Paper";
       const facultyName = section.dataset.facultyName || "Unknown Faculty";
+      
+      // Store the section ID to use later for file input selection
+      const sectionId = section.dataset.section;
 
       const popup = document.getElementById("scrutiny-popup");
       popup.querySelector("#paperName").value = paperName;
       popup.querySelector("#facultyName").value = facultyName;
+      
+      // Store the section ID in a data attribute on the form
+      popup.querySelector("form").dataset.sectionId = sectionId;
 
       popup.classList.add("show");
     });
@@ -132,7 +153,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.querySelector("#scrutiny-popup form").addEventListener("submit", function (event) {
     event.preventDefault();
-    generateScrutinyPdf();
+    const sectionId = this.dataset.sectionId;
+    generateScrutinyPdf(sectionId);
     document.getElementById("scrutiny-popup").classList.remove("show");
   });
 });
@@ -147,7 +169,7 @@ function getPdfUrl(base64Data) {
   return URL.createObjectURL(pdfBlob);
 }
 
-function generateScrutinyPdf() {
+function generateScrutinyPdf(sectionId) {
   const formPopup = document.querySelector("#scrutiny-popup form");
   const qaPairs = [];
   formPopup.querySelectorAll("label").forEach((label) => {
@@ -192,7 +214,57 @@ function generateScrutinyPdf() {
     }
   });
 
-  doc.save(`scrutiny-${paperName}.pdf`);
+  // Instead of saving directly, create a blob
+  const pdfBlob = doc.output('blob');
+  
+  // Create a File object from the Blob (browsers only accept File objects for file inputs)
+  const pdfFile = new File([pdfBlob], `scrutiny-${paperName}.pdf`, { type: 'application/pdf' });
+  
+  // Find the section that triggered this form
+  const section = sectionId 
+    ? document.querySelector(`.content-section[data-section="${sectionId}"]`)
+    : document.querySelector('.content-section[data-paper-name="' + paperName + '"]');
+    
+  if (section) {
+    // Get the file input from this section
+    const fileInput = section.querySelector('input[type="file"]');
+    
+    // Create a new DataTransfer object
+    const dataTransfer = new DataTransfer();
+    
+    // Add our file to it
+    dataTransfer.items.add(pdfFile);
+    
+    // Set the file input's files property to our DataTransfer files list
+    fileInput.files = dataTransfer.files;
+    
+    // Trigger change event to update any UI that might depend on file selection
+    const event = new Event('change', { bubbles: true });
+    fileInput.dispatchEvent(event);
+    
+    // Update the file label to show the selected file name
+    const fileLabel = section.querySelector('.file-label');
+    if (fileLabel) {
+      fileLabel.textContent = pdfFile.name;
+      fileLabel.classList.add('file-selected');
+    }
+    
+    // Add visual feedback
+    section.querySelector('.file-box').classList.add('highlight-selected');
+    setTimeout(() => {
+      section.querySelector('.file-box').classList.remove('highlight-selected');
+    }, 2000);
+    
+    // Show success message
+    showPopup("Scrutiny form completed. File automatically selected.", "success");
+    
+    // Optional: Auto-scroll to the submit button
+    section.querySelector('.submit-button').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    // Fallback to download if we can't find the right section
+    doc.save(`scrutiny-${paperName}.pdf`);
+    showPopup("Scrutiny form completed. Please select the downloaded file.", "info");
+  }
 }
 
 function showPopup(message, type = "info", callback = null) {
