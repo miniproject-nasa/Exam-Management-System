@@ -1819,32 +1819,7 @@ app.post("/api/auth/reset-password", async (req, res) => {
 //___________________upload xlsx_________________________
 
 
-const xlupload = new mongoose.Schema({
-  fileName: String,
-  data: String,
-  
-});
 
-const xlmodel = mongoose.model("xlupload", xlupload, "XLUP");
-app.post("/uploading-xl",upload.single("nwfile"), async(req,res)=>{
-  try {
-    const Base64=req.file.buffer.toString("base64");
-    const fileName=req.file.originalname;
-    const newxl= new xlmodel({
-      fileName:"room.xlsx",
-      data:Base64,
-    }
-  );
-  await newxl.save()
-  res.json({done:"hodeoe"})
-
-    
-  } catch (error) { 
-    console.log(error);
-    
-  }
-  
-});
 
 //__________reading XL file as csv_______________
 
@@ -1934,5 +1909,53 @@ app.post("/csv-converter/:from",upload.single("inputfile"),async(req,res)=>{
       
     }
 });
+
+
+const XLshema=new mongoose.Schema(
+  {
+      fileName:String,
+      data:String,
+  }
+)
+
+const XLmodel=mongoose.model("XLmodel",XLshema,"XL");
+
+app.post("/XLdata/:filename", upload.single("XL") ,async(req,res)=>{
+  
+  try {
+    
+    const {filename}=req.params
+    const base64=req.file.buffer.toString("base64");
+  
+    const newXL=new XLmodel({
+      fileName:filename,
+      data:base64,
+    })
+   await newXL.save();
+   res.status(200).json({success:"true"})
+  } catch (error) {
+      console.log(error);
+      res.status(200).json({success:"false"})
+      
+  }
+  
+})
+
+app.get("/get-XL/:fileName",async (req,res)=>{
+  try {
+    const {fileName}=req.params
+  
+    const result= await XLmodel.findOne({fileName})
+    console.log(result.fileName);
+    
+    res.status(200).json(result)
+    
+  } catch (error) {
+    console.log(error);
+    
+    res.status(400).json({filename:"error"})
+
+  }
+})
 
 app.listen(4000, () => console.log("Listening on port 4000..."));
