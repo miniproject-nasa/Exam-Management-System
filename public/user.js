@@ -32,7 +32,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Create a Blob URL for the Excel file
       const excelUrl = URL.createObjectURL(excelBlob);
-      console.log(excelUrl);
+      console.log(document.querySelector(".button-container-1").children[0]);
+      document.querySelector(".button-container-1").children[0].href=excelUrl
       
       // console.log(blobUrl);
       // // Create a temporary <a> tag for downloading
