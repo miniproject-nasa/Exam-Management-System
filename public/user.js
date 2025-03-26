@@ -14,7 +14,42 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
   await checkAuthStatus();
+  async function xlshow(){
+    try {
+      const response=await fetch(`/get-XL/users`)
+      if(!response.ok){
+        console.log(error);
+        return;
+      }
+      const xlfile=await response.json();
+      const byteCharacters = atob(xlfile.data); // Decode Base64
+      const byteNumbers = new Array(byteCharacters.length)
+      .fill()
+      .map((_, i) => byteCharacters.charCodeAt(i));
 
+      const byteArray = new Uint8Array(byteNumbers);
+      const excelBlob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+    // Create a Blob URL for the Excel file
+      const excelUrl = URL.createObjectURL(excelBlob);
+      console.log(excelUrl);
+      
+      // console.log(blobUrl);
+      // // Create a temporary <a> tag for downloading
+      // const a = document.createElement("a");
+      // a.href = blobUrl;
+      // a.download = data.filename || "download.xlsx"; // Ensure .xlsx extension
+      // document.body.appendChild(a);
+      
+     
+    } catch (error) {
+      console.log(error);
+      
+      
+    }
+      
+  }
+  await xlshow()
   // 2. Grab DOM elements
   const userList = document.getElementById("user-list");
   const userForm = document.getElementById("userForm");
