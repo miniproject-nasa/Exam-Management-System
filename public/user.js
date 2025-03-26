@@ -51,6 +51,43 @@ document.addEventListener("DOMContentLoaded", async function () {
       
   }
   await xlshow()
+
+
+  const submitBttn=document.querySelector("#xl-download")
+
+  submitBttn.addEventListener('click',async function (e){
+
+    const csvFile=e.target.parentElement.children[2].files[0];
+    
+    if(!csvFile)
+      alert("select a csv file")
+    else if(csvFile.name.split('.')[1]!="csv")
+      alert("select a .csv file")
+    else{
+      const formData = new FormData();
+      formData.append('inputfile', csvFile);
+      try {
+        const response = await fetch(`/csv-converter/user`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (response.ok) {
+            alert("uploaded successfully")
+            location.reload(true)
+        } else {
+            alert("Failed to send notification.", "error");
+        }
+    } catch (error) {
+        console.error("Error sending notification:", error);
+        alert("Error sending notification.", "error");
+    }
+       
+
+    }
+    
+
+  })
   // 2. Grab DOM elements
   const userList = document.getElementById("user-list");
   const userForm = document.getElementById("userForm");

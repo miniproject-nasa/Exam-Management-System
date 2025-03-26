@@ -2,6 +2,78 @@
     const subjectList = document.querySelector(".main-content");
     const subjectForm = document.getElementById("subjectForm");
 
+
+
+    async function xlshow(){
+      try {
+        const response=await fetch(`/get-XL/subjects`)
+        if(!response.ok){
+          console.log(error);
+          return;
+        }
+        const xlfile=await response.json();
+        const byteCharacters = atob(xlfile.data); // Decode Base64
+        const byteNumbers = new Array(byteCharacters.length)
+        .fill()
+        .map((_, i) => byteCharacters.charCodeAt(i));
+  
+        const byteArray = new Uint8Array(byteNumbers);
+        const excelBlob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  
+    
+        const excelUrl = URL.createObjectURL(excelBlob);
+        console.log(document.querySelector(".button-container-1").children[0]);
+        document.querySelector(".button-container-1").children[0].href=excelUrl
+        
+       
+        
+       
+      } catch (error) {
+        console.log(error);
+        
+        
+      }
+        
+    }
+    await xlshow()
+  
+  
+    const submitBttn=document.querySelector("#xl-download")
+  
+    submitBttn.addEventListener('click',async function (e){
+  
+      const csvFile=e.target.parentElement.children[2].files[0];
+      
+      if(!csvFile)
+        alert("select a csv file")
+      else if(csvFile.name.split('.')[1]!="csv")
+        alert("select a .csv file")
+      else{
+        const formData = new FormData();
+        formData.append('inputfile', csvFile);
+        try {
+          const response = await fetch(`/csv-converter/subject`, {
+              method: "POST",
+              body: formData,
+          });
+  
+          if (response.ok) {
+              alert("uploaded successfully")
+              location.reload(true)
+          } else {
+              alert("Failed to send notification.", "error");
+          }
+      } catch (error) {
+          console.error("Error sending notification:", error);
+          alert("Error sending notification.", "error");
+      }
+         
+  
+      }
+      
+  
+    })
+
     // --- Tag Functionality Setup ---
     // Global arrays for Add form tags
     let selectedBatches = [];
