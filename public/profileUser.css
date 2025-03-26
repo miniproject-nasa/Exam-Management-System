@@ -117,13 +117,11 @@ p {
     gap: 8px;
 }
 
-#open-add-user {
-    position: static;
+#open-add-user, 
+#xcel-download {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 180px; 
-    max-width: 100%;
     background: rgba(15, 98, 254, 1);
     color: white;
     border: none;
@@ -132,13 +130,72 @@ p {
     cursor: pointer;
     font-size: 14px;
     gap: 8px;
-    margin: 1% 0 0 5%; /* Aligns with content */
     transition: 0.3s;
+}
+
+#open-add-user {
+    width: 180px;
+}
+
+#xcel-download {
+    width: 150px;
 }
 
 #open-add-user:hover {
     background: rgb(1, 83, 235);
     transform: scale(1.02);
+}
+
+#xcel-download:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
+#file-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+#file-label:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.02);
+}
+
+
+.button-container-1 {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end; /* Aligns buttons to the right */
+    align-items: center;
+    gap: 7px; /* Space between buttons */
+    width: 100%; /* Ensures full width */
+    max-width: 95%; /* Keeps container within 95% of screen width */
+    margin-left: auto; /* Pushes container to the right */
+    margin-right: 5%; /* Ensures it stays 5% from the right */
+}
+
+.button-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 98, 254, 1);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
 }
 
 /* Responsive Fix */
@@ -182,7 +239,7 @@ p {
     height: 13px;
 }
 
-.button-type {
+.button-type-1 {
     position: absolute;
     left: 5%;
     margin-bottom: -40px;
@@ -199,6 +256,11 @@ p {
     align-items: center;
     justify-content: center;
     gap: 8px;
+}
+
+.button-type-1:hover {
+    background: rgb(1, 83, 235);
+    transform: scale(1.01);
 }
 
 .button-type:hover {

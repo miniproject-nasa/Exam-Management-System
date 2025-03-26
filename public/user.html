@@ -26,13 +26,22 @@
     </header>
     <br />
     <section class="head">
-      <button type="button" class="button-type" id="open-add-user">
+      <button type="button" class="button-type-1" id="open-add-user">
         <img class="img-chr" src="images/plus.webp" alt="Icon" />
         Add New User
       </button>
-      <a href="https://www.google.com/search?q=google+forms&rlz=1C1RXQR_enIN1116IN1116&oq=google&gs_lcrp=EgZjaHJvbWUqBggBEEUYOzIGCAAQRRg5MgYIARBFGDsyBggCEEUYPDIGCAMQRRg8MgYIBBBFGDzSAQg2MjYwajBqN6gCALACAA&sourceid=chrome&ie=UTF-8" target="_blank"><button class="button-type">XL DOUNLOAD</button></a>
-
-      <input class="button-type" type="file" name="xl" id="XLfile" >
+      <div class="button-container-1">
+        <a href="https://www.google.com/search?q=google+forms" target="_blank">
+          <button class="button-type">Excel Download</button>
+      </a>
+    
+        <!-- Styled File Input -->
+        <label for="XLfile" class="button-type" id="file-label">Choose File</label>
+        <input type="file" name="xl" id="XLfile" hidden>
+    
+        <button type="button" class="button-type" id="pdf-download">Upload</button>
+    </div>
+    
     </section>
 
     <!-- Add User Popup -->
