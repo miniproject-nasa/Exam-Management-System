@@ -30,17 +30,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       const byteArray = new Uint8Array(byteNumbers);
       const excelBlob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 
-    // Create a Blob URL for the Excel file
+  
       const excelUrl = URL.createObjectURL(excelBlob);
       console.log(document.querySelector(".button-container-1").children[0]);
       document.querySelector(".button-container-1").children[0].href=excelUrl
       
-      // console.log(blobUrl);
-      // // Create a temporary <a> tag for downloading
-      // const a = document.createElement("a");
-      // a.href = blobUrl;
-      // a.download = data.filename || "download.xlsx"; // Ensure .xlsx extension
-      // document.body.appendChild(a);
+     
       
      
     } catch (error) {
