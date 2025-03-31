@@ -169,6 +169,8 @@ await checkAuthStatus();
   };
 
   window.deleteBatch = function (batchName) {
+    console.log(batchName);
+    
     document.getElementById("delete-batch-name").textContent = batchName;
     openPopup("delete-popup");
 
