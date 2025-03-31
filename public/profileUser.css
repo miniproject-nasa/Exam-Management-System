@@ -240,9 +240,9 @@ p {
 }
 
 .button-type-1 {
-    position: absolute;
+    position: relative;
     left: 5%;
-    margin-bottom: -40px;
+    margin-bottom: -54px;
     margin-top: 7px;
     background: rgba(15, 98, 254, 1);
     color: white;
