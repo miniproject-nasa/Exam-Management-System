@@ -490,8 +490,10 @@ app.post("/add-batch", async (req, res) => {
 
 app.delete("/delete-batch/:batch_id", async (req, res) => {
   try {
-    const B_id = req.params.batch_id;
-    const deleteBatch = await batch.findOneAndDelete(B_id);
+    console.log(req.params.batch_id);
+    
+    const B_name = req.params.batch_id;
+    const deleteBatch = await batch.findOneAndDelete({B_name});
     res
       .status(200)
       .json({ message: "Batch deleted successfully", data: deleteBatch });
