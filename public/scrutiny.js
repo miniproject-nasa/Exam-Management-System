@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                             <button class="send-button">Allocate</button>
                         </div>
                     </section>`;
-                } else {
+                } else if (inbox.mode === "allocated")  {
                     mainContainer.innerHTML += `
                     <section class="content-section" data-section='${inbox._id}'>
                         <div class="allocated-container"></div>
