@@ -100,9 +100,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                     showPopup("Verified successfully", "success");
                     e.target.style.display = "none";
-                    textArea.replaceWith(
-                        `<span style="color:blue;font-size:15px;font-weight:600;">Verified</span>`
-                    );
+                    span.textContent = "Verified";
+                    span.style.color = "blue";
+                    span.style.fontSize = "15px";
+                    span.style.fontWeight = "600";
+                    textArea.replaceWith(span);
+                    
                 } catch (error) {
                     console.error("Error verifying:", error);
                 }
